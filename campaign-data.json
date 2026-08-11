@@ -1,0 +1,136 @@
+{
+  "meta": { "title": "The Cataclysm Campaign", "players": 3, "gymCount": 8, "visualStyle": "retro pixel-game",
+    "persistence": { "autoSync": "continuous via Firebase while playing", "manualCheckpoints": "DM can save a named checkpoint anytime and reload it later", "resume": "entering the same session code always continues where the campaign left off; DM can also start a fresh session with a new code" } },
+  "rules": {
+    "hpStates": ["full", "half", "quarter", "eighth", "defeated"],
+    "statusEffects": { "types": ["confuse", "poison", "burn"], "effect": "target skips next turn" },
+    "healing": "auto full-heal on arrival in a city / after battle-day",
+    "battleModes": {
+      "rotation": "P1 -> P2 -> P3 -> repeat; defeated player sits out until battle rules allow re-entry (used for standard Gym battles)",
+      "simultaneous": "all three players fight together vs one powerful opponent (used for route bosses, Gladion, Iris, Elite Three, Champions)"
+    },
+    "megaEvolution": { "perBattleLimit": 1, "stonesGeneric": true, "perPlayerOwnStone": true }
+  },
+  "starterPool": {
+    "fire": ["Charmander","Cyndaquil","Torchic","Chimchar","Tepig","Fennekin","Litten","Scorbunny","Fuecoco"],
+    "grass": ["Bulbasaur","Chikorita","Treecko","Turtwig","Snivy","Chespin","Rowlet","Grookey","Sprigatito"],
+    "water": ["Squirtle","Totodile","Mudkip","Piplup","Oshawott","Froakie","Popplio","Sobble","Quaxly"]
+  },
+  "gyms": [
+    { "order": 1, "city": "Pewter City", "leader": "Brock", "type": "Rock", "badge": "Rock Badge", "mode": "rotation", "roster": ["Golett","Alolan Geodude","Krokorok"] },
+    { "order": 2, "city": "Cerulean City", "leader": "Misty", "type": "Water", "badge": "Water Badge", "mode": "rotation", "roster": ["Psyduck","Tatsugiri","Wugtrio","Tirtouga","Buizel","Corphish"] },
+    { "order": 3, "city": "Lumiose City", "leader": "Clemont", "type": "Electric", "badge": "Electric Badge", "mode": "rotation", "roster": ["Raichu","Alolan Golem","Luxray","Galvantula","Vikavolt","Toxtricity","Electivire","Jolteon","Magnezone"] },
+    { "order": 4, "city": "Lavaridge City", "leader": "Flannery", "type": "Fire", "badge": "Heat Badge", "mode": "rotation", "roster": ["Charmeleon","Arcanine","Alolan Marowak","Quilava","Combusken","Torkoal","Magmortar","Simisear","Darmanitan","Chandelure","Coalossal","Centiskorch"] },
+    { "order": 5, "city": "Verdant City", "leader": "Cilan", "type": "Grass", "badge": "Leaf Badge", "mode": "rotation", "roster": ["Venusaur","Tangela","Meganium","Grovyle","Ludicolo","Shiftry","Roselia","Cacturne","Torterra","Leafeon","Serperior","Simisage","Amoonguss","Hisuian Decidueye","Kartana"] },
+    { "order": 6, "city": "Astra City", "leader": "Olympia", "type": "Psychic", "badge": "Mind Badge", "mode": "rotation", "roster": ["Alakazam","Starmie","Galarian Mr. Mime","Espeon","Wobbuffet","Gardevoir","Medicham","Metagross","Latias","Gallade","Gothitelle","Reuniclus","Scream Tail","Rabsca","Mr. Rime","Malamar","Delphox","Hisuian Braviary"] },
+    { "order": 7, "city": "Dusk City", "leader": "Allister", "type": "Ghost", "badge": "Spirit Badge", "mode": "rotation", "roster": ["Gengar","Hisuian Typhlosion","Sableye","Dusclops","Spiritomb","Froslass","Cofagrigus","Golurk","Aegislash","Trevenant","Palossand","Spectrier","Skeledirge","Brambleghast","Annihilape","Gholdengo","Sinistcha","Mismagius"] },
+    { "order": 8, "city": "Dragonia", "leader": "Iris", "type": "Dragon", "badge": "Dragon Badge", "mode": "simultaneous", "roster": ["Mega Dragonite","Mega Altaria","Mega Salamence","Mega Garchomp","Mega Latias","Regidrago"] }
+  ],
+  "routes": [
+    { "id": "route-1", "name": "First Steps", "npcs": [ { "name": "Youngster Joey", "team": ["Rattata","Zigzagoon","Bidoof"] }, { "name": "Kai", "team": ["Pidgey","Nidoran-M","Growlithe"] } ],
+      "encounterTable": { "Common": "Pidgey, Rattata, Caterpie", "Uncommon": "Sentret, Hoppip", "Rare": "Eevee" } },
+    { "id": "route-2", "name": "The Forest Road", "npcs": [ { "name": "Ranger Cabin", "team": ["Starly","Skiddo","Combee"] }, { "name": "Lass Emma", "team": ["Igglybuff","Cleffa","Snubbull"] } ],
+      "encounterTable": { "Common": "Caterpie, Weedle, Bellsprout", "Uncommon": "Hoothoot, Ledyba", "Rare": "Pikachu" } },
+    { "id": "route-3", "name": "The Long Road", "boss": { "name": "Backpacker Talon", "mode": "simultaneous", "team": ["Machoke","Haunter","Gabite"] } },
+    { "id": "route-4", "name": "Echoing Caverns", "npcs": [ { "name": "Hiker Bruce", "team": ["Onix","Graveler","Machop"] } ], "storyNpc": "Professor Rowan (cave scholar, no battle)",
+      "encounterTable": { "Common": "Zubat, Geodude, Diglett", "Uncommon": "Onix, Roggenrola", "Rare": "Nosepass" } },
+    { "id": "route-5", "name": "Ashen Road", "npcs": [ { "name": "Black Belt Ryan", "team": ["Hariyama","Hawlucha","Machoke"] }, { "name": "Nature Girl Sera", "team": ["Roselia","Leavanny","Gogoat"] } ],
+      "encounterTable": { "Normal":"Linoone","Bug":"Volbeat / Illumise","Flying":"Fletchinder","Grass":"Gogoat","Dark":"Mightyena","Electric":"Emolga","Fire":"Ponyta","Water":"Poliwhirl","Ground":"Krokorok","Fighting":"Throh / Sawk","Poison":"Salandit","Rock":"Lycanroc","Psychic":"Duosion","Ghost":"Lampent","Steel":"Skarmory","Fairy":"Mimikyu","Ice":"Sneasel","Dragon":"Fraxure","Volcanic ecosystem":"Slugma, Numel, Torkoal, Salandit, Houndoom, Camerupt (+ Oddish, Budew, Roselia as new growth)" } },
+    { "id": "route-6", "name": "The Old Road", "boss": { "name": "Gladion", "mode": "simultaneous", "roster": ["Silvally","Lucario","Zoroark"] },
+      "encounterTable": { "Normal":"Bibarel","Bug":"Ribombee","Flying":"Hawlucha","Grass":"Tsareena","Dark":"Mightyena","Electric":"Luxio","Fire":"Ninetales","Water":"Floatzel","Ground":"Donphan","Fighting":"Passimian","Poison":"Drapion","Rock":"Lycanroc","Psychic":"Gothorita","Ghost":"Mimikyu","Steel":"Bisharp","Fairy":"Clefable","Ice":"Beartic","Dragon":"Gabite","Forest ecosystem":"Trevenant, Ursaring, Absol, Heracross, Pinsir, Sawsbuck","Pond":"Floatzel, Poliwag, Psyduck, Corphish, Basculin (rare Lapras)" } },
+    { "id": "route-7", "name": "The Sacred Road", "special": "Monument of Beginnings - Mystery Egg (3-way player battle, winner's egg hatches into Larvitar immediately)",
+      "encounterTable": { "Normal":"Furret","Bug":"Heracross","Flying":"Noctowl","Grass":"Roserade","Dark":"Absol","Electric":"Manectric","Fire":"Arcanine","Water":"Azumarill","Ground":"Excadrill","Fighting":"Hawlucha","Poison":"Toxicroak","Rock":"Crustle","Psychic":"Gardevoir","Ghost":"Mismagius","Steel":"Mawile","Fairy":"Granbull","Ice":"Weavile","Dragon":"Haxorus","Stream":"Azumarill, Poliwhirl, Basculin, Floatzel, Corphish (rare Dratini, very rare Milotic)" } },
+    { "id": "route-8", "name": "The Ascent", "special": "Mega Stone Shrine",
+      "encounterTable": { "Normal":"Kangaskhan","Bug":"Scizor","Flying":"Crobat","Grass":"Victreebel","Dark":"Honchkrow","Electric":"Luxray","Fire":"Houndoom","Water":"Gyarados","Ground":"Excadrill","Fighting":"Conkeldurr","Poison":"Crobat","Rock":"Aggron","Psychic":"Metagross","Ghost":"Chandelure","Steel":"Lucario","Fairy":"Sylveon","Ice":"Mamoswine","Dragon":"Goodra","Mountain ecosystem":"Rhydon, Absol, Braviary, Mandibuzz, Sneasel, Noivern (very rare Dratini, Bagon, Beldum)","Waterfall":"Gyarados, Floatzel, Golduck, Basculin, Whiscash (rare Lapras, very rare Milotic)","excluded":["Tyranitar","Larvitar","Pupitar"] },
+      "megaStoneShrine": [
+        { "guardian": "Kira", "team": ["Gardevoir","Absol","Lucario"], "reward": "1 generic Mega Stone" },
+        { "guardian": "Ronan", "team": ["Sableye","Houndoom","Scizor"], "reward": "1 generic Mega Stone" },
+        { "guardian": "Mei", "team": ["Mawile","Manectric","Altaria"], "reward": "1 generic Mega Stone" }
+      ] }
+  ],
+  "teamCataclysmTimeline": [
+    { "step": 1, "location": "Cerulean Lab", "event": "Kidnaps scientists for info on the ancient Orbs", "outcome": "Players fail to stop it" },
+    { "step": 2, "location": "Lumiose Museum", "event": "Steals the Blue Orb", "outcome": "Players fail; Blue Orb acquired by Team Cataclysm" },
+    { "step": 3, "location": "Lavaridge Shrine", "event": "Flannery revealed as helping them, hands over the Red Orb", "outcome": "No battle; Team Cataclysm escapes with Red Orb" },
+    { "step": 4, "location": "Route 6", "event": "Green Orb revealed to already be theirs, given by a secret Champion backer", "outcome": "Story reveal only" },
+    { "step": 5, "location": "Tempest Island", "event": "Groudon, Kyogre, Rayquaza awakened; the trio turns on Team Cataclysm", "outcome": "Team Cataclysm defeated by their own summons; players face the trio" }
+  ],
+  "mysteryEgg": { "location": "route-7", "trigger": "3-way battle between the players", "reward": "Larvitar (hatches immediately, no delay)" },
+  "finalArc": {
+    "location": "Tempest Island",
+    "hpStates": ["full","half","quarter","eighth","defeated"],
+    "catchOptionAt": "eighth",
+    "legendaries": [
+      { "player": "P1", "legendary": "Groudon", "status": "burn" },
+      { "player": "P2", "legendary": "Kyogre", "status": "confuse" },
+      { "player": "P3", "legendary": "Rayquaza", "status": "paralysis" }
+    ]
+  },
+  "league": {
+    "eliteThree": [
+      { "name": "Lance", "represents": "Rayquaza", "mode": "rotation", "roster": ["Dragonite","Salamence","Flygon","Hydreigon","Haxorus","Goodra","Dragapult","Kommo-o","Baxcalibur"] },
+      { "name": "Flint", "represents": "Groudon", "mode": "rotation", "roster": ["Arcanine","Magmortar","Darmanitan","Chandelure","Coalossal","Volcarona","Houndoom","Blaziken","Ceruledge"] },
+      { "name": "Glacia", "represents": "Kyogre", "mode": "rotation", "roster": ["Froslass","Lapras","Weavile","Mamoswine","Alolan Ninetales","Beartic","Baxcalibur","Glaceon","Avalugg"] }
+    ],
+    "champions": [
+      { "name": "Cynthia", "mode": "simultaneous", "roster": ["Spiritomb","Milotic","Roserade","Togekiss","Lucario","Garchomp"] },
+      { "name": "Steven", "mode": "simultaneous", "roster": ["Skarmory","Aggron","Scizor","Excadrill","Tyranitar","Metagross"] },
+      { "name": "Diantha", "mode": "simultaneous", "roster": ["Hawlucha","Goodra","Florges","Aurorus","Gourgeist","Mega Gardevoir"] }
+    ]
+  },
+  "scenes": [
+    { "n": 1, "title": "Starter Town — Leaving Home", "file": "01-starter-town.png" },
+    { "n": 2, "title": "Professor Oak's Laboratory", "file": "02-professor-oaks-laboratory.png" },
+    { "n": 3, "title": "Route 1", "file": "03-route-1.png" },
+    { "n": 4, "title": "Pewter City", "file": "04-pewter-city.png" },
+    { "n": 5, "title": "Brock's Gym", "file": "05-brocks-gym.png" },
+    { "n": 6, "title": "Route 2", "file": "06-route-2.png" },
+    { "n": 7, "title": "Cerulean City", "file": "07-cerulean-city.png" },
+    { "n": 8, "title": "Cerulean Lab — Team Cataclysm", "file": "08-cerulean-lab-team-cataclysm.png" },
+    { "n": 9, "title": "Misty's Gym", "file": "09-mistys-gym.png" },
+    { "n": 10, "title": "Route 3 — Boss Battle", "file": "10-route-3-boss-battle.png" },
+    { "n": 11, "title": "Lumiose City", "file": "11-lumiose-city.png" },
+    { "n": 12, "title": "Lumiose Museum — Blue Orb Heist", "file": "12-lumiose-museum-blue-orb-heist.png" },
+    { "n": 13, "title": "Clemont's Gym", "file": "13-clemonts-gym.png" },
+    { "n": 14, "title": "Route 4 — Cave Approach", "file": "14-route-4-cave-approach.png" },
+    { "n": 15, "title": "Echoing Caverns — Ancient Carvings", "file": "15-echoing-caverns-ancient-carvings.png" },
+    { "n": 16, "title": "Lavaridge Town", "file": "16-lavaridge-town.png" },
+    { "n": 17, "title": "Flannery's Gym", "file": "17-flannerys-gym.png" },
+    { "n": 18, "title": "Flannery's Betrayal", "file": "18-flannerys-betrayal.png" },
+    { "n": 19, "title": "Route 5", "file": "19-route-5.png" },
+    { "n": 20, "title": "Cilan's Grass Gym", "file": "20-cilans-grass-gym.png" },
+    { "n": 21, "title": "Route 6 — Gladion", "file": "21-route-6-gladion.png" },
+    { "n": 22, "title": "Olympia's Psychic Gym", "file": "22-olympias-psychic-gym.png" },
+    { "n": 23, "title": "Route 7 — Ancient Monument", "file": "23-route-7-ancient-monument.png" },
+    { "n": 24, "title": "Battle for the Egg", "file": "24-battle-for-the-egg.png" },
+    { "n": 25, "title": "Larvitar Hatches", "file": "25-larvitar-hatches.png" },
+    { "n": 26, "title": "Abandoned City", "file": "26-abandoned-city.png" },
+    { "n": 27, "title": "Allister's Ghost Gym", "file": "27-allisters-ghost-gym.png" },
+    { "n": 28, "title": "Route 8 — Hidden Shrine", "file": "28-route-8-hidden-shrine.png" },
+    { "n": 29, "title": "Mega Stone Shrine", "file": "29-mega-stone-shrine.png" },
+    { "n": 30, "title": "Iris's Dragon Gym", "file": "30-iris-dragon-gym.png" },
+    { "n": 31, "title": "The Beam — Cataclysm Begins", "file": "31-the-beam-cataclysm-begins.png" },
+    { "n": 32, "title": "Global Cataclysm", "file": "32-global-cataclysm.png" },
+    { "n": 33, "title": "Tempest Island", "file": "33-tempest-island.png" },
+    { "n": 34, "title": "Weather Trio Awakening", "file": "34-weather-trio-awakening.png" },
+    { "n": 35, "title": "Team Cataclysm Defeated", "file": "35-team-cataclysm-defeated.png" },
+    { "n": 36, "title": "Groudon Battle", "file": "36-groudon-battle.png" },
+    { "n": 37, "title": "Kyogre Battle", "file": "37-kyogre-battle.png" },
+    { "n": 38, "title": "Rayquaza Battle", "file": "38-rayquaza-battle.png" },
+    { "n": 39, "title": "Pokémon League Entrance", "file": "39-pokemon-league-entrance.png" },
+    { "n": 40, "title": "Lance — Elite Three", "file": "40-lance-elite-three.png" },
+    { "n": 41, "title": "Flint — Elite Three", "file": "41-flint-elite-three.png" },
+    { "n": 42, "title": "Glacia — Elite Three", "file": "42-glacia-elite-three.png" },
+    { "n": 43, "title": "Cynthia — Champion Battle", "file": "43-cynthia-champion-battle.png" },
+    { "n": 44, "title": "Steven — Champion Battle", "file": "44-steven-champion-battle.png" },
+    { "n": 45, "title": "Diantha — Champion Battle", "file": "45-diantha-champion-battle.png" },
+    { "n": 46, "title": "Final Championship — Player Rivalry", "file": "46-final-championship-player-rivalry.png" },
+    { "n": 47, "title": "The True Champion", "file": "47-the-true-champion.png" }
+  ],
+  "finale": {
+    "rounds": ["P1 vs P2", "P1 vs P3", "P2 vs P3"],
+    "scoring": "1 point per win",
+    "tiebreak": "if 1-1-1, three-way free-for-all, last standing wins",
+    "title": "True Champion"
+  }
+}

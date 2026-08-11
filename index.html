@@ -272,7 +272,34 @@
     <p class="status-msg">Give this code to your players so they can join on their own devices.</p>
     <label>Players joined</label>
     <ul class="party-list" id="dm-player-list"></ul>
-    <p class="status-msg" id="dm-panel-note">Phase 1 skeleton &mdash; draft, catching, and battle controls come next.</p>
+
+    <div id="dm-draft-box">
+      <button class="btn" id="btn-start-draft">Begin Starter Draft</button>
+    </div>
+
+    <div id="dm-draft-rolls" class="hidden">
+      <label>Enter each player's die roll (from your phone)</label>
+      <div class="slot-row">
+        <input type="text" id="roll-P1" placeholder="P1" style="text-align:center;">
+        <input type="text" id="roll-P2" placeholder="P2" style="text-align:center;">
+        <input type="text" id="roll-P3" placeholder="P3" style="text-align:center;">
+      </div>
+      <button class="btn secondary" id="btn-compute-order">Compute Draft Order</button>
+      <div class="error-msg" id="draft-roll-error"></div>
+    </div>
+
+    <div id="dm-draft-status" class="hidden">
+      <label>Draft order (lowest roll first)</label>
+      <ul class="party-list" id="dm-draft-order-list"></ul>
+    </div>
+
+    <hr style="border:none;border-top:2px dashed var(--panel-light);margin:24px 0;">
+
+    <label>Story scene</label>
+    <select id="dm-scene-select"></select>
+    <button class="btn" id="btn-show-scene">Show Scene</button>
+    <button class="btn secondary" id="btn-clear-scene">Clear Scene</button>
+
     <span class="back-link" id="btn-dm-leave">&larr; leave / switch role</span>
   </div>
 
@@ -299,8 +326,31 @@
     <h2 class="pixel-font" style="font-size:14px;color:var(--accent-teal);text-align:center;margin-top:0;" id="player-view-name">trainer</h2>
     <p class="status-msg" id="player-view-status">Connected. Waiting for the Dungeon Master&hellip;</p>
     <div class="badge-strip" id="player-badge-strip"></div>
-    <p class="status-msg" id="player-view-note" style="margin-top:24px;">Phase 1 skeleton &mdash; your party, box, and badges will appear here as the campaign builds.</p>
+
+    <div id="player-draft-picker" class="hidden">
+      <label>Pick your type</label>
+      <div class="slot-row" id="player-type-row">
+        <div class="slot-btn" data-type="fire">Fire</div>
+        <div class="slot-btn" data-type="grass">Grass</div>
+        <div class="slot-btn" data-type="water">Water</div>
+      </div>
+      <div id="player-starter-list" class="hidden">
+        <label>Choose your starter</label>
+        <div id="player-starter-options"></div>
+      </div>
+    </div>
+
+    <div id="player-party-box" class="hidden">
+      <label>Your party</label>
+      <ul class="party-list" id="player-party-list"></ul>
+    </div>
+
     <span class="back-link" id="btn-player-leave">&larr; leave / switch role</span>
+  </div>
+
+  <!-- SCENE OVERLAY -->
+  <div id="scene-overlay" class="hidden" style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:50;">
+    <img id="scene-overlay-img" style="max-width:100%;max-height:100%;object-fit:contain;" alt="Story scene">
   </div>
 
 </div>
@@ -325,6 +375,62 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   const auth = getAuth(app);
+
+  const STARTERS = {
+    fire: ["Charmander","Cyndaquil","Torchic","Chimchar","Tepig","Fennekin","Litten","Scorbunny","Fuecoco"],
+    grass: ["Bulbasaur","Chikorita","Treecko","Turtwig","Snivy","Chespin","Rowlet","Grookey","Sprigatito"],
+    water: ["Squirtle","Totodile","Mudkip","Piplup","Oshawott","Froakie","Popplio","Sobble","Quaxly"]
+  };
+
+  const SCENES = [
+    {n:1,title:"Starter Town — Leaving Home",file:"01-starter-town.png"},
+    {n:2,title:"Professor Oak's Laboratory",file:"02-professor-oaks-laboratory.png"},
+    {n:3,title:"Route 1",file:"03-route-1.png"},
+    {n:4,title:"Pewter City",file:"04-pewter-city.png"},
+    {n:5,title:"Brock's Gym",file:"05-brocks-gym.png"},
+    {n:6,title:"Route 2",file:"06-route-2.png"},
+    {n:7,title:"Cerulean City",file:"07-cerulean-city.png"},
+    {n:8,title:"Cerulean Lab — Team Cataclysm",file:"08-cerulean-lab-team-cataclysm.png"},
+    {n:9,title:"Misty's Gym",file:"09-mistys-gym.png"},
+    {n:10,title:"Route 3 — Boss Battle",file:"10-route-3-boss-battle.png"},
+    {n:11,title:"Lumiose City",file:"11-lumiose-city.png"},
+    {n:12,title:"Lumiose Museum — Blue Orb Heist",file:"12-lumiose-museum-blue-orb-heist.png"},
+    {n:13,title:"Clemont's Gym",file:"13-clemonts-gym.png"},
+    {n:14,title:"Route 4 — Cave Approach",file:"14-route-4-cave-approach.png"},
+    {n:15,title:"Echoing Caverns — Ancient Carvings",file:"15-echoing-caverns-ancient-carvings.png"},
+    {n:16,title:"Lavaridge Town",file:"16-lavaridge-town.png"},
+    {n:17,title:"Flannery's Gym",file:"17-flannerys-gym.png"},
+    {n:18,title:"Flannery's Betrayal",file:"18-flannerys-betrayal.png"},
+    {n:19,title:"Route 5",file:"19-route-5.png"},
+    {n:20,title:"Cilan's Grass Gym",file:"20-cilans-grass-gym.png"},
+    {n:21,title:"Route 6 — Gladion",file:"21-route-6-gladion.png"},
+    {n:22,title:"Olympia's Psychic Gym",file:"22-olympias-psychic-gym.png"},
+    {n:23,title:"Route 7 — Ancient Monument",file:"23-route-7-ancient-monument.png"},
+    {n:24,title:"Battle for the Egg",file:"24-battle-for-the-egg.png"},
+    {n:25,title:"Larvitar Hatches",file:"25-larvitar-hatches.png"},
+    {n:26,title:"Abandoned City",file:"26-abandoned-city.png"},
+    {n:27,title:"Allister's Ghost Gym",file:"27-allisters-ghost-gym.png"},
+    {n:28,title:"Route 8 — Hidden Shrine",file:"28-route-8-hidden-shrine.png"},
+    {n:29,title:"Mega Stone Shrine",file:"29-mega-stone-shrine.png"},
+    {n:30,title:"Iris's Dragon Gym",file:"30-iris-dragon-gym.png"},
+    {n:31,title:"The Beam — Cataclysm Begins",file:"31-the-beam-cataclysm-begins.png"},
+    {n:32,title:"Global Cataclysm",file:"32-global-cataclysm.png"},
+    {n:33,title:"Tempest Island",file:"33-tempest-island.png"},
+    {n:34,title:"Weather Trio Awakening",file:"34-weather-trio-awakening.png"},
+    {n:35,title:"Team Cataclysm Defeated",file:"35-team-cataclysm-defeated.png"},
+    {n:36,title:"Groudon Battle",file:"36-groudon-battle.png"},
+    {n:37,title:"Kyogre Battle",file:"37-kyogre-battle.png"},
+    {n:38,title:"Rayquaza Battle",file:"38-rayquaza-battle.png"},
+    {n:39,title:"Pokémon League Entrance",file:"39-pokemon-league-entrance.png"},
+    {n:40,title:"Lance — Elite Three",file:"40-lance-elite-three.png"},
+    {n:41,title:"Flint — Elite Three",file:"41-flint-elite-three.png"},
+    {n:42,title:"Glacia — Elite Three",file:"42-glacia-elite-three.png"},
+    {n:43,title:"Cynthia — Champion Battle",file:"43-cynthia-champion-battle.png"},
+    {n:44,title:"Steven — Champion Battle",file:"44-steven-champion-battle.png"},
+    {n:45,title:"Diantha — Champion Battle",file:"45-diantha-champion-battle.png"},
+    {n:46,title:"Final Championship — Player Rivalry",file:"46-final-championship-player-rivalry.png"},
+    {n:47,title:"The True Champion",file:"47-the-true-champion.png"}
+  ];
 
   // ---- Screen helpers ----
   const screens = {
@@ -356,11 +462,11 @@
   function emptySessionState() {
     return {
       meta: { createdAt: Date.now() },
-      session: { phase: 'draft' },
+      session: { phase: 'lobby', currentScene: null },
       players: {
-        P1: { joined: false, name: null, badges: 0 },
-        P2: { joined: false, name: null, badges: 0 },
-        P3: { joined: false, name: null, badges: 0 }
+        P1: { joined: false, name: null, badges: 0, type: null, starter: null, party: [], draftDone: false },
+        P2: { joined: false, name: null, badges: 0, type: null, starter: null, party: [], draftDone: false },
+        P3: { joined: false, name: null, badges: 0, type: null, starter: null, party: [], draftDone: false }
       }
     };
   }
@@ -429,6 +535,7 @@
   function openDmPanel(code) {
     document.getElementById('dm-session-code').textContent = code;
     showScreen('dmPanel');
+
     onValue(ref(db, `sessions/${code}/players`), (snap) => {
       const players = snap.val() || {};
       const list = document.getElementById('dm-player-list');
@@ -437,13 +544,66 @@
         const p = players[slot] || {};
         const li = document.createElement('li');
         if (p.joined) {
-          li.innerHTML = `<span>${slot}</span><span>${escapeHtml(p.name || 'Trainer')}</span>`;
+          const extra = p.starter ? ` &mdash; ${escapeHtml(p.starter)} (${escapeHtml(p.type || '')})` : '';
+          li.innerHTML = `<span>${slot}</span><span>${escapeHtml(p.name || 'Trainer')}${extra}</span>`;
         } else {
           li.classList.add('empty');
           li.innerHTML = `<span>${slot}</span><span>waiting to join&hellip;</span>`;
         }
         list.appendChild(li);
       });
+    });
+
+    onValue(ref(db, `sessions/${code}/session`), (snap) => {
+      const session = snap.val() || {};
+      const phase = session.phase || 'lobby';
+      document.getElementById('dm-draft-box').classList.toggle('hidden', phase !== 'lobby');
+      document.getElementById('dm-draft-rolls').classList.toggle('hidden', phase !== 'draft-rolls');
+      document.getElementById('dm-draft-status').classList.toggle('hidden', phase !== 'draft-picking' && phase !== 'playing');
+
+      if ((phase === 'draft-picking' || phase === 'playing') && session.draftOrder) {
+        const list = document.getElementById('dm-draft-order-list');
+        list.innerHTML = '';
+        session.draftOrder.forEach((slot, i) => {
+          const li = document.createElement('li');
+          const isCurrent = phase === 'draft-picking' && i === session.currentPickerIndex;
+          li.innerHTML = `<span>${i + 1}. ${slot}</span><span>${isCurrent ? 'picking now…' : ''}</span>`;
+          list.appendChild(li);
+        });
+      }
+    });
+
+    document.getElementById('btn-start-draft').addEventListener('click', async () => {
+      await update(ref(db, `sessions/${code}/session`), { phase: 'draft-rolls' });
+    }, { once: true });
+
+    document.getElementById('btn-compute-order').addEventListener('click', async () => {
+      const errEl = document.getElementById('draft-roll-error');
+      errEl.textContent = '';
+      const rolls = {
+        P1: parseInt(document.getElementById('roll-P1').value, 10),
+        P2: parseInt(document.getElementById('roll-P2').value, 10),
+        P3: parseInt(document.getElementById('roll-P3').value, 10)
+      };
+      if (Object.values(rolls).some(isNaN)) { errEl.textContent = 'Enter all three rolls.'; return; }
+      const vals = Object.values(rolls);
+      if (new Set(vals).size !== vals.length) { errEl.textContent = 'Tie detected — re-roll the tied players and enter again.'; return; }
+      const order = Object.entries(rolls).sort((a, b) => a[1] - b[1]).map(e => e[0]);
+      await update(ref(db, `sessions/${code}/session`), {
+        phase: 'draft-picking',
+        draftOrder: order,
+        currentPickerIndex: 0
+      });
+    });
+
+    // Scene picker
+    const sceneSelect = document.getElementById('dm-scene-select');
+    sceneSelect.innerHTML = SCENES.map(s => `<option value="${s.file}">${s.n}. ${escapeHtml(s.title)}</option>`).join('');
+    document.getElementById('btn-show-scene').addEventListener('click', async () => {
+      await update(ref(db, `sessions/${code}/session`), { currentScene: sceneSelect.value });
+    });
+    document.getElementById('btn-clear-scene').addEventListener('click', async () => {
+      await update(ref(db, `sessions/${code}/session`), { currentScene: null });
     });
   }
 
@@ -512,8 +672,11 @@
     }
   });
 
+  let myChosenType = null;
+
   function attachPlayerView(code, slot) {
     showScreen('playerView');
+
     onValue(ref(db, `sessions/${code}/players/${slot}`), (snap) => {
       const p = snap.val() || {};
       document.getElementById('player-view-name').textContent = p.name || 'trainer';
@@ -526,13 +689,125 @@
         if (i < badgeCount) dot.style.background = 'var(--accent-gold)';
         badgeStrip.appendChild(dot);
       }
+      const partyBox = document.getElementById('player-party-box');
+      if (p.party && p.party.length) {
+        partyBox.classList.remove('hidden');
+        const list = document.getElementById('player-party-list');
+        list.innerHTML = '';
+        p.party.forEach((mon) => {
+          const li = document.createElement('li');
+          li.innerHTML = `<span>${escapeHtml(mon)}</span><span>${escapeHtml(p.type || '')}</span>`;
+          list.appendChild(li);
+        });
+      } else {
+        partyBox.classList.add('hidden');
+      }
     });
-    onValue(ref(db, `sessions/${code}/session/phase`), (snap) => {
-      const phase = snap.val();
-      const statusEl = document.getElementById('player-view-status');
-      if (phase === 'draft') statusEl.textContent = 'Connected. Waiting for the Dungeon Master to start the starter draft…';
-      else statusEl.textContent = `Connected. Campaign phase: ${phase}`;
+
+    onValue(ref(db, `sessions/${code}/players`), async (snap) => {
+      const allPlayers = snap.val() || {};
+      const sessSnap = await get(ref(db, `sessions/${code}/session`));
+      const session = sessSnap.val() || {};
+      renderPlayerPhase(code, slot, session, allPlayers);
     });
+
+    onValue(ref(db, `sessions/${code}/session`), async (snap) => {
+      const session = snap.val() || {};
+      const playersSnap = await get(ref(db, `sessions/${code}/players`));
+      renderPlayerPhase(code, slot, session, playersSnap.val() || {});
+
+      const overlay = document.getElementById('scene-overlay');
+      if (session.currentScene) {
+        document.getElementById('scene-overlay-img').src = `scenes/${session.currentScene}`;
+        overlay.classList.remove('hidden');
+      } else {
+        overlay.classList.add('hidden');
+      }
+    });
+  }
+
+  function renderPlayerPhase(code, slot, session, allPlayers) {
+    const phase = session.phase || 'lobby';
+    const statusEl = document.getElementById('player-view-status');
+    const pickerBox = document.getElementById('player-draft-picker');
+    const me = allPlayers[slot] || {};
+
+    if (phase === 'lobby') {
+      statusEl.textContent = 'Connected. Waiting for the Dungeon Master to start the starter draft…';
+      pickerBox.classList.add('hidden');
+      return;
+    }
+    if (phase === 'draft-rolls') {
+      statusEl.textContent = 'The Dungeon Master is rolling for draft order…';
+      pickerBox.classList.add('hidden');
+      return;
+    }
+    if (phase === 'draft-picking') {
+      const order = session.draftOrder || [];
+      const isMyTurn = order[session.currentPickerIndex] === slot && !me.draftDone;
+      if (me.draftDone) {
+        statusEl.textContent = `You picked ${me.starter}. Waiting for the others…`;
+        pickerBox.classList.add('hidden');
+        return;
+      }
+      if (!isMyTurn) {
+        statusEl.textContent = `Waiting for your turn to pick a starter…`;
+        pickerBox.classList.add('hidden');
+        return;
+      }
+      statusEl.textContent = `Your turn! Pick your type.`;
+      pickerBox.classList.remove('hidden');
+      const takenTypes = Object.values(allPlayers).filter(p => p.type).map(p => p.type);
+      document.querySelectorAll('#player-type-row .slot-btn').forEach((btn) => {
+        const taken = takenTypes.includes(btn.dataset.type);
+        btn.classList.toggle('taken', taken);
+      });
+      return;
+    }
+    // phase === 'playing' or beyond
+    statusEl.textContent = 'The journey is underway.';
+    pickerBox.classList.add('hidden');
+  }
+
+  document.querySelectorAll('#player-type-row .slot-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('taken')) return;
+      document.querySelectorAll('#player-type-row .slot-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      myChosenType = btn.dataset.type;
+      const starterList = document.getElementById('player-starter-list');
+      const optionsBox = document.getElementById('player-starter-options');
+      optionsBox.innerHTML = '';
+      STARTERS[myChosenType].forEach((mon) => {
+        const b = document.createElement('button');
+        b.className = 'btn secondary';
+        b.textContent = mon;
+        b.addEventListener('click', () => confirmStarterPick(mon));
+        optionsBox.appendChild(b);
+      });
+      starterList.classList.remove('hidden');
+    });
+  });
+
+  async function confirmStarterPick(mon) {
+    const id = loadIdentity();
+    if (!id || id.role !== 'player') return;
+    const { code, slot } = id;
+    await update(ref(db, `sessions/${code}/players/${slot}`), {
+      type: myChosenType,
+      starter: mon,
+      party: [mon],
+      draftDone: true
+    });
+    const sessSnap = await get(ref(db, `sessions/${code}/session`));
+    const session = sessSnap.val() || {};
+    const order = session.draftOrder || [];
+    const nextIndex = (session.currentPickerIndex || 0) + 1;
+    if (nextIndex >= order.length) {
+      await update(ref(db, `sessions/${code}/session`), { phase: 'playing' });
+    } else {
+      await update(ref(db, `sessions/${code}/session`), { currentPickerIndex: nextIndex });
+    }
   }
 
   function leaveAndReset() {
