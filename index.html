@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>The Cataclysm Campaign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #14142b;
+    --panel: #1f1f3d;
+    --panel-light: #2a2a52;
+    --accent-red: #e63950;
+    --accent-red-dark: #a5253a;
+    --accent-gold: #ffd23f;
+    --accent-teal: #4ecdc4;
+    --text-light: #f4f1de;
+    --text-dim: #9a9ac0;
+    --border-pixel: #0a0a18;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: var(--bg-deep);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, transparent 2px, transparent 4px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.02) 0px, transparent 2px, transparent 4px);
+    color: var(--text-light);
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+  }
+
+  h1, h2, h3, .pixel-font {
+    font-family: 'Press Start 2P', monospace;
+    line-height: 1.6;
+  }
+
+  .app-shell {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 16px 64px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cartridge {
+    width: 100%;
+    background: var(--panel);
+    border: 4px solid var(--border-pixel);
+    box-shadow:
+      0 0 0 4px var(--panel-light),
+      0 8px 0 0 var(--border-pixel),
+      0 8px 0 4px var(--border-pixel);
+    padding: 32px 24px;
+    margin-top: 24px;
+  }
+
+  .title-block {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .title-block h1 {
+    font-size: 22px;
+    color: var(--accent-gold);
+    text-shadow: 3px 3px 0 var(--border-pixel);
+    margin: 0 0 12px;
+  }
+
+  .title-block .subtitle {
+    font-size: 20px;
+    color: var(--text-dim);
+    margin: 0;
+  }
+
+  .blink-cursor {
+    display: inline-block;
+    animation: blink 1s step-start infinite;
+    color: var(--accent-teal);
+  }
+
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .btn {
+    display: block;
+    width: 100%;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    color: var(--text-light);
+    background: var(--accent-red);
+    border: none;
+    box-shadow: 0 5px 0 0 var(--accent-red-dark);
+    padding: 16px 12px;
+    margin: 10px 0;
+    cursor: pointer;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  .btn:active {
+    transform: translateY(5px);
+    box-shadow: 0 0 0 0 var(--accent-red-dark);
+  }
+
+  .btn.secondary {
+    background: var(--panel-light);
+    box-shadow: 0 5px 0 0 var(--border-pixel);
+  }
+
+  .btn.secondary:active { box-shadow: 0 0 0 0 var(--border-pixel); }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  label {
+    display: block;
+    font-size: 15px;
+    color: var(--text-dim);
+    margin: 18px 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    font-family: 'VT323', monospace;
+    font-size: 24px;
+    color: var(--text-light);
+    background: var(--bg-deep);
+    border: 3px solid var(--border-pixel);
+    padding: 10px 12px;
+    letter-spacing: 2px;
+  }
+
+  input[type="text"]:focus { outline: 3px solid var(--accent-teal); }
+
+  .slot-row {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+  }
+
+  .slot-btn {
+    flex: 1;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    padding: 14px 4px;
+    background: var(--panel-light);
+    border: 3px solid var(--border-pixel);
+    color: var(--text-dim);
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .slot-btn.taken { opacity: 0.35; cursor: not-allowed; }
+  .slot-btn.selected { background: var(--accent-teal); color: var(--border-pixel); }
+
+  .code-display {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 32px;
+    color: var(--accent-gold);
+    text-align: center;
+    letter-spacing: 6px;
+    margin: 18px 0;
+    padding: 16px;
+    border: 3px dashed var(--accent-gold);
+  }
+
+  .party-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0;
+  }
+
+  .party-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--panel-light);
+    border-left: 4px solid var(--accent-teal);
+    margin-bottom: 8px;
+    font-size: 18px;
+  }
+
+  .party-list li.empty {
+    border-left-color: var(--text-dim);
+    color: var(--text-dim);
+  }
+
+  .status-msg {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 16px;
+    margin-top: 16px;
+  }
+
+  .error-msg {
+    color: var(--accent-red);
+    font-size: 16px;
+    text-align: center;
+    margin-top: 12px;
+    min-height: 20px;
+  }
+
+  .hidden { display: none !important; }
+
+  .back-link {
+    display: inline-block;
+    margin-top: 20px;
+    color: var(--text-dim);
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  .badge-strip {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .badge-dot {
+    width: 18px;
+    height: 18px;
+    background: var(--panel-light);
+    border: 2px solid var(--border-pixel);
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <div class="title-block">
+    <h1>The Cataclysm<br>Campaign</h1>
+    <p class="subtitle">&gt; press start<span class="blink-cursor">_</span></p>
+  </div>
+
+  <!-- ROLE SELECT -->
+  <div id="screen-role" class="cartridge">
+    <h2 class="pixel-font" style="font-size:14px;color:var(--accent-teal);text-align:center;margin-top:0;">choose your role</h2>
+    <button class="btn" id="btn-role-dm">I'm the Dungeon Master</button>
+    <button class="btn secondary" id="btn-role-player">I'm a Player</button>
+  </div>
+
+  <!-- DM HOME -->
+  <div id="screen-dm-home" class="cartridge hidden">
+    <h2 class="pixel-font" style="font-size:14px;color:var(--accent-gold);text-align:center;margin-top:0;">dungeon master</h2>
+    <button class="btn" id="btn-dm-new">Start New Campaign</button>
+    <label for="dm-resume-code">Resume with session code</label>
+    <input type="text" id="dm-resume-code" maxlength="6" placeholder="ABCD12" style="text-transform:uppercase;">
+    <button class="btn secondary" id="btn-dm-resume">Resume Campaign</button>
+    <div class="error-msg" id="dm-home-error"></div>
+    <span class="back-link" id="back-from-dm-home">&larr; back</span>
+  </div>
+
+  <!-- DM PANEL (post session creation) -->
+  <div id="screen-dm-panel" class="cartridge hidden">
+    <h2 class="pixel-font" style="font-size:14px;color:var(--accent-gold);text-align:center;margin-top:0;">session code</h2>
+    <div class="code-display" id="dm-session-code">------</div>
+    <p class="status-msg">Give this code to your players so they can join on their own devices.</p>
+    <label>Players joined</label>
+    <ul class="party-list" id="dm-player-list"></ul>
+    <p class="status-msg" id="dm-panel-note">Phase 1 skeleton &mdash; draft, catching, and battle controls come next.</p>
+  </div>
+
+  <!-- PLAYER JOIN -->
+  <div id="screen-player-join" class="cartridge hidden">
+    <h2 class="pixel-font" style="font-size:14px;color:var(--accent-teal);text-align:center;margin-top:0;">join campaign</h2>
+    <label for="player-code">Session code</label>
+    <input type="text" id="player-code" maxlength="6" placeholder="ABCD12" style="text-transform:uppercase;">
+    <label>Choose your slot</label>
+    <div class="slot-row" id="player-slot-row">
+      <div class="slot-btn" data-slot="P1">P1</div>
+      <div class="slot-btn" data-slot="P2">P2</div>
+      <div class="slot-btn" data-slot="P3">P3</div>
+    </div>
+    <label for="player-name">Trainer name</label>
+    <input type="text" id="player-name" maxlength="16" placeholder="Your name">
+    <button class="btn" id="btn-player-join" disabled>Join Campaign</button>
+    <div class="error-msg" id="player-join-error"></div>
+    <span class="back-link" id="back-from-player-join">&larr; back</span>
+  </div>
+
+  <!-- PLAYER VIEW (post join) -->
+  <div id="screen-player-view" class="cartridge hidden">
+    <h2 class="pixel-font" style="font-size:14px;color:var(--accent-teal);text-align:center;margin-top:0;" id="player-view-name">trainer</h2>
+    <p class="status-msg" id="player-view-status">Connected. Waiting for the Dungeon Master&hellip;</p>
+    <div class="badge-strip" id="player-badge-strip"></div>
+    <p class="status-msg" id="player-view-note" style="margin-top:24px;">Phase 1 skeleton &mdash; your party, box, and badges will appear here as the campaign builds.</p>
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+  import {
+    getDatabase, ref, set, get, update, onValue, child
+  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBZkPzell6GahCvxDVeEasfyU93nJXsKeU",
+    authDomain: "pokemon-dnd-build.firebaseapp.com",
+    databaseURL: "https://pokemon-dnd-build-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "pokemon-dnd-build",
+    storageBucket: "pokemon-dnd-build.firebasestorage.app",
+    messagingSenderId: "977880476250",
+    appId: "1:977880476250:web:86355ed3c6452e57c1c663"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  // ---- Screen helpers ----
+  const screens = {
+    role: document.getElementById('screen-role'),
+    dmHome: document.getElementById('screen-dm-home'),
+    dmPanel: document.getElementById('screen-dm-panel'),
+    playerJoin: document.getElementById('screen-player-join'),
+    playerView: document.getElementById('screen-player-view'),
+  };
+  function showScreen(name) {
+    Object.values(screens).forEach(s => s.classList.add('hidden'));
+    screens[name].classList.remove('hidden');
+  }
+
+  // ---- Local identity (so a device remembers who it is on refresh) ----
+  const LS_KEY = 'cataclysm-identity';
+  function saveIdentity(obj) { localStorage.setItem(LS_KEY, JSON.stringify(obj)); }
+  function loadIdentity() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY)); } catch (e) { return null; }
+  }
+
+  function randomCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars
+    let out = '';
+    for (let i = 0; i < 6; i++) out += chars[Math.floor(Math.random() * chars.length)];
+    return out;
+  }
+
+  function emptySessionState() {
+    return {
+      meta: { createdAt: Date.now() },
+      session: { phase: 'draft' },
+      players: {
+        P1: { joined: false, name: null, badges: 0 },
+        P2: { joined: false, name: null, badges: 0 },
+        P3: { joined: false, name: null, badges: 0 }
+      }
+    };
+  }
+
+  // ---- Wait for anonymous auth before touching the database ----
+  let authReady = false;
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      authReady = true;
+      resumeFromLocalIdentity();
+    }
+  });
+  signInAnonymously(auth).catch((err) => {
+    console.error('Anonymous sign-in failed', err);
+  });
+
+  function resumeFromLocalIdentity() {
+    const id = loadIdentity();
+    if (!id) return;
+    if (id.role === 'dm' && id.code) {
+      openDmPanel(id.code);
+    } else if (id.role === 'player' && id.code && id.slot) {
+      attachPlayerView(id.code, id.slot);
+    }
+  }
+
+  // ---- Role select ----
+  document.getElementById('btn-role-dm').addEventListener('click', () => showScreen('dmHome'));
+  document.getElementById('btn-role-player').addEventListener('click', () => showScreen('playerJoin'));
+  document.getElementById('back-from-dm-home').addEventListener('click', () => showScreen('role'));
+  document.getElementById('back-from-player-join').addEventListener('click', () => showScreen('role'));
+
+  // ---- DM: new campaign ----
+  document.getElementById('btn-dm-new').addEventListener('click', async () => {
+    const errEl = document.getElementById('dm-home-error');
+    errEl.textContent = '';
+    if (!authReady) { errEl.textContent = 'Still connecting, try again in a moment.'; return; }
+    const code = randomCode();
+    try {
+      await set(ref(db, `sessions/${code}`), emptySessionState());
+      saveIdentity({ role: 'dm', code });
+      openDmPanel(code);
+    } catch (e) {
+      console.error(e);
+      errEl.textContent = 'Could not create session. Check your Firebase database rules.';
+    }
+  });
+
+  // ---- DM: resume existing ----
+  document.getElementById('btn-dm-resume').addEventListener('click', async () => {
+    const errEl = document.getElementById('dm-home-error');
+    errEl.textContent = '';
+    const code = document.getElementById('dm-resume-code').value.trim().toUpperCase();
+    if (!code) { errEl.textContent = 'Enter a session code.'; return; }
+    try {
+      const snap = await get(ref(db, `sessions/${code}`));
+      if (!snap.exists()) { errEl.textContent = 'No campaign found with that code.'; return; }
+      saveIdentity({ role: 'dm', code });
+      openDmPanel(code);
+    } catch (e) {
+      console.error(e);
+      errEl.textContent = 'Could not reach the database.';
+    }
+  });
+
+  function openDmPanel(code) {
+    document.getElementById('dm-session-code').textContent = code;
+    showScreen('dmPanel');
+    onValue(ref(db, `sessions/${code}/players`), (snap) => {
+      const players = snap.val() || {};
+      const list = document.getElementById('dm-player-list');
+      list.innerHTML = '';
+      ['P1', 'P2', 'P3'].forEach((slot) => {
+        const p = players[slot] || {};
+        const li = document.createElement('li');
+        if (p.joined) {
+          li.innerHTML = `<span>${slot}</span><span>${escapeHtml(p.name || 'Trainer')}</span>`;
+        } else {
+          li.classList.add('empty');
+          li.innerHTML = `<span>${slot}</span><span>waiting to join&hellip;</span>`;
+        }
+        list.appendChild(li);
+      });
+    });
+  }
+
+  // ---- Player: join flow ----
+  let selectedSlot = null;
+  let joinCodeSnapshot = null;
+
+  document.getElementById('player-code').addEventListener('input', checkTakenSlots);
+
+  async function checkTakenSlots() {
+    const code = document.getElementById('player-code').value.trim().toUpperCase();
+    if (code.length !== 6) return;
+    try {
+      const snap = await get(ref(db, `sessions/${code}/players`));
+      if (!snap.exists()) return;
+      joinCodeSnapshot = snap.val();
+      document.querySelectorAll('.slot-btn').forEach((btn) => {
+        const slot = btn.dataset.slot;
+        const taken = joinCodeSnapshot[slot] && joinCodeSnapshot[slot].joined;
+        btn.classList.toggle('taken', !!taken);
+        if (taken && selectedSlot === slot) selectedSlot = null;
+      });
+      updateJoinButtonState();
+    } catch (e) { /* silent until they finish typing a valid code */ }
+  }
+
+  document.querySelectorAll('.slot-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('taken')) return;
+      document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedSlot = btn.dataset.slot;
+      updateJoinButtonState();
+    });
+  });
+
+  document.getElementById('player-name').addEventListener('input', updateJoinButtonState);
+
+  function updateJoinButtonState() {
+    const code = document.getElementById('player-code').value.trim();
+    const name = document.getElementById('player-name').value.trim();
+    document.getElementById('btn-player-join').disabled = !(code.length === 6 && selectedSlot && name.length > 0);
+  }
+
+  document.getElementById('btn-player-join').addEventListener('click', async () => {
+    const errEl = document.getElementById('player-join-error');
+    errEl.textContent = '';
+    const code = document.getElementById('player-code').value.trim().toUpperCase();
+    const name = document.getElementById('player-name').value.trim();
+    if (!authReady) { errEl.textContent = 'Still connecting, try again in a moment.'; return; }
+    try {
+      const snap = await get(ref(db, `sessions/${code}`));
+      if (!snap.exists()) { errEl.textContent = 'No campaign found with that code.'; return; }
+      const players = snap.val().players || {};
+      if (players[selectedSlot] && players[selectedSlot].joined) {
+        errEl.textContent = 'That slot was just taken, pick another.';
+        checkTakenSlots();
+        return;
+      }
+      await update(ref(db, `sessions/${code}/players/${selectedSlot}`), { joined: true, name });
+      saveIdentity({ role: 'player', code, slot: selectedSlot });
+      attachPlayerView(code, selectedSlot);
+    } catch (e) {
+      console.error(e);
+      errEl.textContent = 'Could not join. Check your Firebase database rules.';
+    }
+  });
+
+  function attachPlayerView(code, slot) {
+    showScreen('playerView');
+    onValue(ref(db, `sessions/${code}/players/${slot}`), (snap) => {
+      const p = snap.val() || {};
+      document.getElementById('player-view-name').textContent = p.name || 'trainer';
+      const badgeStrip = document.getElementById('player-badge-strip');
+      badgeStrip.innerHTML = '';
+      const badgeCount = p.badges || 0;
+      for (let i = 0; i < 8; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'badge-dot';
+        if (i < badgeCount) dot.style.background = 'var(--accent-gold)';
+        badgeStrip.appendChild(dot);
+      }
+    });
+    onValue(ref(db, `sessions/${code}/session/phase`), (snap) => {
+      const phase = snap.val();
+      const statusEl = document.getElementById('player-view-status');
+      if (phase === 'draft') statusEl.textContent = 'Connected. Waiting for the Dungeon Master to start the starter draft…';
+      else statusEl.textContent = `Connected. Campaign phase: ${phase}`;
+    });
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+</script>
+
+</body>
+</html>
