@@ -264,6 +264,79 @@
     letter-spacing: 1px;
   }
 
+  /* ---- Party sprite items ---- */
+  .party-list li { align-items: center; gap: 8px; }
+  .party-sprite {
+    width: 48px; height: 48px;
+    image-rendering: pixelated;
+    flex-shrink: 0;
+    background: var(--bg-deep);
+    border: 2px solid var(--border-pixel);
+  }
+  .party-mon-name { flex: 1; }
+  .party-action-btn {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    background: var(--panel);
+    color: var(--accent-teal);
+    border: 2px solid var(--accent-teal);
+    padding: 4px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .party-action-btn:hover { background: var(--accent-teal); color: var(--bg-deep); }
+
+  /* ---- Trainer avatar ---- */
+  .trainer-avatar-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 12px 0 8px;
+  }
+  .trainer-avatar-card img {
+    width: 80px;
+    height: 80px;
+    image-rendering: pixelated;
+    border: 3px solid var(--accent-gold);
+    background: var(--bg-deep);
+    box-shadow: 0 0 12px rgba(255, 210, 63, 0.3);
+  }
+  .trainer-avatar-card .trainer-slot-label {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  /* ---- DM roster with party management ---- */
+  .dm-player-roster { margin-top: 8px; }
+  .dm-player-roster .party-list li {
+    font-size: 16px; padding: 6px 10px;
+  }
+  .dm-evolve-row { display: flex; gap: 4px; align-items: center; margin-top: 4px; }
+  .dm-evolve-row input {
+    flex: 1; font-family: 'VT323', monospace; font-size: 18px;
+    background: var(--bg-deep); color: var(--text-light);
+    border: 2px solid var(--border-pixel); padding: 4px 8px;
+  }
+  .dm-evolve-row button {
+    font-family: 'VT323', monospace; font-size: 16px;
+    background: var(--accent-teal); color: var(--bg-deep);
+    border: none; padding: 6px 10px; cursor: pointer;
+  }
+
+  select {
+    width: 100%;
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+    color: var(--text-light);
+    background: var(--bg-deep);
+    border: 3px solid var(--border-pixel);
+    padding: 8px 12px;
+    margin: 4px 0;
+  }
+  select:focus { outline: 3px solid var(--accent-teal); }
+
   /* ---- Encounter sprite overlay ---- */
   #encounter-overlay {
     position: fixed;
@@ -401,6 +474,11 @@
 
     <hr style="border:none;border-top:2px dashed var(--panel-light);margin:24px 0;">
 
+    <label>Player rosters</label>
+    <div id="dm-roster-panels"></div>
+
+    <hr style="border:none;border-top:2px dashed var(--panel-light);margin:24px 0;">
+
     <label>Wild encounter</label>
     <select id="dm-route-select">
       <option value="">Choose a route&hellip;</option>
@@ -451,6 +529,10 @@
 
   <!-- PLAYER VIEW (post join) -->
   <div id="screen-player-view" class="cartridge hidden">
+    <div class="trainer-avatar-card">
+      <img id="player-trainer-sprite" src="" alt="Trainer">
+      <span class="trainer-slot-label" id="player-slot-label"></span>
+    </div>
     <h2 class="pixel-font" style="font-size:14px;color:var(--accent-teal);text-align:center;margin-top:0;" id="player-view-name">trainer</h2>
     <p class="status-msg" id="player-view-status">Connected. Waiting for the Dungeon Master&hellip;</p>
     <div class="badge-strip" id="player-badge-strip"></div>
@@ -531,13 +613,14 @@
   };
 
   const ROUTES = [
-    { id: "route-1", name: "Route 1 — First Steps", encounterTable: { "Common": "Pidgey, Rattata, Caterpie", "Uncommon": "Sentret, Hoppip", "Rare": "Eevee" } },
-    { id: "route-2", name: "Route 2 — The Forest Road", encounterTable: { "Common": "Caterpie, Weedle, Bellsprout", "Uncommon": "Hoothoot, Ledyba", "Rare": "Pikachu" } },
-    { id: "route-4", name: "Route 4 — Echoing Caverns", encounterTable: { "Common": "Zubat, Geodude, Diglett", "Uncommon": "Onix, Roggenrola", "Rare": "Nosepass" } },
+    { id: "route-1", name: "Route 1 — First Steps", encounterTable: { "Normal":"Sentret","Bug":"Scatterbug","Flying":"Pidgey","Grass":"Bounsweet","Dark":"Poochyena","Electric":"Pawmi","Fire":"Litten","Water":"Poliwag","Ground":"Sandshrew","Fighting":"Machop","Poison":"Nidoran-M, Nidoran-F","Rock":"Roggenrola","Psychic":"Abra","Ghost":"Gastly","Steel":"Aron","Fairy":"Cutiefly","Ice":"Swinub","Dragon":"Dratini","Additional":"Eevee, Sunkern, Hoppip, Bunnelby","Pond":"Poliwag, Magikarp, Psyduck, Lotad" } },
+    { id: "route-2", name: "Route 2 — The Forest Road", encounterTable: { "Normal":"Furret","Bug":"Venipede","Flying":"Taillow","Grass":"Petilil","Dark":"Nickit","Electric":"Pikachu","Fire":"Growlithe","Water":"Buizel","Ground":"Drilbur","Fighting":"Mankey","Poison":"Ekans","Rock":"Nosepass","Psychic":"Ralts","Ghost":"Shuppet","Steel":"Pawniard","Fairy":"Flabébé","Ice":"Snover","Dragon":"Gible","Additional":"Oddish, Hoppip, Combee, Pineco, Heracross","Pond":"Buizel, Psyduck, Poliwag, Goldeen, Magikarp","Special":"Dratini" } },
+    { id: "route-3", name: "Route 3 — The Long Road", encounterTable: { "Normal":"Lillipup","Bug":"Nincada","Flying":"Starly","Grass":"Fomantis","Dark":"Mightyena","Electric":"Yamper","Fire":"Pansear","Water":"Barboach","Ground":"Mudbray","Fighting":"Riolu","Poison":"Trubbish","Rock":"Dwebble","Psychic":"Gothita","Ghost":"Phantump","Steel":"Ferroseed","Fairy":"Mawile","Ice":"Bergmite","Dragon":"Noibat","Additional":"Ponyta, Skiddo, Houndour, Rhyhorn, Pikipek","Pond":"Barboach, Wooper, Corphish, Goldeen, Psyduck, Feebas" } },
+    { id: "route-4", name: "Route 4 — Echoing Caverns", encounterTable: { "Normal":"Girafarig","Bug":"Venomoth","Flying":"Swablu","Grass":"Gloom","Dark":"Murkrow","Electric":"Luxio","Fire":"Slugma","Water":"Barboach","Ground":"Piloswine","Fighting":"Hariyama","Poison":"Golbat","Rock":"Graveler","Psychic":"Bronzor","Ghost":"Haunter","Steel":"Skarmory","Fairy":"Mawile","Ice":"Sneasel","Dragon":"Noibat","Additional":"Numel, Rhyhorn, Torkoal, Salandit, Camerupt","Pond":"Barboach, Wooper, Goldeen, Basculin, Corphish, Psyduck","Mountain":"Rufflet, Vullaby, Larvitar","Special":"Bagon" } },
     { id: "route-5", name: "Route 5 — Ashen Road", encounterTable: { "Normal":"Linoone","Bug":"Volbeat, Illumise","Flying":"Fletchinder","Grass":"Gogoat","Dark":"Mightyena","Electric":"Emolga","Fire":"Ponyta","Water":"Poliwhirl","Ground":"Krokorok","Fighting":"Throh, Sawk","Poison":"Salandit","Rock":"Lycanroc","Psychic":"Duosion","Ghost":"Lampent","Steel":"Skarmory","Fairy":"Mimikyu","Ice":"Sneasel","Dragon":"Fraxure","Volcanic ecosystem":"Slugma, Numel, Torkoal, Salandit, Houndoom, Camerupt, Oddish, Budew, Roselia" } },
-    { id: "route-6", name: "Route 6 — The Old Road", encounterTable: { "Normal":"Bibarel","Bug":"Ribombee","Flying":"Hawlucha","Grass":"Tsareena","Dark":"Mightyena","Electric":"Luxio","Fire":"Ninetales","Water":"Floatzel","Ground":"Donphan","Fighting":"Passimian","Poison":"Drapion","Rock":"Lycanroc","Psychic":"Gothorita","Ghost":"Mimikyu","Steel":"Bisharp","Fairy":"Clefable","Ice":"Beartic","Dragon":"Gabite","Forest ecosystem":"Trevenant, Ursaring, Absol, Heracross, Pinsir, Sawsbuck","Pond":"Floatzel, Poliwag, Psyduck, Corphish, Basculin, Lapras" } },
-    { id: "route-7", name: "Route 7 — The Sacred Road", encounterTable: { "Normal":"Furret","Bug":"Heracross","Flying":"Noctowl","Grass":"Roserade","Dark":"Absol","Electric":"Manectric","Fire":"Arcanine","Water":"Azumarill","Ground":"Excadrill","Fighting":"Hawlucha","Poison":"Toxicroak","Rock":"Crustle","Psychic":"Gardevoir","Ghost":"Mismagius","Steel":"Mawile","Fairy":"Granbull","Ice":"Weavile","Dragon":"Haxorus","Stream":"Azumarill, Poliwhirl, Basculin, Floatzel, Corphish, Dratini, Milotic" } },
-    { id: "route-8", name: "Route 8 — The Ascent", encounterTable: { "Normal":"Kangaskhan","Bug":"Scizor","Flying":"Crobat","Grass":"Victreebel","Dark":"Honchkrow","Electric":"Luxray","Fire":"Houndoom","Water":"Gyarados","Ground":"Excadrill","Fighting":"Conkeldurr","Poison":"Crobat","Rock":"Aggron","Psychic":"Metagross","Ghost":"Chandelure","Steel":"Lucario","Fairy":"Sylveon","Ice":"Mamoswine","Dragon":"Goodra","Mountain ecosystem":"Rhydon, Absol, Braviary, Mandibuzz, Sneasel, Noivern, Dratini, Bagon, Beldum","Waterfall":"Gyarados, Floatzel, Golduck, Basculin, Whiscash, Lapras, Milotic" } }
+    { id: "route-6", name: "Route 6 — The Old Road", encounterTable: { "Normal":"Bibarel","Bug":"Ribombee","Flying":"Hawlucha","Grass":"Tsareena","Dark":"Mightyena","Electric":"Luxio","Fire":"Ninetales","Water":"Floatzel","Ground":"Donphan","Fighting":"Passimian","Poison":"Drapion","Rock":"Midday Lycanroc","Psychic":"Gothorita","Ghost":"Mimikyu","Steel":"Bisharp","Fairy":"Clefable","Ice":"Beartic","Dragon":"Gabite","Forest ecosystem":"Trevenant, Ursaring, Absol, Heracross, Pinsir, Sawsbuck","Pond":"Floatzel, Poliwag, Psyduck, Corphish, Basculin","Special":"Lapras" } },
+    { id: "route-7", name: "Route 7 — The Sacred Road", encounterTable: { "Normal":"Furret","Bug":"Heracross","Flying":"Noctowl","Grass":"Roserade","Dark":"Absol","Electric":"Manectric","Fire":"Arcanine","Water":"Azumarill","Ground":"Excadrill","Fighting":"Hawlucha","Poison":"Toxicroak","Rock":"Crustle","Psychic":"Gardevoir","Ghost":"Mismagius, Sinistcha","Steel":"Mawile","Fairy":"Granbull","Ice":"Weavile","Dragon":"Haxorus","Additional":"Absol, Ursaring, Trevenant, Sawsbuck, Braviary, Mandibuzz","Stream":"Azumarill, Poliwhirl, Basculin, Floatzel, Corphish, Dratini, Milotic" } },
+    { id: "route-8", name: "Route 8 — The Ascent", encounterTable: { "Normal":"Kangaskhan","Bug":"Scizor","Flying":"Crobat","Grass":"Victreebel","Dark":"Honchkrow","Electric":"Luxray","Fire":"Houndoom","Water":"Gyarados","Ground":"Excadrill","Fighting":"Conkeldurr","Poison":"Crobat","Rock":"Aggron","Psychic":"Metagross","Ghost":"Chandelure","Steel":"Lucario","Fairy":"Sylveon","Ice":"Mamoswine","Dragon":"Goodra","Additional":"Rhydon, Absol, Tyranitar, Braviary, Mandibuzz, Sneasel, Noivern, Metang","Pond":"Gyarados, Floatzel, Golduck, Basculin, Whiscash, Milotic","Mountain":"Rhydon, Absol, Tyranitar, Braviary, Mandibuzz, Sneasel, Noivern, Metang" } }
   ];
 
   function flattenEncounterTable(table) {
@@ -719,6 +802,8 @@
         }
         list.appendChild(li);
       });
+      // Render DM roster panels with evolve + party/box management
+      renderDmRosterPanels(code, players);
     });
 
     document.getElementById('dm-player-list').addEventListener('click', async (e) => {
@@ -887,6 +972,84 @@
     }, { once: true });
   }
 
+  // ---- DM roster panels (evolve + party/box management) ----
+  function renderDmRosterPanels(code, players) {
+    const container = document.getElementById('dm-roster-panels');
+    container.innerHTML = '';
+    ['P1','P2','P3'].forEach(slot => {
+      const p = players[slot] || {};
+      if (!p.joined) return;
+      const panel = document.createElement('div');
+      panel.className = 'dm-player-roster';
+      panel.innerHTML = `<label style="color:var(--accent-teal);margin-top:12px;">${escapeHtml(p.name||slot)} — Party</label>`;
+      const partyUl = document.createElement('ul');
+      partyUl.className = 'party-list';
+      const party = p.party || [];
+      party.forEach((mon, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span class="party-mon-name">${escapeHtml(mon)}</span>`;
+        // Evolve row
+        const evolveRow = document.createElement('div');
+        evolveRow.className = 'dm-evolve-row';
+        evolveRow.innerHTML = `<input type="text" placeholder="Evolve to…" data-eidx="${i}"><button data-eslot="${slot}" data-eidx="${i}">Evolve</button>`;
+        evolveRow.querySelector('button').addEventListener('click', async () => {
+          const input = evolveRow.querySelector('input');
+          const newName = input.value.trim();
+          if (!newName) return;
+          const snap = await get(ref(db, `sessions/${code}/players/${slot}/party`));
+          const arr = snap.val() || [];
+          arr[i] = newName;
+          await update(ref(db, `sessions/${code}/players/${slot}`), { party: arr });
+        });
+        li.appendChild(evolveRow);
+        // Move to box button
+        const toBoxBtn = document.createElement('button');
+        toBoxBtn.className = 'party-action-btn';
+        toBoxBtn.textContent = '→ Box';
+        toBoxBtn.addEventListener('click', async () => {
+          const pSnap = await get(ref(db, `sessions/${code}/players/${slot}`));
+          const pd = pSnap.val() || {};
+          const pa = pd.party || []; const ba = pd.box || [];
+          if (pa.length <= 1) { alert('Party must have at least 1 Pokémon!'); return; }
+          ba.push(pa.splice(i, 1)[0]);
+          await update(ref(db, `sessions/${code}/players/${slot}`), { party: pa, box: ba });
+        });
+        li.appendChild(toBoxBtn);
+        partyUl.appendChild(li);
+      });
+      panel.appendChild(partyUl);
+      // Box section
+      const boxArr = p.box || [];
+      if (boxArr.length) {
+        const boxLabel = document.createElement('label');
+        boxLabel.style.color = 'var(--text-dim)';
+        boxLabel.textContent = `${p.name||slot} — Box`;
+        panel.appendChild(boxLabel);
+        const boxUl = document.createElement('ul');
+        boxUl.className = 'party-list';
+        boxArr.forEach((mon, i) => {
+          const li = document.createElement('li');
+          li.innerHTML = `<span class="party-mon-name">${escapeHtml(mon)}</span>`;
+          const toPartyBtn = document.createElement('button');
+          toPartyBtn.className = 'party-action-btn';
+          toPartyBtn.textContent = '→ Party';
+          toPartyBtn.addEventListener('click', async () => {
+            const pSnap = await get(ref(db, `sessions/${code}/players/${slot}`));
+            const pd = pSnap.val() || {};
+            const pa = pd.party || []; const ba = pd.box || [];
+            if (pa.length >= 6) { alert('Party is full (6 max)! Move one to box first.'); return; }
+            pa.push(ba.splice(i, 1)[0]);
+            await update(ref(db, `sessions/${code}/players/${slot}`), { party: pa, box: ba });
+          });
+          li.appendChild(toPartyBtn);
+          boxUl.appendChild(li);
+        });
+        panel.appendChild(boxUl);
+      }
+      container.appendChild(panel);
+    });
+  }
+
   // ---- Player: join flow ----
   let selectedSlot = null;
   let joinCodeSnapshot = null;
@@ -956,6 +1119,11 @@
 
   function attachPlayerView(code, slot) {
     showScreen('playerView');
+    // Set trainer avatar sprite
+    const trainerImg = document.getElementById('player-trainer-sprite');
+    trainerImg.src = `sprites/trainer-${slot.toLowerCase()}.png`;
+    trainerImg.alt = `Trainer ${slot}`;
+    document.getElementById('player-slot-label').textContent = slot;
 
     onValue(ref(db, `sessions/${code}/players/${slot}`), (snap) => {
       const p = snap.val() || {};
@@ -974,9 +1142,31 @@
         partyBox.classList.remove('hidden');
         const list = document.getElementById('player-party-list');
         list.innerHTML = '';
-        p.party.forEach((mon) => {
+        p.party.forEach((mon, idx) => {
           const li = document.createElement('li');
-          li.innerHTML = `<span>${escapeHtml(mon)}</span><span>${escapeHtml(p.type || '')}</span>`;
+          const img = document.createElement('img');
+          img.className = 'party-sprite';
+          img.alt = mon;
+          img.src = '';
+          fetchPokemonSprite(mon).then(url => { if (url) img.src = url; });
+          li.appendChild(img);
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'party-mon-name';
+          nameSpan.textContent = mon;
+          li.appendChild(nameSpan);
+          // Move to box button
+          const toBoxBtn = document.createElement('button');
+          toBoxBtn.className = 'party-action-btn';
+          toBoxBtn.textContent = '→ Box';
+          toBoxBtn.addEventListener('click', async () => {
+            const pSnap = await get(ref(db, `sessions/${code}/players/${slot}`));
+            const pd = pSnap.val() || {};
+            const pa = pd.party || []; const ba = pd.box || [];
+            if (pa.length <= 1) return;
+            ba.push(pa.splice(idx, 1)[0]);
+            await update(ref(db, `sessions/${code}/players/${slot}`), { party: pa, box: ba });
+          });
+          li.appendChild(toBoxBtn);
           list.appendChild(li);
         });
       } else {
@@ -988,9 +1178,31 @@
         boxBox.classList.remove('hidden');
         const list = document.getElementById('player-box-list');
         list.innerHTML = '';
-        p.box.forEach((mon) => {
+        p.box.forEach((mon, idx) => {
           const li = document.createElement('li');
-          li.innerHTML = `<span>${escapeHtml(mon)}</span><span></span>`;
+          const img = document.createElement('img');
+          img.className = 'party-sprite';
+          img.alt = mon;
+          img.src = '';
+          fetchPokemonSprite(mon).then(url => { if (url) img.src = url; });
+          li.appendChild(img);
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'party-mon-name';
+          nameSpan.textContent = mon;
+          li.appendChild(nameSpan);
+          // Move to party button
+          const toPartyBtn = document.createElement('button');
+          toPartyBtn.className = 'party-action-btn';
+          toPartyBtn.textContent = '→ Party';
+          toPartyBtn.addEventListener('click', async () => {
+            const pSnap = await get(ref(db, `sessions/${code}/players/${slot}`));
+            const pd = pSnap.val() || {};
+            const pa = pd.party || []; const ba = pd.box || [];
+            if (pa.length >= 6) return;
+            pa.push(ba.splice(idx, 1)[0]);
+            await update(ref(db, `sessions/${code}/players/${slot}`), { party: pa, box: ba });
+          });
+          li.appendChild(toPartyBtn);
           list.appendChild(li);
         });
       } else {
@@ -1112,6 +1324,10 @@
       party: [mon],
       draftDone: true
     });
+    // Show starter sprite popup
+    const spriteUrl = await fetchPokemonSprite(mon);
+    showEncounterOverlay(mon, spriteUrl, `You chose ${mon}!`);
+    setTimeout(() => { document.getElementById('encounter-overlay').classList.add('hidden'); }, 3000);
     const sessSnap = await get(ref(db, `sessions/${code}/session`));
     const session = sessSnap.val() || {};
     const order = session.draftOrder || [];
@@ -1147,6 +1363,14 @@
     'tapu bulu': 'tapu-bulu', 'tapu fini': 'tapu-fini',
     'ho-oh': 'ho-oh', 'porygon-z': 'porygon-z',
     'kommo-o': 'kommo-o', 'hakamo-o': 'hakamo-o', 'jangmo-o': 'jangmo-o',
+    'lycanroc': 'lycanroc-midday', 'midday lycanroc': 'lycanroc-midday',
+    'mimikyu': 'mimikyu-disguised',
+    'basculin': 'basculin-red-striped',
+    'sinistcha': 'sinistcha',
+    'meowstic': 'meowstic-male',
+    'indeedee': 'indeedee-male',
+    'oinkologne': 'oinkologne',
+    'scream tail': 'scream-tail',
   };
 
   function slugifyPokemon(name) {
@@ -1199,13 +1423,13 @@
     }
   }
 
-  function showEncounterOverlay(pokemonName, spriteUrl) {
+  function showEncounterOverlay(pokemonName, spriteUrl, customText) {
     const overlay = document.getElementById('encounter-overlay');
     const img = document.getElementById('enc-sprite-img');
     const text = document.getElementById('enc-overlay-text');
 
     // Set content
-    text.textContent = `A wild ${pokemonName} appeared!`;
+    text.textContent = customText || `A wild ${pokemonName} appeared!`;
     if (spriteUrl) {
       img.src = spriteUrl;
       img.alt = pokemonName;
