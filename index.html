@@ -61,6 +61,7 @@
       0 8px 0 4px var(--border-pixel);
     padding: 32px 24px;
     margin-top: 24px;
+    overflow: visible;
   }
 
   .title-block {
@@ -236,6 +237,111 @@
     background: var(--panel-light);
     border: 2px solid var(--border-pixel);
   }
+
+  /* ---- Encounter table grid ---- */
+  #dm-encounter-table {
+    max-height: 50vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-teal) var(--panel);
+  }
+  #dm-encounter-table::-webkit-scrollbar { width: 8px; }
+  #dm-encounter-table::-webkit-scrollbar-track { background: var(--panel); }
+  #dm-encounter-table::-webkit-scrollbar-thumb { background: var(--accent-teal); }
+  .encounter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+  .encounter-grid .btn { margin: 0; font-size: 11px; padding: 10px 6px; }
+  .encounter-tier-label {
+    grid-column: 1 / -1;
+    color: var(--text-dim);
+    font-size: 16px;
+    text-align: left;
+    margin: 10px 0 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ---- Encounter sprite overlay ---- */
+  #encounter-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a18 70%);
+    animation: encOverlayIn 0.3s ease-out;
+  }
+  @keyframes encOverlayIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  #encounter-overlay .enc-flash {
+    position: absolute;
+    inset: 0;
+    background: white;
+    animation: encFlash 0.6s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes encFlash {
+    0% { opacity: 0.8; }
+    100% { opacity: 0; }
+  }
+  #encounter-overlay .enc-sprite {
+    width: 192px;
+    height: 192px;
+    image-rendering: pixelated;
+    animation: encSpriteIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+    filter: drop-shadow(0 0 24px rgba(78, 205, 196, 0.5));
+  }
+  @keyframes encSpriteIn {
+    from { transform: scale(0) rotate(-20deg); opacity: 0; }
+    to { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  #encounter-overlay .enc-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    color: var(--accent-gold);
+    text-shadow: 2px 2px 0 var(--border-pixel);
+    margin-top: 24px;
+    text-align: center;
+    animation: encTextIn 0.4s ease-out 0.5s both;
+  }
+  @keyframes encTextIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  #encounter-overlay .enc-grass {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(to top, #1a4a2a 0%, transparent 100%);
+    opacity: 0.4;
+  }
+  .enc-particles {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .enc-particles span {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--accent-gold);
+    opacity: 0;
+    animation: encParticle 2s ease-out infinite;
+  }
+  @keyframes encParticle {
+    0% { opacity: 0.8; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-80px) scale(0); }
+  }
 </style>
 </head>
 <body>
@@ -386,6 +492,15 @@
     <img id="scene-overlay-img" style="max-width:100%;max-height:100%;object-fit:contain;" alt="Story scene">
   </div>
 
+  <!-- ENCOUNTER SPRITE OVERLAY -->
+  <div id="encounter-overlay" class="hidden">
+    <div class="enc-flash"></div>
+    <div class="enc-particles"></div>
+    <img class="enc-sprite" id="enc-sprite-img" src="" alt="">
+    <div class="enc-text" id="enc-overlay-text"></div>
+    <div class="enc-grass"></div>
+  </div>
+
 </div>
 
 <script type="module">
@@ -444,45 +559,42 @@
     {n:5,title:"Brock's Gym",file:"05-brocks-gym.png"},
     {n:6,title:"Route 2",file:"06-route-2.png"},
     {n:7,title:"Cerulean City",file:"07-cerulean-city.png"},
-    {n:8,title:"Cerulean Lab — Team Cataclysm",file:"08-cerulean-lab-team-cataclysm.png"},
+    {n:8,title:"Cerulean Lab — Team Cataclysm",file:"08-cerulean-lab.png"},
     {n:9,title:"Misty's Gym",file:"09-mistys-gym.png"},
-    {n:10,title:"Route 3 — Boss Battle",file:"10-route-3-boss-battle.png"},
+    {n:10,title:"Route 3 — Boss Battle",file:"10-route-3.png"},
     {n:11,title:"Lumiose City",file:"11-lumiose-city.png"},
-    {n:12,title:"Lumiose Museum — Blue Orb Heist",file:"12-lumiose-museum-blue-orb-heist.png"},
+    {n:12,title:"Lumiose Museum — Blue Orb Heist",file:"12-lumiose-museum.png"},
     {n:13,title:"Clemont's Gym",file:"13-clemonts-gym.png"},
-    {n:14,title:"Route 4 — Cave Approach",file:"14-route-4-cave-approach.png"},
-    {n:15,title:"Echoing Caverns — Ancient Carvings",file:"15-echoing-caverns-ancient-carvings.png"},
+    {n:14,title:"Route 4 — Cave Approach",file:"14-route-4.png"},
+    {n:15,title:"Echoing Caverns — Ancient Carvings",file:"15-echoing-caverns.png"},
     {n:16,title:"Lavaridge Town",file:"16-lavaridge-town.png"},
     {n:17,title:"Flannery's Gym",file:"17-flannerys-gym.png"},
     {n:18,title:"Flannery's Betrayal",file:"18-flannerys-betrayal.png"},
     {n:19,title:"Route 5",file:"19-route-5.png"},
     {n:20,title:"Cilan's Grass Gym",file:"20-cilans-grass-gym.png"},
-    {n:21,title:"Route 6 — Gladion",file:"21-route-6-gladion.png"},
+    {n:21,title:"Route 6 — Gladion",file:"21-route-6.png"},
     {n:22,title:"Olympia's Psychic Gym",file:"22-olympias-psychic-gym.png"},
-    {n:23,title:"Route 7 — Ancient Monument",file:"23-route-7-ancient-monument.png"},
-    {n:24,title:"Battle for the Egg",file:"24-battle-for-the-egg.png"},
-    {n:25,title:"Larvitar Hatches",file:"25-larvitar-hatches.png"},
+    {n:23,title:"Route 7 — Ancient Monument",file:"23-route-7.png"},
     {n:26,title:"Abandoned City",file:"26-abandoned-city.png"},
     {n:27,title:"Allister's Ghost Gym",file:"27-allisters-ghost-gym.png"},
-    {n:28,title:"Route 8 — Hidden Shrine",file:"28-route-8-hidden-shrine.png"},
+    {n:28,title:"Route 8 — Hidden Shrine",file:"28-route-8.png"},
     {n:29,title:"Mega Stone Shrine",file:"29-mega-stone-shrine.png"},
-    {n:30,title:"Iris's Dragon Gym",file:"30-iris-dragon-gym.png"},
-    {n:31,title:"The Beam — Cataclysm Begins",file:"31-the-beam-cataclysm-begins.png"},
+    {n:30,title:"Iris's Dragon Gym",file:"30-iriss-dragon-gym.png"},
+    {n:31,title:"The Beam — Cataclysm Begins",file:"31-the-beam.png"},
     {n:32,title:"Global Cataclysm",file:"32-global-cataclysm.png"},
     {n:33,title:"Tempest Island",file:"33-tempest-island.png"},
     {n:34,title:"Weather Trio Awakening",file:"34-weather-trio-awakening.png"},
-    {n:35,title:"Team Cataclysm Defeated",file:"35-team-cataclysm-defeated.png"},
     {n:36,title:"Groudon Battle",file:"36-groudon-battle.png"},
     {n:37,title:"Kyogre Battle",file:"37-kyogre-battle.png"},
     {n:38,title:"Rayquaza Battle",file:"38-rayquaza-battle.png"},
     {n:39,title:"Pokémon League Entrance",file:"39-pokemon-league-entrance.png"},
-    {n:40,title:"Lance — Elite Three",file:"40-lance-elite-three.png"},
-    {n:41,title:"Flint — Elite Three",file:"41-flint-elite-three.png"},
-    {n:42,title:"Glacia — Elite Three",file:"42-glacia-elite-three.png"},
-    {n:43,title:"Cynthia — Champion Battle",file:"43-cynthia-champion-battle.png"},
-    {n:44,title:"Steven — Champion Battle",file:"44-steven-champion-battle.png"},
-    {n:45,title:"Diantha — Champion Battle",file:"45-diantha-champion-battle.png"},
-    {n:46,title:"Final Championship — Player Rivalry",file:"46-final-championship-player-rivalry.png"},
+    {n:40,title:"Lance — Elite Three",file:"40-lance.png"},
+    {n:41,title:"Flint — Elite Three",file:"41-flint.png"},
+    {n:42,title:"Glacia — Elite Three",file:"42-glacia.png"},
+    {n:43,title:"Cynthia — Champion Battle",file:"43-cynthia.png"},
+    {n:44,title:"Steven — Champion Battle",file:"44-steven.png"},
+    {n:45,title:"Diantha — Champion Battle",file:"45-diantha.png"},
+    {n:46,title:"Final Championship — Player Rivalry",file:"46-final-championship.png"},
     {n:47,title:"The True Champion",file:"47-the-true-champion.png"}
   ];
 
@@ -673,28 +785,28 @@
       const route = ROUTES.find(r => r.id === encRoute);
       if (!route) return;
       const options = flattenEncounterTable(route.encounterTable);
+      const grid = document.createElement('div');
+      grid.className = 'encounter-grid';
       let currentTier = null;
       options.forEach((opt) => {
         if (opt.tier !== currentTier) {
           currentTier = opt.tier;
           const label = document.createElement('div');
-          label.className = 'status-msg';
-          label.style.textAlign = 'left';
-          label.style.margin = '10px 0 4px';
+          label.className = 'encounter-tier-label';
           label.textContent = currentTier;
-          box.appendChild(label);
+          grid.appendChild(label);
         }
         const btn = document.createElement('button');
         btn.className = 'btn secondary';
-        btn.style.margin = '4px 0';
         btn.textContent = opt.name;
         btn.addEventListener('click', async () => {
           await update(ref(db, `sessions/${code}/session`), {
             currentEncounter: { route: route.name, pokemon: opt.name, forPlayer: encPlayer, status: 'pending' }
           });
         });
-        box.appendChild(btn);
+        grid.appendChild(btn);
       });
+      box.appendChild(grid);
     }
 
     routeSelect.addEventListener('change', () => { encRoute = routeSelect.value || null; renderEncounterTable(); });
@@ -889,14 +1001,19 @@
       document.getElementById('player-pokeball-count').textContent = `Pokéballs: ${balls}`;
     });
 
-    onValue(ref(db, `sessions/${code}/session/currentEncounter`), (snap) => {
+    onValue(ref(db, `sessions/${code}/session/currentEncounter`), async (snap) => {
       const enc = snap.val();
       const banner = document.getElementById('player-encounter-banner');
+      const overlay = document.getElementById('encounter-overlay');
       if (enc && enc.status === 'pending' && enc.forPlayer === slot) {
         banner.classList.remove('hidden');
         document.getElementById('player-encounter-text').textContent = `A wild ${enc.pokemon} appeared!`;
+        // Show sprite overlay
+        const spriteUrl = await fetchPokemonSprite(enc.pokemon);
+        showEncounterOverlay(enc.pokemon, spriteUrl);
       } else {
         banner.classList.add('hidden');
+        overlay.classList.add('hidden');
       }
     });
 
@@ -1017,6 +1134,105 @@
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+  }
+
+  // ---- Pokémon sprite system ----
+  const SLUG_OVERRIDES = {
+    'nidoran-m': 'nidoran-male', 'nidoran-f': 'nidoran-female',
+    'mr. mime': 'mr-mime', 'mr. rime': 'mr-rime', 'mime jr.': 'mime-jr',
+    'farfetch\'d': 'farfetchd', 'sirfetch\'d': 'sirfetchd',
+    'type: null': 'type-null',
+    'flabébé': 'flabebe',
+    'tapu koko': 'tapu-koko', 'tapu lele': 'tapu-lele',
+    'tapu bulu': 'tapu-bulu', 'tapu fini': 'tapu-fini',
+    'ho-oh': 'ho-oh', 'porygon-z': 'porygon-z',
+    'kommo-o': 'kommo-o', 'hakamo-o': 'hakamo-o', 'jangmo-o': 'jangmo-o',
+  };
+
+  function slugifyPokemon(name) {
+    let s = name.trim().toLowerCase();
+    // Regional forms: "Alolan X" → "x-alola", "Galarian X" → "x-galar", "Hisuian X" → "x-hisui"
+    const regionalPrefixes = [
+      { prefix: 'alolan ', suffix: '-alola' },
+      { prefix: 'galarian ', suffix: '-galar' },
+      { prefix: 'hisuian ', suffix: '-hisui' },
+      { prefix: 'paldean ', suffix: '-paldea' },
+    ];
+    for (const rp of regionalPrefixes) {
+      if (s.startsWith(rp.prefix)) {
+        s = s.slice(rp.prefix.length);
+        // Recurse to handle the base name, then append suffix
+        return slugifyPokemon(s) + rp.suffix;
+      }
+    }
+    // Mega forms: "Mega X" → "x-mega"
+    if (s.startsWith('mega ')) {
+      s = s.slice(5);
+      return slugifyPokemon(s) + '-mega';
+    }
+    // Ash-Greninja
+    if (s === 'ash-greninja') return 'greninja-ash';
+    // Check overrides
+    if (SLUG_OVERRIDES[s]) return SLUG_OVERRIDES[s];
+    // Default: replace spaces and dots with hyphens, remove other special chars
+    return s.replace(/[.'']/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  }
+
+  const spriteCache = new Map();
+
+  async function fetchPokemonSprite(name) {
+    const slug = slugifyPokemon(name);
+    if (spriteCache.has(slug)) return spriteCache.get(slug);
+    try {
+      const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${slug}`);
+      if (!resp.ok) throw new Error(`PokeAPI ${resp.status}`);
+      const data = await resp.json();
+      const url = data.sprites.other?.['official-artwork']?.front_default
+                || data.sprites.front_default
+                || null;
+      spriteCache.set(slug, url);
+      return url;
+    } catch (e) {
+      console.warn(`Could not fetch sprite for "${name}" (slug: ${slug})`, e);
+      spriteCache.set(slug, null);
+      return null;
+    }
+  }
+
+  function showEncounterOverlay(pokemonName, spriteUrl) {
+    const overlay = document.getElementById('encounter-overlay');
+    const img = document.getElementById('enc-sprite-img');
+    const text = document.getElementById('enc-overlay-text');
+
+    // Set content
+    text.textContent = `A wild ${pokemonName} appeared!`;
+    if (spriteUrl) {
+      img.src = spriteUrl;
+      img.alt = pokemonName;
+      img.style.display = 'block';
+    } else {
+      img.style.display = 'none';
+    }
+
+    // Populate particles
+    const particlesBox = overlay.querySelector('.enc-particles');
+    particlesBox.innerHTML = '';
+    for (let i = 0; i < 12; i++) {
+      const span = document.createElement('span');
+      span.style.left = Math.random() * 100 + '%';
+      span.style.top = (40 + Math.random() * 50) + '%';
+      span.style.animationDelay = (Math.random() * 2) + 's';
+      span.style.background = ['var(--accent-gold)', 'var(--accent-teal)', 'var(--accent-red)'][Math.floor(Math.random() * 3)];
+      particlesBox.appendChild(span);
+    }
+
+    // Re-trigger flash animation
+    const flash = overlay.querySelector('.enc-flash');
+    flash.style.animation = 'none';
+    flash.offsetHeight; // force reflow
+    flash.style.animation = '';
+
+    overlay.classList.remove('hidden');
   }
 </script>
 

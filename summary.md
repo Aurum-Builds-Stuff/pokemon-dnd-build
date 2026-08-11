@@ -1,4 +1,4 @@
-# Pokémon D&D Campaign — Project Summary
+  # Pokémon D&D Campaign — Project Summary
 
 ## Project Overview
 Building a web app companion for a 3-player Pokémon-themed D&D campaign ("The Cataclysm Campaign"). DM runs a control panel; each of 3 players has their own device showing a read-only/live-synced trainer view. Physical dice are rolled on the DM's phone (not built into the app) and results entered manually.
