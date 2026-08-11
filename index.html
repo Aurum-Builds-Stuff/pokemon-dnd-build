@@ -321,6 +321,8 @@
     <button class="btn secondary" id="btn-clear-scene">Clear Scene</button>
 
     <span class="back-link" id="btn-dm-leave">&larr; leave / switch role</span>
+    <button class="btn" id="btn-dm-delete" style="background:var(--accent-red-dark);box-shadow:0 5px 0 0 #6b1826;margin-top:20px;">Delete This Campaign</button>
+    <p class="status-msg" style="color:var(--accent-red);">Permanently deletes all campaign data for everyone. Cannot be undone.</p>
   </div>
 
   <!-- PLAYER JOIN -->
@@ -389,7 +391,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
   import {
-    getDatabase, ref, set, get, update, onValue, child
+    getDatabase, ref, set, get, update, onValue, child, remove
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
   import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
 
@@ -757,6 +759,20 @@
     document.getElementById('btn-clear-scene').addEventListener('click', async () => {
       await update(ref(db, `sessions/${code}/session`), { currentScene: null });
     });
+
+    document.getElementById('btn-dm-delete').addEventListener('click', async () => {
+      const confirmed = confirm(
+        `Delete campaign ${code}? This permanently removes all players, party data, and progress for everyone. This cannot be undone.`
+      );
+      if (!confirmed) return;
+      try {
+        await remove(ref(db, `sessions/${code}`));
+        leaveAndReset();
+      } catch (e) {
+        console.error(e);
+        alert('Could not delete the campaign. Check your Firebase database rules.');
+      }
+    }, { once: true });
   }
 
   // ---- Player: join flow ----
