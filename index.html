@@ -273,6 +273,7 @@
     <label>Players joined</label>
     <ul class="party-list" id="dm-player-list"></ul>
     <p class="status-msg" id="dm-panel-note">Phase 1 skeleton &mdash; draft, catching, and battle controls come next.</p>
+    <span class="back-link" id="btn-dm-leave">&larr; leave / switch role</span>
   </div>
 
   <!-- PLAYER JOIN -->
@@ -299,6 +300,7 @@
     <p class="status-msg" id="player-view-status">Connected. Waiting for the Dungeon Master&hellip;</p>
     <div class="badge-strip" id="player-badge-strip"></div>
     <p class="status-msg" id="player-view-note" style="margin-top:24px;">Phase 1 skeleton &mdash; your party, box, and badges will appear here as the campaign builds.</p>
+    <span class="back-link" id="btn-player-leave">&larr; leave / switch role</span>
   </div>
 
 </div>
@@ -532,6 +534,13 @@
       else statusEl.textContent = `Connected. Campaign phase: ${phase}`;
     });
   }
+
+  function leaveAndReset() {
+    localStorage.removeItem(LS_KEY);
+    location.reload();
+  }
+  document.getElementById('btn-dm-leave').addEventListener('click', leaveAndReset);
+  document.getElementById('btn-player-leave').addEventListener('click', leaveAndReset);
 
   function escapeHtml(str) {
     const div = document.createElement('div');
