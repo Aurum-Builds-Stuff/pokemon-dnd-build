@@ -314,10 +314,10 @@
     font-size: 16px; padding: 6px 10px;
   }
   .dm-evolve-row { display: flex; gap: 4px; align-items: center; margin-top: 4px; }
-  .dm-evolve-row input {
-    flex: 1; font-family: 'VT323', monospace; font-size: 18px;
+  .dm-evolve-row select {
+    flex: 1; font-family: 'VT323', monospace; font-size: 16px;
     background: var(--bg-deep); color: var(--text-light);
-    border: 2px solid var(--border-pixel); padding: 4px 8px;
+    border: 2px solid var(--border-pixel); padding: 4px 8px; margin: 0;
   }
   .dm-evolve-row button {
     font-family: 'VT323', monospace; font-size: 16px;
@@ -991,10 +991,23 @@
         // Evolve row
         const evolveRow = document.createElement('div');
         evolveRow.className = 'dm-evolve-row';
-        evolveRow.innerHTML = `<input type="text" placeholder="Evolve to…" data-eidx="${i}"><button data-eslot="${slot}" data-eidx="${i}">Evolve</button>`;
-        evolveRow.querySelector('button').addEventListener('click', async () => {
-          const input = evolveRow.querySelector('input');
-          const newName = input.value.trim();
+        evolveRow.innerHTML = `<select disabled><option value="">Loading...</option></select><button data-eslot="${slot}" data-eidx="${i}" disabled>Evolve</button>`;
+        
+        const selectEl = evolveRow.querySelector('select');
+        const evolveBtn = evolveRow.querySelector('button');
+
+        fetchNextEvolutions(mon).then(evos => {
+          if (!evos || evos.length === 0) {
+            selectEl.innerHTML = `<option value="">Fully Evolved</option>`;
+          } else {
+            selectEl.innerHTML = evos.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+            selectEl.disabled = false;
+            evolveBtn.disabled = false;
+          }
+        });
+
+        evolveBtn.addEventListener('click', async () => {
+          const newName = selectEl.value;
           if (!newName) return;
           const snap = await get(ref(db, `sessions/${code}/players/${slot}/party`));
           const arr = snap.val() || [];
@@ -1403,6 +1416,73 @@
   }
 
   const spriteCache = new Map();
+  const evolutionCache = new Map();
+
+  async function fetchNextEvolutions(name) {
+    const slug = slugifyPokemon(name);
+    if (evolutionCache.has(slug)) return evolutionCache.get(slug);
+
+    // Extract base slug for species lookup
+    const baseSlug = slug.replace(/-(alola|galar|hisui|paldea|mega)$/, '');
+    
+    // Determine the regional prefix of the current pokemon to re-apply later
+    let prefix = '';
+    const lowerName = name.trim().toLowerCase();
+    const prefixes = ['alolan ', 'galarian ', 'hisuian ', 'paldean '];
+    for (const p of prefixes) {
+      if (lowerName.startsWith(p)) { prefix = p; break; }
+    }
+
+    try {
+      const speciesResp = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${baseSlug}`);
+      if (!speciesResp.ok) throw new Error(`Species API ${speciesResp.status}`);
+      const speciesData = await speciesResp.json();
+      const chainUrl = speciesData.evolution_chain?.url;
+      if (!chainUrl) {
+        evolutionCache.set(slug, []);
+        return [];
+      }
+      const chainResp = await fetch(chainUrl);
+      if (!chainResp.ok) throw new Error(`Chain API ${chainResp.status}`);
+      const chainData = await chainResp.json();
+      
+      let nextEvos = [];
+      function searchTree(node) {
+        if (node.species.name === baseSlug) {
+          nextEvos = node.evolves_to.map(e => e.species.name);
+          return true;
+        }
+        for (const child of node.evolves_to) {
+          if (searchTree(child)) return true;
+        }
+        return false;
+      }
+      searchTree(chainData.chain);
+      
+      // Capitalize and apply prefix
+      let finalEvos = nextEvos.map(n => {
+        let capitalBase = n.charAt(0).toUpperCase() + n.slice(1).replace(/-/g, ' ');
+        if (prefix) {
+          let capitalPrefix = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+          return capitalPrefix + capitalBase;
+        }
+        return capitalBase;
+      });
+
+      // Simple manual overrides for common regional branched evolutions
+      if (slug === 'meowth-galar') finalEvos = ['Perrserker'];
+      if (slug === 'farfetchd-galar') finalEvos = ['Sirfetch\\'d'];
+      if (slug === 'linoone-galar') finalEvos = ['Obstagoon'];
+      if (slug === 'mime-jr') finalEvos = ['Mr. Mime', 'Galarian Mr. Mime'];
+
+      evolutionCache.set(slug, finalEvos);
+      return finalEvos;
+    } catch (e) {
+      console.warn(`Could not fetch evolutions for "${name}"`, e);
+      evolutionCache.set(slug, []);
+      return [];
+    }
+  }
 
   async function fetchPokemonSprite(name) {
     const slug = slugifyPokemon(name);
