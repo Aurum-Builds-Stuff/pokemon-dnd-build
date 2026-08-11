@@ -295,6 +295,26 @@
 
     <hr style="border:none;border-top:2px dashed var(--panel-light);margin:24px 0;">
 
+    <label>Wild encounter</label>
+    <select id="dm-route-select">
+      <option value="">Choose a route&hellip;</option>
+    </select>
+    <div class="slot-row" id="dm-encounter-player-row">
+      <div class="slot-btn" data-slot="P1">P1</div>
+      <div class="slot-btn" data-slot="P2">P2</div>
+      <div class="slot-btn" data-slot="P3">P3</div>
+    </div>
+    <div id="dm-encounter-table" style="margin-top:10px;"></div>
+
+    <div id="dm-encounter-pending" class="hidden" style="margin-top:14px;">
+      <p class="status-msg" id="dm-encounter-pending-text"></p>
+      <button class="btn" id="btn-encounter-catch">Catch!</button>
+      <button class="btn secondary" id="btn-encounter-escape">Escaped</button>
+      <button class="btn secondary" id="btn-encounter-runaway">Player Ran Away</button>
+    </div>
+
+    <hr style="border:none;border-top:2px dashed var(--panel-light);margin:24px 0;">
+
     <label>Story scene</label>
     <select id="dm-scene-select"></select>
     <button class="btn" id="btn-show-scene">Show Scene</button>
@@ -345,6 +365,17 @@
       <ul class="party-list" id="player-party-list"></ul>
     </div>
 
+    <div id="player-box-box" class="hidden">
+      <label>Your box</label>
+      <ul class="party-list" id="player-box-list"></ul>
+    </div>
+
+    <p class="status-msg" id="player-pokeball-count"></p>
+
+    <div id="player-encounter-banner" class="hidden" style="margin-top:14px;padding:14px;border:3px dashed var(--accent-gold);text-align:center;">
+      <span class="pixel-font" style="font-size:12px;color:var(--accent-gold);" id="player-encounter-text"></span>
+    </div>
+
     <span class="back-link" id="btn-player-leave">&larr; leave / switch role</span>
   </div>
 
@@ -381,6 +412,27 @@
     grass: ["Bulbasaur","Chikorita","Treecko","Turtwig","Snivy","Chespin","Rowlet","Grookey","Sprigatito"],
     water: ["Squirtle","Totodile","Mudkip","Piplup","Oshawott","Froakie","Popplio","Sobble","Quaxly"]
   };
+
+  const ROUTES = [
+    { id: "route-1", name: "Route 1 — First Steps", encounterTable: { "Common": "Pidgey, Rattata, Caterpie", "Uncommon": "Sentret, Hoppip", "Rare": "Eevee" } },
+    { id: "route-2", name: "Route 2 — The Forest Road", encounterTable: { "Common": "Caterpie, Weedle, Bellsprout", "Uncommon": "Hoothoot, Ledyba", "Rare": "Pikachu" } },
+    { id: "route-4", name: "Route 4 — Echoing Caverns", encounterTable: { "Common": "Zubat, Geodude, Diglett", "Uncommon": "Onix, Roggenrola", "Rare": "Nosepass" } },
+    { id: "route-5", name: "Route 5 — Ashen Road", encounterTable: { "Normal":"Linoone","Bug":"Volbeat, Illumise","Flying":"Fletchinder","Grass":"Gogoat","Dark":"Mightyena","Electric":"Emolga","Fire":"Ponyta","Water":"Poliwhirl","Ground":"Krokorok","Fighting":"Throh, Sawk","Poison":"Salandit","Rock":"Lycanroc","Psychic":"Duosion","Ghost":"Lampent","Steel":"Skarmory","Fairy":"Mimikyu","Ice":"Sneasel","Dragon":"Fraxure","Volcanic ecosystem":"Slugma, Numel, Torkoal, Salandit, Houndoom, Camerupt, Oddish, Budew, Roselia" } },
+    { id: "route-6", name: "Route 6 — The Old Road", encounterTable: { "Normal":"Bibarel","Bug":"Ribombee","Flying":"Hawlucha","Grass":"Tsareena","Dark":"Mightyena","Electric":"Luxio","Fire":"Ninetales","Water":"Floatzel","Ground":"Donphan","Fighting":"Passimian","Poison":"Drapion","Rock":"Lycanroc","Psychic":"Gothorita","Ghost":"Mimikyu","Steel":"Bisharp","Fairy":"Clefable","Ice":"Beartic","Dragon":"Gabite","Forest ecosystem":"Trevenant, Ursaring, Absol, Heracross, Pinsir, Sawsbuck","Pond":"Floatzel, Poliwag, Psyduck, Corphish, Basculin, Lapras" } },
+    { id: "route-7", name: "Route 7 — The Sacred Road", encounterTable: { "Normal":"Furret","Bug":"Heracross","Flying":"Noctowl","Grass":"Roserade","Dark":"Absol","Electric":"Manectric","Fire":"Arcanine","Water":"Azumarill","Ground":"Excadrill","Fighting":"Hawlucha","Poison":"Toxicroak","Rock":"Crustle","Psychic":"Gardevoir","Ghost":"Mismagius","Steel":"Mawile","Fairy":"Granbull","Ice":"Weavile","Dragon":"Haxorus","Stream":"Azumarill, Poliwhirl, Basculin, Floatzel, Corphish, Dratini, Milotic" } },
+    { id: "route-8", name: "Route 8 — The Ascent", encounterTable: { "Normal":"Kangaskhan","Bug":"Scizor","Flying":"Crobat","Grass":"Victreebel","Dark":"Honchkrow","Electric":"Luxray","Fire":"Houndoom","Water":"Gyarados","Ground":"Excadrill","Fighting":"Conkeldurr","Poison":"Crobat","Rock":"Aggron","Psychic":"Metagross","Ghost":"Chandelure","Steel":"Lucario","Fairy":"Sylveon","Ice":"Mamoswine","Dragon":"Goodra","Mountain ecosystem":"Rhydon, Absol, Braviary, Mandibuzz, Sneasel, Noivern, Dratini, Bagon, Beldum","Waterfall":"Gyarados, Floatzel, Golduck, Basculin, Whiscash, Lapras, Milotic" } }
+  ];
+
+  function flattenEncounterTable(table) {
+    const options = [];
+    Object.entries(table).forEach(([tier, value]) => {
+      value.split(',').forEach((tok) => {
+        const name = tok.trim();
+        if (name) options.push({ tier, name });
+      });
+    });
+    return options;
+  }
 
   const SCENES = [
     {n:1,title:"Starter Town — Leaving Home",file:"01-starter-town.png"},
@@ -462,11 +514,11 @@
   function emptySessionState() {
     return {
       meta: { createdAt: Date.now() },
-      session: { phase: 'lobby', currentScene: null },
+      session: { phase: 'lobby', currentScene: null, currentEncounter: null },
       players: {
-        P1: { joined: false, name: null, badges: 0, type: null, starter: null, party: [], draftDone: false },
-        P2: { joined: false, name: null, badges: 0, type: null, starter: null, party: [], draftDone: false },
-        P3: { joined: false, name: null, badges: 0, type: null, starter: null, party: [], draftDone: false }
+        P1: { joined: false, name: null, badges: 0, type: null, starter: null, party: [], box: [], pokeballs: 5, draftDone: false },
+        P2: { joined: false, name: null, badges: 0, type: null, starter: null, party: [], box: [], pokeballs: 5, draftDone: false },
+        P3: { joined: false, name: null, badges: 0, type: null, starter: null, party: [], box: [], pokeballs: 5, draftDone: false }
       }
     };
   }
@@ -545,13 +597,22 @@
         const li = document.createElement('li');
         if (p.joined) {
           const extra = p.starter ? ` &mdash; ${escapeHtml(p.starter)} (${escapeHtml(p.type || '')})` : '';
-          li.innerHTML = `<span>${slot}</span><span>${escapeHtml(p.name || 'Trainer')}${extra}</span>`;
+          const balls = typeof p.pokeballs === 'number' ? p.pokeballs : 0;
+          li.innerHTML = `<span>${slot}</span><span>${escapeHtml(p.name || 'Trainer')}${extra} &middot; balls: ${balls} <button class="btn secondary" style="display:inline-block;width:auto;padding:6px 10px;margin:0 0 0 8px;font-size:11px;" data-grant-slot="${slot}">+1 ball</button></span>`;
         } else {
           li.classList.add('empty');
           li.innerHTML = `<span>${slot}</span><span>waiting to join&hellip;</span>`;
         }
         list.appendChild(li);
       });
+    });
+
+    document.getElementById('dm-player-list').addEventListener('click', async (e) => {
+      const slot = e.target.dataset.grantSlot;
+      if (!slot) return;
+      const snap = await get(ref(db, `sessions/${code}/players/${slot}/pokeballs`));
+      const current = snap.exists() ? snap.val() : 0;
+      await update(ref(db, `sessions/${code}/players/${slot}`), { pokeballs: current + 1 });
     });
 
     onValue(ref(db, `sessions/${code}/session`), (snap) => {
@@ -594,6 +655,97 @@
         draftOrder: order,
         currentPickerIndex: 0
       });
+    });
+
+    // Wild encounter picker
+    const routeSelect = document.getElementById('dm-route-select');
+    routeSelect.innerHTML = '<option value="">Choose a route…</option>' +
+      ROUTES.map(r => `<option value="${r.id}">${escapeHtml(r.name)}</option>`).join('');
+    let encRoute = null;
+    let encPlayer = null;
+
+    function renderEncounterTable() {
+      const box = document.getElementById('dm-encounter-table');
+      box.innerHTML = '';
+      if (!encRoute || !encPlayer) return;
+      const route = ROUTES.find(r => r.id === encRoute);
+      if (!route) return;
+      const options = flattenEncounterTable(route.encounterTable);
+      let currentTier = null;
+      options.forEach((opt) => {
+        if (opt.tier !== currentTier) {
+          currentTier = opt.tier;
+          const label = document.createElement('div');
+          label.className = 'status-msg';
+          label.style.textAlign = 'left';
+          label.style.margin = '10px 0 4px';
+          label.textContent = currentTier;
+          box.appendChild(label);
+        }
+        const btn = document.createElement('button');
+        btn.className = 'btn secondary';
+        btn.style.margin = '4px 0';
+        btn.textContent = opt.name;
+        btn.addEventListener('click', async () => {
+          await update(ref(db, `sessions/${code}/session`), {
+            currentEncounter: { route: route.name, pokemon: opt.name, forPlayer: encPlayer, status: 'pending' }
+          });
+        });
+        box.appendChild(btn);
+      });
+    }
+
+    routeSelect.addEventListener('change', () => { encRoute = routeSelect.value || null; renderEncounterTable(); });
+    document.querySelectorAll('#dm-encounter-player-row .slot-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#dm-encounter-player-row .slot-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        encPlayer = btn.dataset.slot;
+        renderEncounterTable();
+      });
+    });
+
+    onValue(ref(db, `sessions/${code}/session/currentEncounter`), (snap) => {
+      const enc = snap.val();
+      const pendingBox = document.getElementById('dm-encounter-pending');
+      if (enc && enc.status === 'pending') {
+        pendingBox.classList.remove('hidden');
+        document.getElementById('dm-encounter-pending-text').textContent =
+          `${enc.forPlayer} encountered a wild ${enc.pokemon} on ${enc.route}.`;
+      } else {
+        pendingBox.classList.add('hidden');
+      }
+    });
+
+    document.getElementById('btn-encounter-catch').addEventListener('click', async () => {
+      const snap = await get(ref(db, `sessions/${code}/session/currentEncounter`));
+      const enc = snap.val();
+      if (!enc) return;
+      const pSnap = await get(ref(db, `sessions/${code}/players/${enc.forPlayer}`));
+      const p = pSnap.val() || {};
+      const party = p.party || [];
+      const boxArr = p.box || [];
+      const balls = typeof p.pokeballs === 'number' ? p.pokeballs : 0;
+      if (party.length < 6) party.push(enc.pokemon); else boxArr.push(enc.pokemon);
+      await update(ref(db, `sessions/${code}/players/${enc.forPlayer}`), {
+        party, box: boxArr, pokeballs: Math.max(0, balls - 1)
+      });
+      await update(ref(db, `sessions/${code}/session`), { currentEncounter: null });
+    });
+
+    document.getElementById('btn-encounter-escape').addEventListener('click', async () => {
+      const snap = await get(ref(db, `sessions/${code}/session/currentEncounter`));
+      const enc = snap.val();
+      if (!enc) return;
+      const pSnap = await get(ref(db, `sessions/${code}/players/${enc.forPlayer}/pokeballs`));
+      const balls = pSnap.exists() ? pSnap.val() : 0;
+      await update(ref(db, `sessions/${code}/players/${enc.forPlayer}`), { pokeballs: Math.max(0, balls - 1) });
+      await update(ref(db, `sessions/${code}/session`), { currentEncounter: null });
+    });
+
+    document.getElementById('btn-encounter-runaway').addEventListener('click', async () => {
+      // Player chose not to throw a ball at all — no Pokeball is consumed.
+      await update(ref(db, `sessions/${code}/session`), { currentEncounter: null });
     });
 
     // Scene picker
@@ -701,6 +853,34 @@
         });
       } else {
         partyBox.classList.add('hidden');
+      }
+
+      const boxBox = document.getElementById('player-box-box');
+      if (p.box && p.box.length) {
+        boxBox.classList.remove('hidden');
+        const list = document.getElementById('player-box-list');
+        list.innerHTML = '';
+        p.box.forEach((mon) => {
+          const li = document.createElement('li');
+          li.innerHTML = `<span>${escapeHtml(mon)}</span><span></span>`;
+          list.appendChild(li);
+        });
+      } else {
+        boxBox.classList.add('hidden');
+      }
+
+      const balls = typeof p.pokeballs === 'number' ? p.pokeballs : 0;
+      document.getElementById('player-pokeball-count').textContent = `Pokéballs: ${balls}`;
+    });
+
+    onValue(ref(db, `sessions/${code}/session/currentEncounter`), (snap) => {
+      const enc = snap.val();
+      const banner = document.getElementById('player-encounter-banner');
+      if (enc && enc.status === 'pending' && enc.forPlayer === slot) {
+        banner.classList.remove('hidden');
+        document.getElementById('player-encounter-text').textContent = `A wild ${enc.pokemon} appeared!`;
+      } else {
+        banner.classList.add('hidden');
       }
     });
 
