@@ -61,7 +61,6 @@
       0 8px 0 4px var(--border-pixel);
     padding: 32px 24px;
     margin-top: 24px;
-    overflow: visible;
   }
 
   .title-block {
@@ -229,6 +228,7 @@
     gap: 6px;
     justify-content: center;
     margin-top: 20px;
+    flex-wrap: wrap;
   }
 
   .badge-dot {
@@ -238,183 +238,60 @@
     border: 2px solid var(--border-pixel);
   }
 
-  /* ---- Encounter table grid ---- */
-  #dm-encounter-table {
-    max-height: 50vh;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-teal) var(--panel);
-  }
-  #dm-encounter-table::-webkit-scrollbar { width: 8px; }
-  #dm-encounter-table::-webkit-scrollbar-track { background: var(--panel); }
-  #dm-encounter-table::-webkit-scrollbar-thumb { background: var(--accent-teal); }
-  .encounter-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px;
-  }
-  .encounter-grid .btn { margin: 0; font-size: 11px; padding: 10px 6px; }
-  .encounter-tier-label {
-    grid-column: 1 / -1;
-    color: var(--text-dim);
-    font-size: 16px;
-    text-align: left;
-    margin: 10px 0 4px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  /* ---- Party sprite items ---- */
-  .party-list li { align-items: center; gap: 8px; }
-  .party-sprite {
-    width: 48px; height: 48px;
-    image-rendering: pixelated;
-    flex-shrink: 0;
-    background: var(--bg-deep);
-    border: 2px solid var(--border-pixel);
-  }
-  .party-mon-name { flex: 1; }
-  .party-action-btn {
-    font-family: 'VT323', monospace;
-    font-size: 16px;
-    background: var(--panel);
-    color: var(--accent-teal);
-    border: 2px solid var(--accent-teal);
-    padding: 4px 8px;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .party-action-btn:hover { background: var(--accent-teal); color: var(--bg-deep); }
-
-  /* ---- Trainer avatar ---- */
-  .trainer-avatar-card {
+  .badge-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 12px 0 8px;
-  }
-  .trainer-avatar-card img {
-    width: 80px;
-    height: 80px;
-    image-rendering: pixelated;
-    border: 3px solid var(--accent-gold);
-    background: var(--bg-deep);
-    box-shadow: 0 0 12px rgba(255, 210, 63, 0.3);
-  }
-  .trainer-avatar-card .trainer-slot-label {
-    font-family: 'VT323', monospace;
-    font-size: 16px;
+    width: 60px;
+    font-size: 9px;
     color: var(--text-dim);
-    margin-top: 4px;
   }
+  .badge-item.earned { color: var(--accent-gold); }
+  .badge-item .badge-dot { margin-bottom: 3px; }
 
-  /* ---- DM roster with party management ---- */
-  .dm-player-roster { margin-top: 8px; }
-  .dm-player-roster .party-list li {
-    font-size: 16px; padding: 6px 10px;
+  .battle-stage {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    gap: 10px;
+    margin: 10px 0;
+    flex-wrap: wrap;
   }
-  .dm-evolve-row { display: flex; gap: 4px; align-items: center; margin-top: 4px; }
-  .dm-evolve-row select {
-    flex: 1; font-family: 'VT323', monospace; font-size: 16px;
-    background: var(--bg-deep); color: var(--text-light);
-    border: 2px solid var(--border-pixel); padding: 4px 8px; margin: 0;
-  }
-  .dm-evolve-row button {
-    font-family: 'VT323', monospace; font-size: 16px;
-    background: var(--accent-teal); color: var(--bg-deep);
-    border: none; padding: 6px 10px; cursor: pointer;
-  }
-
-  select {
-    width: 100%;
-    font-family: 'VT323', monospace;
-    font-size: 20px;
-    color: var(--text-light);
-    background: var(--bg-deep);
-    border: 3px solid var(--border-pixel);
-    padding: 8px 12px;
-    margin: 4px 0;
-  }
-  select:focus { outline: 3px solid var(--accent-teal); }
-
-  /* ---- Encounter sprite overlay ---- */
-  #encounter-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 60;
+  .battle-combatant {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0a18 70%);
-    animation: encOverlayIn 0.3s ease-out;
+    width: 100px;
   }
-  @keyframes encOverlayIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  #encounter-overlay .enc-flash {
-    position: absolute;
-    inset: 0;
-    background: white;
-    animation: encFlash 0.6s ease-out forwards;
-    pointer-events: none;
-  }
-  @keyframes encFlash {
-    0% { opacity: 0.8; }
-    100% { opacity: 0; }
-  }
-  #encounter-overlay .enc-sprite {
-    width: 192px;
-    height: 192px;
+  .battle-combatant img {
     image-rendering: pixelated;
-    animation: encSpriteIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
-    filter: drop-shadow(0 0 24px rgba(78, 205, 196, 0.5));
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
   }
-  @keyframes encSpriteIn {
-    from { transform: scale(0) rotate(-20deg); opacity: 0; }
-    to { transform: scale(1) rotate(0deg); opacity: 1; }
+  .battle-combatant.is-gmax img,
+  .battle-combatant.is-mega img {
+    width: 100px;
+    height: 100px;
   }
-  #encounter-overlay .enc-text {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 14px;
+  .battle-combatant .combatant-tag {
+    font-size: 9px;
     color: var(--accent-gold);
-    text-shadow: 2px 2px 0 var(--border-pixel);
-    margin-top: 24px;
     text-align: center;
-    animation: encTextIn 0.4s ease-out 0.5s both;
   }
-  @keyframes encTextIn {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+  .battle-combatant .combatant-name {
+    font-size: 10px;
+    text-align: center;
+    margin-top: 2px;
   }
-  #encounter-overlay .enc-grass {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 120px;
-    background: linear-gradient(to top, #1a4a2a 0%, transparent 100%);
-    opacity: 0.4;
+
+  @keyframes damageFlash {
+    0% { filter: brightness(1) saturate(1); transform: translateX(0); }
+    20% { filter: brightness(1.8) sepia(1) saturate(8) hue-rotate(-50deg); transform: translateX(-4px); }
+    50% { transform: translateX(4px); }
+    100% { filter: brightness(1) saturate(1); transform: translateX(0); }
   }
-  .enc-particles {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-  }
-  .enc-particles span {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: var(--accent-gold);
-    opacity: 0;
-    animation: encParticle 2s ease-out infinite;
-  }
-  @keyframes encParticle {
-    0% { opacity: 0.8; transform: translateY(0) scale(1); }
-    100% { opacity: 0; transform: translateY(-80px) scale(0); }
-  }
+  .sprite-hit { animation: damageFlash 0.5s ease; }
 </style>
 </head>
 <body>
@@ -474,11 +351,6 @@
 
     <hr style="border:none;border-top:2px dashed var(--panel-light);margin:24px 0;">
 
-    <label>Player rosters</label>
-    <div id="dm-roster-panels"></div>
-
-    <hr style="border:none;border-top:2px dashed var(--panel-light);margin:24px 0;">
-
     <label>Wild encounter</label>
     <select id="dm-route-select">
       <option value="">Choose a route&hellip;</option>
@@ -499,10 +371,64 @@
 
     <hr style="border:none;border-top:2px dashed var(--panel-light);margin:24px 0;">
 
+    <label>Battle</label>
+    <div id="dm-battle-start">
+      <select id="dm-battle-boss-select">
+        <option value="">Choose a boss/gym battle&hellip;</option>
+      </select>
+      <select id="dm-battle-soloplayer-select" style="margin-top:8px;">
+        <option value="">Whole team (default)</option>
+        <option value="P1">Solo for P1</option>
+        <option value="P2">Solo for P2</option>
+        <option value="P3">Solo for P3</option>
+      </select>
+      <button class="btn" id="btn-start-boss-battle">Start Boss Battle</button>
+      <div class="slot-row" style="margin-top:10px;">
+        <div class="slot-btn" id="btn-start-leg-P1" style="font-size:11px;">Groudon (P1)</div>
+        <div class="slot-btn" id="btn-start-leg-P2" style="font-size:11px;">Kyogre (P2)</div>
+        <div class="slot-btn" id="btn-start-leg-P3" style="font-size:11px;">Rayquaza (P3)</div>
+      </div>
+      <hr style="border:none;border-top:2px dashed var(--panel-light);margin:14px 0;">
+      <label style="font-size:11px;">Player vs Player</label>
+      <button class="btn secondary" id="btn-start-mystery-egg">Route 7 — 3-Way Egg Battle</button>
+      <div class="slot-row" style="margin-top:8px;">
+        <div class="slot-btn" data-pvp-slot="P1">P1</div>
+        <div class="slot-btn" data-pvp-slot="P2">P2</div>
+        <div class="slot-btn" data-pvp-slot="P3">P3</div>
+      </div>
+      <button class="btn secondary" id="btn-start-championship-duel">Start Championship Duel (pick 2 above)</button>
+      <p class="status-msg" id="dm-championship-standings"></p>
+    </div>
+    <div id="dm-battle-active" class="hidden" style="margin-top:12px;padding:12px;border:3px solid var(--accent-red-dark);background:var(--panel-light);">
+      <div id="dm-battle-enemy"></div>
+      <hr style="border:none;border-top:2px dashed var(--panel);margin:14px 0;">
+      <div id="dm-battle-players"></div>
+      <hr style="border:none;border-top:2px dashed var(--panel);margin:14px 0;">
+      <div id="dm-battle-pvp-declare"></div>
+      <button class="btn" id="btn-battle-victory">🏆 Victory — End Battle</button>
+      <button class="btn secondary" id="btn-battle-reset">💀 Party Wiped — Reset &amp; Retry</button>
+      <button class="btn secondary" id="btn-battle-retreat" style="background:var(--accent-red-dark);">🚩 Retreat — End Battle</button>
+    </div>
+
+    <hr style="border:none;border-top:2px dashed var(--panel-light);margin:24px 0;">
+
     <label>Story scene</label>
     <select id="dm-scene-select"></select>
     <button class="btn" id="btn-show-scene">Show Scene</button>
     <button class="btn secondary" id="btn-clear-scene">Clear Scene</button>
+
+    <hr style="border:none;border-top:2px dashed var(--panel-light);margin:24px 0;">
+
+    <label>Map</label>
+    <button class="btn" id="btn-show-map">Show Map</button>
+    <button class="btn secondary" id="btn-hide-map">Hide Map</button>
+
+    <hr style="border:none;border-top:2px dashed var(--panel-light);margin:24px 0;">
+
+    <label>NPC popup (no battle, just show &amp; talk)</label>
+    <select id="dm-npc-select"></select>
+    <button class="btn" id="btn-show-npc">Show NPC</button>
+    <button class="btn secondary" id="btn-clear-npc">Clear NPC</button>
 
     <span class="back-link" id="btn-dm-leave">&larr; leave / switch role</span>
     <button class="btn" id="btn-dm-delete" style="background:var(--accent-red-dark);box-shadow:0 5px 0 0 #6b1826;margin-top:20px;">Delete This Campaign</button>
@@ -529,10 +455,6 @@
 
   <!-- PLAYER VIEW (post join) -->
   <div id="screen-player-view" class="cartridge hidden">
-    <div class="trainer-avatar-card">
-      <img id="player-trainer-sprite" src="" alt="Trainer">
-      <span class="trainer-slot-label" id="player-slot-label"></span>
-    </div>
     <h2 class="pixel-font" style="font-size:14px;color:var(--accent-teal);text-align:center;margin-top:0;" id="player-view-name">trainer</h2>
     <p class="status-msg" id="player-view-status">Connected. Waiting for the Dungeon Master&hellip;</p>
     <div class="badge-strip" id="player-badge-strip"></div>
@@ -566,6 +488,10 @@
       <span class="pixel-font" style="font-size:12px;color:var(--accent-gold);" id="player-encounter-text"></span>
     </div>
 
+    <div id="player-battle-banner" class="hidden" style="margin-top:14px;padding:14px;border:3px solid var(--accent-red-dark);background:var(--panel-light);">
+      <div id="player-battle-content"></div>
+    </div>
+
     <span class="back-link" id="btn-player-leave">&larr; leave / switch role</span>
   </div>
 
@@ -574,13 +500,15 @@
     <img id="scene-overlay-img" style="max-width:100%;max-height:100%;object-fit:contain;" alt="Story scene">
   </div>
 
-  <!-- ENCOUNTER SPRITE OVERLAY -->
-  <div id="encounter-overlay" class="hidden">
-    <div class="enc-flash"></div>
-    <div class="enc-particles"></div>
-    <img class="enc-sprite" id="enc-sprite-img" src="" alt="">
-    <div class="enc-text" id="enc-overlay-text"></div>
-    <div class="enc-grass"></div>
+  <!-- MAP OVERLAY -->
+  <div id="map-overlay" class="hidden" style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:51;">
+    <img id="map-overlay-img" src="map.png" style="max-width:100%;max-height:100%;object-fit:contain;" alt="Campaign map">
+  </div>
+
+  <!-- NPC OVERLAY -->
+  <div id="npc-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:52;">
+    <img id="npc-overlay-img" style="max-width:60%;max-height:70%;object-fit:contain;image-rendering:pixelated;" alt="NPC">
+    <p class="pixel-font" id="npc-overlay-name" style="font-size:14px;color:var(--accent-gold);margin-top:14px;"></p>
   </div>
 
 </div>
@@ -613,15 +541,143 @@
   };
 
   const ROUTES = [
-    { id: "route-1", name: "Route 1 — First Steps", encounterTable: { "Normal":"Sentret","Bug":"Scatterbug","Flying":"Pidgey","Grass":"Bounsweet","Dark":"Poochyena","Electric":"Pawmi","Fire":"Litten","Water":"Poliwag","Ground":"Sandshrew","Fighting":"Machop","Poison":"Nidoran-M, Nidoran-F","Rock":"Roggenrola","Psychic":"Abra","Ghost":"Gastly","Steel":"Aron","Fairy":"Cutiefly","Ice":"Swinub","Dragon":"Dratini","Additional":"Eevee, Sunkern, Hoppip, Bunnelby","Pond":"Poliwag, Magikarp, Psyduck, Lotad" } },
-    { id: "route-2", name: "Route 2 — The Forest Road", encounterTable: { "Normal":"Furret","Bug":"Venipede","Flying":"Taillow","Grass":"Petilil","Dark":"Nickit","Electric":"Pikachu","Fire":"Growlithe","Water":"Buizel","Ground":"Drilbur","Fighting":"Mankey","Poison":"Ekans","Rock":"Nosepass","Psychic":"Ralts","Ghost":"Shuppet","Steel":"Pawniard","Fairy":"Flabébé","Ice":"Snover","Dragon":"Gible","Additional":"Oddish, Hoppip, Combee, Pineco, Heracross","Pond":"Buizel, Psyduck, Poliwag, Goldeen, Magikarp","Special":"Dratini" } },
-    { id: "route-3", name: "Route 3 — The Long Road", encounterTable: { "Normal":"Lillipup","Bug":"Nincada","Flying":"Starly","Grass":"Fomantis","Dark":"Mightyena","Electric":"Yamper","Fire":"Pansear","Water":"Barboach","Ground":"Mudbray","Fighting":"Riolu","Poison":"Trubbish","Rock":"Dwebble","Psychic":"Gothita","Ghost":"Phantump","Steel":"Ferroseed","Fairy":"Mawile","Ice":"Bergmite","Dragon":"Noibat","Additional":"Ponyta, Skiddo, Houndour, Rhyhorn, Pikipek","Pond":"Barboach, Wooper, Corphish, Goldeen, Psyduck, Feebas" } },
-    { id: "route-4", name: "Route 4 — Echoing Caverns", encounterTable: { "Normal":"Girafarig","Bug":"Venomoth","Flying":"Swablu","Grass":"Gloom","Dark":"Murkrow","Electric":"Luxio","Fire":"Slugma","Water":"Barboach","Ground":"Piloswine","Fighting":"Hariyama","Poison":"Golbat","Rock":"Graveler","Psychic":"Bronzor","Ghost":"Haunter","Steel":"Skarmory","Fairy":"Mawile","Ice":"Sneasel","Dragon":"Noibat","Additional":"Numel, Rhyhorn, Torkoal, Salandit, Camerupt","Pond":"Barboach, Wooper, Goldeen, Basculin, Corphish, Psyduck","Mountain":"Rufflet, Vullaby, Larvitar","Special":"Bagon" } },
-    { id: "route-5", name: "Route 5 — Ashen Road", encounterTable: { "Normal":"Linoone","Bug":"Volbeat, Illumise","Flying":"Fletchinder","Grass":"Gogoat","Dark":"Mightyena","Electric":"Emolga","Fire":"Ponyta","Water":"Poliwhirl","Ground":"Krokorok","Fighting":"Throh, Sawk","Poison":"Salandit","Rock":"Lycanroc","Psychic":"Duosion","Ghost":"Lampent","Steel":"Skarmory","Fairy":"Mimikyu","Ice":"Sneasel","Dragon":"Fraxure","Volcanic ecosystem":"Slugma, Numel, Torkoal, Salandit, Houndoom, Camerupt, Oddish, Budew, Roselia" } },
-    { id: "route-6", name: "Route 6 — The Old Road", encounterTable: { "Normal":"Bibarel","Bug":"Ribombee","Flying":"Hawlucha","Grass":"Tsareena","Dark":"Mightyena","Electric":"Luxio","Fire":"Ninetales","Water":"Floatzel","Ground":"Donphan","Fighting":"Passimian","Poison":"Drapion","Rock":"Midday Lycanroc","Psychic":"Gothorita","Ghost":"Mimikyu","Steel":"Bisharp","Fairy":"Clefable","Ice":"Beartic","Dragon":"Gabite","Forest ecosystem":"Trevenant, Ursaring, Absol, Heracross, Pinsir, Sawsbuck","Pond":"Floatzel, Poliwag, Psyduck, Corphish, Basculin","Special":"Lapras" } },
-    { id: "route-7", name: "Route 7 — The Sacred Road", encounterTable: { "Normal":"Furret","Bug":"Heracross","Flying":"Noctowl","Grass":"Roserade","Dark":"Absol","Electric":"Manectric","Fire":"Arcanine","Water":"Azumarill","Ground":"Excadrill","Fighting":"Hawlucha","Poison":"Toxicroak","Rock":"Crustle","Psychic":"Gardevoir","Ghost":"Mismagius, Sinistcha","Steel":"Mawile","Fairy":"Granbull","Ice":"Weavile","Dragon":"Haxorus","Additional":"Absol, Ursaring, Trevenant, Sawsbuck, Braviary, Mandibuzz","Stream":"Azumarill, Poliwhirl, Basculin, Floatzel, Corphish, Dratini, Milotic" } },
-    { id: "route-8", name: "Route 8 — The Ascent", encounterTable: { "Normal":"Kangaskhan","Bug":"Scizor","Flying":"Crobat","Grass":"Victreebel","Dark":"Honchkrow","Electric":"Luxray","Fire":"Houndoom","Water":"Gyarados","Ground":"Excadrill","Fighting":"Conkeldurr","Poison":"Crobat","Rock":"Aggron","Psychic":"Metagross","Ghost":"Chandelure","Steel":"Lucario","Fairy":"Sylveon","Ice":"Mamoswine","Dragon":"Goodra","Additional":"Rhydon, Absol, Tyranitar, Braviary, Mandibuzz, Sneasel, Noivern, Metang","Pond":"Gyarados, Floatzel, Golduck, Basculin, Whiscash, Milotic","Mountain":"Rhydon, Absol, Tyranitar, Braviary, Mandibuzz, Sneasel, Noivern, Metang" } }
+    { id: "route-1", name: "Route 1 — First Steps", encounterTable: { "Common": "Pidgey, Rattata, Caterpie", "Uncommon": "Sentret, Hoppip", "Rare": "Eevee" } },
+    { id: "route-2", name: "Route 2 — The Forest Road", encounterTable: { "Common": "Caterpie, Weedle, Bellsprout", "Uncommon": "Hoothoot, Ledyba", "Rare": "Pikachu" } },
+    { id: "route-4", name: "Route 4 — Echoing Caverns", encounterTable: { "Common": "Zubat, Geodude, Diglett", "Uncommon": "Onix, Roggenrola", "Rare": "Nosepass" } },
+    { id: "route-5", name: "Route 5 — Ashen Road", encounterTable: { "Normal":"Linoone","Bug":"Volbeat, Illumise","Flying":"Fletchinder","Grass":"Gogoat","Dark":"Mightyena","Electric":"Emolga","Fire":"Ponyta","Water":"Poliwhirl","Ground":"Krokorok","Fighting":"Throh, Sawk","Poison":"Salandit","Rock":"Lycanroc","Psychic":"Duosion","Ghost":"Lampent","Steel":"Skarmory","Fairy":"Mimikyu","Ice":"Sneasel","Dragon":"Fraxure, Jangmo-o","Volcanic ecosystem":"Slugma, Numel, Torkoal, Salandit, Houndoom, Camerupt, Oddish, Budew, Roselia" } },
+    { id: "route-6", name: "Route 6 — The Old Road", encounterTable: { "Normal":"Bibarel","Bug":"Ribombee","Flying":"Hawlucha","Grass":"Tsareena","Dark":"Mightyena","Electric":"Luxio","Fire":"Ninetales","Water":"Floatzel","Ground":"Donphan","Fighting":"Passimian","Poison":"Drapion","Rock":"Lycanroc","Psychic":"Gothorita","Ghost":"Mimikyu","Steel":"Bisharp","Fairy":"Clefable","Ice":"Beartic","Dragon":"Gabite","Forest ecosystem":"Trevenant, Ursaring, Absol, Heracross, Pinsir, Sawsbuck","Pond":"Floatzel, Poliwag, Psyduck, Corphish, Basculin, Lapras" } },
+    { id: "route-7", name: "Route 7 — The Sacred Road", encounterTable: { "Normal":"Furret","Bug":"Heracross","Flying":"Noctowl","Grass":"Roserade","Dark":"Absol","Electric":"Manectric","Fire":"Arcanine","Water":"Azumarill","Ground":"Excadrill","Fighting":"Hawlucha","Poison":"Toxicroak","Rock":"Crustle","Psychic":"Gardevoir","Ghost":"Mismagius","Steel":"Mawile","Fairy":"Granbull","Ice":"Weavile","Dragon":"Haxorus, Hakamo-o","Stream":"Azumarill, Poliwhirl, Basculin, Floatzel, Corphish, Dratini, Milotic" } },
+    { id: "route-8", name: "Route 8 — The Ascent", encounterTable: { "Normal":"Kangaskhan","Bug":"Scizor","Flying":"Crobat","Grass":"Victreebel","Dark":"Honchkrow","Electric":"Luxray","Fire":"Houndoom","Water":"Gyarados","Ground":"Excadrill","Fighting":"Conkeldurr","Poison":"Crobat","Rock":"Aggron","Psychic":"Metagross","Ghost":"Chandelure","Steel":"Lucario","Fairy":"Sylveon, Tinkatuff","Ice":"Mamoswine","Dragon":"Goodra","Mountain ecosystem":"Rhydon, Absol, Braviary, Mandibuzz, Sneasel, Noivern, Dratini, Bagon, Beldum","Waterfall":"Gyarados, Floatzel, Golduck, Basculin, Whiscash, Lapras, Milotic" } }
   ];
+
+  // ---- Battle engine templates ----
+  function mon(name, opts) { return Object.assign({ n: name }, opts || {}); }
+
+  const BOSSES = [
+    { id: "gym-brock", label: "Gym 1 — Brock (Rock)", mode: "rotation", isGym: true, sprite: "brock.png", roster: [mon("Golett"), mon("Alolan Geodude"), mon("Krokorok")] },
+    { id: "gym-misty", label: "Gym 2 — Misty (Water)", mode: "rotation", isGym: true, sprite: "misty.png", roster: [mon("Poliwhirl"), mon("Seaking"), mon("Starmie")] },
+    { id: "gym-clemont", label: "Gym 3 — Clemont (Electric)", mode: "rotation", isGym: true, sprite: "clemont.png", roster: [mon("Magneton"), mon("Heliolisk"), mon("Luxray")] },
+    { id: "gym-flannery", label: "Gym 4 — Flannery (Fire)", mode: "rotation", isGym: true, sprite: "flannery.png", roster: [mon("Torkoal"), mon("Camerupt"), mon("Talonflame")] },
+    { id: "gym-cilan", label: "Gym 5 — Cilan (Grass)", mode: "rotation", isGym: true, sprite: "cilan.png", roster: [mon("Whimsicott"), mon("Lurantis"), mon("Tsareena")] },
+    { id: "gym-olympia", label: "Gym 6 — Olympia (Psychic)", mode: "rotation", isGym: true, sprite: "olympia.png", roster: [mon("Sigilyph"), mon("Meowstic"), mon("Gothitelle")] },
+    { id: "gym-allister", label: "Gym 7 — Allister (Ghost)", mode: "rotation", isGym: true, sprite: "allister.png", roster: [mon("Mimikyu"), mon("Dusknoir"), mon("Gengar")] },
+    { id: "gym-iris", label: "Gym 8 — Iris (Dragon)", mode: "rotation", isGym: true, sprite: "iris.png", roster: [mon("Fraxure"), mon("Druddigon"), mon("Haxorus")] },
+    { id: "route3-talon", label: "Route 3 — Backpacker Talon", mode: "simultaneous", isGym: false, sprite: "backpacker-talon.png", roster: [mon("Machoke"), mon("Haunter"), mon("Gabite")] },
+    { id: "route6-gladion-boss", label: "Route 6 — Gladion (boss)", mode: "simultaneous", isGym: false, sprite: "gladion.png", roster: [mon("Silvally"), mon("Lucario"), mon("Zoroark")] },
+    { id: "elite-lance", label: "Elite Three — Lance", mode: "rotation", isGym: false, sprite: "lance.png", roster: [mon("Dragonite"), mon("Salamence"), mon("Flygon"), mon("Hydreigon"), mon("Haxorus"), mon("Goodra"), mon("Dragapult"), mon("Kommo-o"), mon("Baxcalibur")] },
+    { id: "elite-flint", label: "Elite Three — Flint", mode: "rotation", isGym: false, sprite: "flint.png", roster: [mon("Arcanine"), mon("Magmortar"), mon("Darmanitan"), mon("Chandelure"), mon("Coalossal"), mon("Volcarona"), mon("Houndoom"), mon("Blaziken"), mon("Ceruledge")] },
+    { id: "elite-glacia", label: "Elite Three — Glacia", mode: "rotation", isGym: false, sprite: "glacia.png", roster: [mon("Froslass"), mon("Lapras"), mon("Weavile"), mon("Mamoswine"), mon("Alolan Ninetales"), mon("Beartic"), mon("Baxcalibur"), mon("Glaceon"), mon("Avalugg")] },
+    { id: "champ-cynthia", label: "Champion — Cynthia", mode: "simultaneous", isGym: false, sprite: "cynthia.png", roster: [mon("Spiritomb"), mon("Milotic"), mon("Roserade"), mon("Togekiss"), mon("Lucario"), mon("Garchomp")] },
+    { id: "champ-steven", label: "Champion — Steven", mode: "simultaneous", isGym: false, sprite: "steven.png", roster: [mon("Skarmory"), mon("Aggron"), mon("Scizor"), mon("Excadrill"), mon("Tyranitar"), mon("Metagross")] },
+    { id: "champ-diantha", label: "Champion — Diantha", mode: "simultaneous", isGym: false, sprite: "diantha.png", roster: [mon("Hawlucha"), mon("Goodra"), mon("Florges"), mon("Aurorus"), mon("Gourgeist"), mon("Gardevoir", { mega: true, startMega: true })] },
+
+    // Route trainer battles — "assigned" mode: roster[0]→P1, roster[1]→P2, roster[2]→P3, each an independent 1v1
+    { id: "route1-joey", label: "Route 1 — Youngster Joey", mode: "assigned", isGym: false, sprite: "youngster-joey.png", roster: [mon("Rattata"), mon("Sentret"), mon("Dhelmise")] },
+    { id: "route1-gladion", label: "Route 1 — Gladion", mode: "assigned", isGym: false, sprite: "gladion.png", roster: [mon("Zorua"), mon("Rockruff"), mon("Type: Null")] },
+    { id: "route2-emma", label: "Route 2 — Lass Emma", mode: "assigned", isGym: false, sprite: "lass-emma.png", roster: [mon("Psyduck"), mon("Oddish"), mon("Drampa")] },
+    { id: "route2-rangercabin", label: "Route 2 — Ranger Cabin", mode: "assigned", isGym: false, sprite: "ranger-cabin.png", roster: [mon("Arcanine"), mon("Noctowl"), mon("Absol")] },
+    { id: "cerulean-grunt", label: "Cerulean Lab — Team Cataclysm Grunt", mode: "assigned", isGym: false, sprite: "team-cataclysm-grunt.png", scriptedWin: true, roster: [mon("Flapple"), mon("Appletun"), mon("Dipplin")] },
+    { id: "route3-kai", label: "Route 3 — Boss Trainer Kai (Gmax)", mode: "simultaneous", isGym: false, sprite: "kai.png", roster: [mon("Drednaw", { gmax: true }), mon("Grimmsnarl", { gmax: true }), mon("Machamp", { gmax: true })] },
+    { id: "lumiose-vesper", label: "Lumiose Museum — Commander Vesper", mode: "simultaneous", isGym: false, sprite: "commander-vesper.png", scriptedLoss: true, roster: [mon("Charizard", { megaX: true }), mon("Raichu", { megaX: true }), mon("Golurk", { mega: true })] },
+    { id: "route4-bruce", label: "Route 4 — Hiker Bruce", mode: "assigned", isGym: false, sprite: "hiker-bruce.png", roster: [mon("Monferno"), mon("Meditite"), mon("Hariyama")] },
+    { id: "echoing-rowan", label: "Echoing Caverns — Professor Rowan", mode: "simultaneous", isGym: false, sprite: "professor-rowan.png", roster: [mon("Annihilape"), mon("Iron Valiant"), mon("Sneasler"), mon("Crabominable")] },
+    { id: "route5-emma2", label: "Route 5 — Lass Emma", mode: "assigned", isGym: false, sprite: "lass-emma.png", roster: [mon("Wiglett"), mon("Quaxwell"), mon("Basculin")] },
+    { id: "route5-kai2", label: "Route 5 — Kai", mode: "assigned", isGym: false, sprite: "kai.png", roster: [mon("Wartortle"), mon("Poliwrath"), mon("Starmie")] },
+    { id: "shrine-kira", label: "Mega Stone Shrine — Kira", mode: "rotation", isGym: false, sprite: "kira.png", requiresPlayerPick: true, roster: [mon("Feraligatr", { mega: true }), mon("Swampert", { mega: true }), mon("Greninja", { mega: true })] },
+    { id: "shrine-ronan", label: "Mega Stone Shrine — Ronan", mode: "rotation", isGym: false, sprite: "ronan.png", requiresPlayerPick: true, roster: [mon("Falinks", { mega: true }), mon("Scrafty", { mega: true }), mon("Blaziken", { mega: true })] },
+    { id: "shrine-mei", label: "Mega Stone Shrine — Mei", mode: "rotation", isGym: false, sprite: "mei.png", requiresPlayerPick: true, roster: [mon("Delphox", { mega: true }), mon("Scovillain", { mega: true }), mon("Heatran", { mega: true })] }
+  ];
+
+  const LEGENDARIES = [
+    { id: "leg-groudon", player: "P1", name: "Groudon", status: "burn" },
+    { id: "leg-kyogre", player: "P2", name: "Kyogre", status: "confuse" },
+    { id: "leg-rayquaza", player: "P3", name: "Rayquaza", status: "paralysis" }
+  ];
+
+  const NPCS = [
+    { id: "npc-steven", name: "Steven", sprite: "steven.png" },
+    { id: "npc-professor-oak", name: "Professor Oak", sprite: "professor-oak.png" },
+    { id: "npc-professor-rowan", name: "Professor Rowan", sprite: "professor-rowan.png" },
+    { id: "npc-gladion", name: "Gladion", sprite: "gladion.png" },
+    { id: "npc-commander-vesper", name: "Commander Vesper", sprite: "commander-vesper.png" },
+    { id: "npc-team-cataclysm-grunt", name: "Team Cataclysm Grunt", sprite: "team-cataclysm-grunt.png" }
+  ];
+
+  const HP_LABELS = ["Full", "½", "¼", "⅛", "Defeated"];
+  function hpStageLabel(hits, max) {
+    const idx = Math.min(4, Math.floor((hits / max) * 4));
+    return HP_LABELS[idx];
+  }
+  function hpDots(hits, max) {
+    let dots = '';
+    for (let i = 0; i < max; i++) {
+      dots += `<span style="display:inline-block;width:12px;height:12px;margin-right:3px;border:2px solid var(--panel-light);background:${i < hits ? 'var(--accent-red)' : 'transparent'};"></span>`;
+    }
+    return dots;
+  }
+
+  // ---- Pokémon sprite fetching (PokeAPI, cached client-side) ----
+  const SPRITE_URL_CACHE = new Map();
+  const SPRITE_OVERRIDES = {
+    "alolan geodude": "geodude-alola", "alolan ninetales": "ninetales-alola",
+    "alolan x": "x-alola", "type: null": "type-null", "type null": "type-null",
+    "mr. mime": "mr-mime", "ash-greninja": "greninja-ash",
+    "iron valiant": "iron-valiant"
+  };
+  function baseSlug(name) {
+    const key = (name || '').trim().toLowerCase();
+    if (SPRITE_OVERRIDES[key]) return SPRITE_OVERRIDES[key];
+    return key.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+  function spriteSlug(name, opts) {
+    opts = opts || {};
+    let slug = baseSlug(name);
+    if (opts.megaX) slug += '-mega-x';
+    else if (opts.mega) slug += '-mega';
+    if (opts.gmax) slug += '-gmax';
+    return slug;
+  }
+  async function getSpriteUrl(name, opts) {
+    const slug = spriteSlug(name, opts);
+    if (SPRITE_URL_CACHE.has(slug)) return SPRITE_URL_CACHE.get(slug);
+    let url = null;
+    try {
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${slug}`);
+      if (res.ok) {
+        const data = await res.json();
+        url = (data.sprites && (data.sprites.front_default ||
+          (data.sprites.other && data.sprites.other['official-artwork'] && data.sprites.other['official-artwork'].front_default))) || null;
+      }
+    } catch (e) { url = null; }
+    if (!url && (opts.mega || opts.megaX || opts.gmax)) {
+      url = await getSpriteUrl(name, {});
+    }
+    SPRITE_URL_CACHE.set(slug, url);
+    return url;
+  }
+  function hydrateSprites(container) {
+    if (!container) return;
+    container.querySelectorAll('img[data-sprite-name]').forEach((img) => {
+      const name = img.dataset.spriteName;
+      const opts = { mega: img.dataset.spriteMega === '1', megaX: img.dataset.spriteMegax === '1', gmax: img.dataset.spriteGmax === '1' };
+      getSpriteUrl(name, opts).then((url) => { if (url) img.src = url; });
+    });
+  }
+  function combatantHtml(name, hits, max, formOpts, hitKey, lastHit) {
+    formOpts = formOpts || {};
+    const isMega = !!(formOpts.mega || formOpts.megaX);
+    const isGmax = !!formOpts.gmax;
+    const flashCls = (lastHit && lastHit.key === hitKey && (Date.now() - lastHit.ts) < 900) ? 'sprite-hit' : '';
+    return `
+      <div class="battle-combatant ${isMega ? 'is-mega' : ''} ${isGmax ? 'is-gmax' : ''}">
+        <img class="${flashCls}" data-sprite-name="${escapeHtml(name)}" data-sprite-mega="${formOpts.mega ? '1' : '0'}" data-sprite-megax="${formOpts.megaX ? '1' : '0'}" data-sprite-gmax="${isGmax ? '1' : '0'}" alt="${escapeHtml(name)}">
+        ${formOpts.megaX ? '<span class="combatant-tag">MEGA X</span>' : (formOpts.mega ? '<span class="combatant-tag">MEGA</span>' : '')}
+        ${isGmax ? '<span class="combatant-tag">GMAX</span>' : ''}
+        <div class="combatant-name">${escapeHtml(name)}</div>
+        <div>${hpDots(hits, max)}</div>
+      </div>
+    `;
+  }
 
   function flattenEncounterTable(table) {
     const options = [];
@@ -785,8 +841,11 @@
     document.getElementById('dm-session-code').textContent = code;
     showScreen('dmPanel');
 
+    let latestPlayers = {};
+
     onValue(ref(db, `sessions/${code}/players`), (snap) => {
       const players = snap.val() || {};
+      latestPlayers = players;
       const list = document.getElementById('dm-player-list');
       list.innerHTML = '';
       ['P1', 'P2', 'P3'].forEach((slot) => {
@@ -802,8 +861,6 @@
         }
         list.appendChild(li);
       });
-      // Render DM roster panels with evolve + party/box management
-      renderDmRosterPanels(code, players);
     });
 
     document.getElementById('dm-player-list').addEventListener('click', async (e) => {
@@ -870,28 +927,28 @@
       const route = ROUTES.find(r => r.id === encRoute);
       if (!route) return;
       const options = flattenEncounterTable(route.encounterTable);
-      const grid = document.createElement('div');
-      grid.className = 'encounter-grid';
       let currentTier = null;
       options.forEach((opt) => {
         if (opt.tier !== currentTier) {
           currentTier = opt.tier;
           const label = document.createElement('div');
-          label.className = 'encounter-tier-label';
+          label.className = 'status-msg';
+          label.style.textAlign = 'left';
+          label.style.margin = '10px 0 4px';
           label.textContent = currentTier;
-          grid.appendChild(label);
+          box.appendChild(label);
         }
         const btn = document.createElement('button');
         btn.className = 'btn secondary';
+        btn.style.margin = '4px 0';
         btn.textContent = opt.name;
         btn.addEventListener('click', async () => {
           await update(ref(db, `sessions/${code}/session`), {
             currentEncounter: { route: route.name, pokemon: opt.name, forPlayer: encPlayer, status: 'pending' }
           });
         });
-        grid.appendChild(btn);
+        box.appendChild(btn);
       });
-      box.appendChild(grid);
     }
 
     routeSelect.addEventListener('change', () => { encRoute = routeSelect.value || null; renderEncounterTable(); });
@@ -947,6 +1004,435 @@
       await update(ref(db, `sessions/${code}/session`), { currentEncounter: null });
     });
 
+    // ---- Battle engine (DM side) ----
+    const bossSelect = document.getElementById('dm-battle-boss-select');
+    bossSelect.innerHTML = '<option value="">Choose a boss/gym battle&hellip;</option>' +
+      BOSSES.map(b => `<option value="${b.id}">${escapeHtml(b.label)}</option>`).join('');
+    const soloPlayerSelect = document.getElementById('dm-battle-soloplayer-select');
+
+    function freshPlayerBattleState(slot, onlySlot) {
+      const party = (latestPlayers[slot] && latestPlayers[slot].party) || [];
+      const participating = !onlySlot || onlySlot === slot;
+      return {
+        active: participating ? (party[0] || null) : null,
+        hits: 0, max: 4, status: null, benched: [], out: participating ? party.length === 0 : true,
+        megaActive: false, megaUsed: false
+      };
+    }
+
+    document.getElementById('btn-start-boss-battle').addEventListener('click', async () => {
+      const bossId = bossSelect.value;
+      if (!bossId) return;
+      const boss = BOSSES.find(b => b.id === bossId);
+      if (!boss) return;
+      const soloPlayer = soloPlayerSelect.value || null;
+      if (boss.requiresPlayerPick && !soloPlayer) {
+        alert('This battle needs a "Solo for" player selected above.');
+        return;
+      }
+      const baseMax = boss.mode === 'simultaneous' ? 12 : 4;
+      const players = {};
+      ['P1', 'P2', 'P3'].forEach((slot) => { players[slot] = freshPlayerBattleState(slot, soloPlayer); });
+
+      const battleObj = {
+        active: true, bossId: boss.id, label: boss.label, mode: boss.mode, isGym: !!boss.isGym,
+        sprite: boss.sprite || null, scriptedWin: !!boss.scriptedWin, scriptedLoss: !!boss.scriptedLoss,
+        enemyRoster: boss.roster, soloPlayer, legendaryStatus: null, catchAvailable: false,
+        players, lastHit: null
+      };
+
+      if (boss.mode === 'assigned') {
+        const enemyByPlayer = {};
+        ['P1', 'P2', 'P3'].forEach((slot, i) => {
+          const m = boss.roster[i] || {};
+          const mega = !!m.startMega && (m.mega || m.megaX);
+          enemyByPlayer[slot] = { hits: 0, max: mega ? 8 : 4, megaActive: mega };
+        });
+        battleObj.enemyByPlayer = enemyByPlayer;
+      } else {
+        const first = boss.roster[0] || {};
+        const startMega = !!first.startMega && (first.mega || first.megaX);
+        battleObj.enemyIndex = 0;
+        battleObj.enemyHits = 0;
+        battleObj.enemyMax = startMega ? baseMax * 2 : baseMax;
+        battleObj.enemyMegaActive = startMega;
+      }
+
+      await set(ref(db, `sessions/${code}/session/battle`), battleObj);
+      soloPlayerSelect.value = '';
+    });
+
+    LEGENDARIES.forEach((leg) => {
+      document.getElementById(`btn-start-leg-${leg.player}`).addEventListener('click', async () => {
+        const players = {};
+        ['P1', 'P2', 'P3'].forEach((slot) => { players[slot] = freshPlayerBattleState(slot, leg.player); });
+        await set(ref(db, `sessions/${code}/session/battle`), {
+          active: true, bossId: leg.id, label: `${leg.name} — ${leg.player} solo fight`, mode: 'legendary', isGym: false,
+          sprite: null, enemyRoster: [mon(leg.name)], enemyIndex: 0, enemyHits: 0, enemyMax: 4, enemyMegaActive: false,
+          soloPlayer: leg.player, legendaryStatus: leg.status, catchAvailable: false,
+          players, lastHit: null
+        });
+      });
+    });
+
+    // ---- PvP: Mystery Egg (3-way) & Championship duels ----
+    let pvpPickedSlots = [];
+    document.querySelectorAll('#dm-battle-start [data-pvp-slot]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('selected');
+        const s = btn.dataset.pvpSlot;
+        pvpPickedSlots = pvpPickedSlots.includes(s) ? pvpPickedSlots.filter(x => x !== s) : [...pvpPickedSlots, s];
+      });
+    });
+
+    async function startPvpBattle(slots, purpose, label) {
+      const players = {};
+      ['P1', 'P2', 'P3'].forEach((slot) => { players[slot] = freshPlayerBattleState(slot, null); });
+      // Only the chosen slots actually participate; others marked out so they don't render.
+      ['P1', 'P2', 'P3'].forEach((slot) => { if (!slots.includes(slot)) players[slot].out = true; });
+      await set(ref(db, `sessions/${code}/session/battle`), {
+        active: true, bossId: `pvp-${purpose}`, label, mode: 'pvp', isGym: false, sprite: null,
+        pvpParticipants: slots, pvpPurpose: purpose,
+        enemyRoster: [], soloPlayer: null, legendaryStatus: null, catchAvailable: false,
+        players, lastHit: null
+      });
+    }
+
+    document.getElementById('btn-start-mystery-egg').addEventListener('click', () => {
+      startPvpBattle(['P1', 'P2', 'P3'], 'mystery-egg', 'Route 7 — Monument of Beginnings (3-way for the Egg)');
+    });
+
+    document.getElementById('btn-start-championship-duel').addEventListener('click', () => {
+      if (pvpPickedSlots.length !== 2) { alert('Pick exactly 2 players above for the duel.'); return; }
+      startPvpBattle(pvpPickedSlots, 'championship', `Final Championship — ${pvpPickedSlots.join(' vs ')}`);
+    });
+
+    onValue(ref(db, `sessions/${code}/session/championship`), (snap) => {
+      const c = snap.val() || {};
+      document.getElementById('dm-championship-standings').textContent =
+        `Standings — P1: ${c.P1 || 0}  P2: ${c.P2 || 0}  P3: ${c.P3 || 0}`;
+    });
+
+    function toggleMegaFields(hits, max, activating) {
+      const newMax = activating ? max * 2 : Math.max(4, max / 2);
+      return { max: newMax, hits: Math.min(hits, newMax) };
+    }
+
+    function renderDmBattle(battle) {
+      const enemyBox = document.getElementById('dm-battle-enemy');
+      const lastHit = battle.lastHit;
+
+      if (battle.mode === 'pvp') {
+        enemyBox.innerHTML = `<div class="pixel-font" style="font-size:12px;color:var(--accent-gold);">${escapeHtml(battle.label)}</div><p class="status-msg">Player vs Player — DM mediates HP directly on each combatant below.</p>`;
+      } else if (battle.mode === 'assigned') {
+        const npcTag = battle.sprite ? `<img src="sprites/${battle.sprite}" style="width:48px;height:48px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:8px;">` : '';
+        enemyBox.innerHTML = `
+          <div class="pixel-font" style="font-size:12px;color:var(--accent-gold);">${npcTag}${escapeHtml(battle.label)}</div>
+          <p class="status-msg">Each player faces their own assigned opponent (1:1) below.</p>
+          ${battle.scriptedWin ? '<p class="status-msg" style="color:var(--accent-teal);">Scripted win — they get away regardless of outcome.</p>' : ''}
+          ${battle.scriptedLoss ? '<p class="status-msg" style="color:var(--accent-red);">Scripted loss — no restart, story continues after.</p>' : ''}
+        `;
+      } else {
+        const roster = battle.enemyRoster || [];
+        const idx = battle.enemyIndex || 0;
+        const currentMon = roster[idx];
+        const allDefeated = idx >= roster.length;
+        const legendNote = battle.mode === 'legendary' ? `<p class="status-msg">Thematic status for this fight: <b>${escapeHtml(battle.legendaryStatus || '')}</b> — apply below when it fits the story. Catch opens once the ⅛ stage is reached.</p>` : '';
+        const npcTag = battle.sprite ? `<img src="sprites/${battle.sprite}" style="width:48px;height:48px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:8px;">` : '';
+        const canMega = currentMon && (currentMon.mega || currentMon.megaX) && !allDefeated;
+        enemyBox.innerHTML = `
+          <div class="pixel-font" style="font-size:12px;color:var(--accent-gold);">${npcTag}${escapeHtml(battle.label)}</div>
+          ${legendNote}
+          ${battle.scriptedWin ? '<p class="status-msg" style="color:var(--accent-teal);">Scripted win — they get away regardless of outcome.</p>' : ''}
+          ${battle.scriptedLoss ? '<p class="status-msg" style="color:var(--accent-red);">Scripted loss — no restart, story continues after.</p>' : ''}
+          <p class="status-msg">${allDefeated ? 'Enemy roster fully defeated!' : `Enemy ${idx}/${roster.length} down`}</p>
+          ${allDefeated ? '' : `
+            ${combatantHtml(currentMon.n, battle.enemyHits, battle.enemyMax, { mega: battle.enemyMegaActive && currentMon.mega, megaX: battle.enemyMegaActive && currentMon.megaX, gmax: currentMon.gmax }, 'enemy', lastHit)}
+            <span class="status-msg">(${hpStageLabel(battle.enemyHits, battle.enemyMax)})</span><br>
+            <button class="btn secondary" style="width:auto;padding:6px 14px;font-size:11px;display:inline-block;margin-top:8px;" data-enemy-hit="1">-1 stage (hit)</button>
+            <button class="btn secondary" style="width:auto;padding:6px 14px;font-size:11px;display:inline-block;margin-top:8px;margin-left:6px;" data-enemy-hit="-1">undo</button>
+            ${canMega && !battle.enemyMegaActive ? `<button class="btn" style="width:auto;padding:6px 14px;font-size:11px;display:inline-block;margin-top:8px;margin-left:6px;" data-enemy-mega="1">Mega Evolve!</button>` : ''}
+          `}
+        `;
+      }
+      hydrateSprites(enemyBox);
+
+      const playersBox = document.getElementById('dm-battle-players');
+      const slots = battle.soloPlayer ? [battle.soloPlayer] : (battle.pvpParticipants || ['P1', 'P2', 'P3']);
+      playersBox.innerHTML = slots.map((slot) => {
+        const p = (battle.players && battle.players[slot]) || {};
+        const party = (latestPlayers[slot] && latestPlayers[slot].party) || [];
+        const benched = p.benched || [];
+        const swapOptions = party.filter((m) => !benched.includes(m));
+        if (p.out) {
+          return `<div style="margin-bottom:14px;"><span class="pixel-font" style="font-size:11px;">${slot}</span> — <span class="status-msg" style="color:var(--accent-red);">out of usable Pok&eacute;mon</span></div>`;
+        }
+        let assignedEnemyHtml = '';
+        if (battle.mode === 'assigned') {
+          const em = battle.enemyRoster[['P1', 'P2', 'P3'].indexOf(slot)];
+          const eb = (battle.enemyByPlayer && battle.enemyByPlayer[slot]) || { hits: 0, max: 4, megaActive: false };
+          const canMega = em && (em.mega || em.megaX);
+          assignedEnemyHtml = `
+            <div style="margin:6px 0;padding:6px;border:2px dashed var(--panel);">
+              <span class="status-msg">vs</span>
+              ${combatantHtml(em.n, eb.hits, eb.max, { mega: eb.megaActive && em.mega, megaX: eb.megaActive && em.megaX, gmax: em.gmax }, `assigned-enemy-${slot}`, battle.lastHit)}
+              <span class="status-msg">(${hpStageLabel(eb.hits, eb.max)})</span><br>
+              <button class="btn secondary" style="width:auto;padding:4px 8px;font-size:9px;display:inline-block;margin-top:4px;" data-assigned-enemy-hit="${slot}">-1 stage</button>
+              ${canMega && !eb.megaActive ? `<button class="btn" style="width:auto;padding:4px 8px;font-size:9px;display:inline-block;margin-top:4px;margin-left:4px;" data-assigned-enemy-mega="${slot}">Mega Evolve!</button>` : ''}
+            </div>
+          `;
+        }
+        return `
+          <div style="margin-bottom:14px;">
+            <span class="pixel-font" style="font-size:11px;">${slot}</span>
+            ${p.status ? `<span style="color:var(--accent-gold);font-size:11px;"> [${escapeHtml(p.status)}]</span>` : ''}
+            ${combatantHtml(p.active || '—', p.hits, p.max, { mega: p.megaActive }, `player-${slot}`, battle.lastHit)}
+            <span class="status-msg">(${hpStageLabel(p.hits, p.max)})</span><br>
+            <button class="btn secondary" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;" data-player-hit="${slot}">-1 stage (hit)</button>
+            ${!p.megaUsed ? `<button class="btn secondary" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;" data-player-mega="${slot}">Mega Evolve!</button>` : ''}
+            <br>
+            <select data-player-swap="${slot}" style="width:auto;display:inline-block;font-size:10px;padding:4px;margin-top:4px;">
+              <option value="">swap active&hellip;</option>
+              ${swapOptions.map((m) => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('')}
+            </select>
+            <select data-player-status="${slot}" style="width:auto;display:inline-block;font-size:10px;padding:4px;">
+              <option value="">status: none</option>
+              <option value="confuse" ${p.status === 'confuse' ? 'selected' : ''}>confuse</option>
+              <option value="poison" ${p.status === 'poison' ? 'selected' : ''}>poison</option>
+              <option value="burn" ${p.status === 'burn' ? 'selected' : ''}>burn</option>
+              <option value="paralysis" ${p.status === 'paralysis' ? 'selected' : ''}>paralysis</option>
+            </select>
+            <button class="btn secondary" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;" data-player-turn="${slot}">took turn (clear status)</button>
+            ${battle.mode === 'legendary' && battle.catchAvailable ? `<button class="btn" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;" data-catch-legendary="${slot}">Catch!</button>` : ''}
+            ${assignedEnemyHtml}
+          </div>
+        `;
+      }).join('');
+      hydrateSprites(playersBox);
+
+      const declareBox = document.getElementById('dm-battle-pvp-declare');
+      if (battle.mode === 'pvp') {
+        const parts = battle.pvpParticipants || [];
+        declareBox.innerHTML = parts.map((slot) => `<button class="btn" style="width:auto;padding:6px 12px;font-size:11px;display:inline-block;margin:0 6px 6px 0;" data-declare-winner="${slot}">Declare ${slot} Winner</button>`).join('');
+      } else {
+        declareBox.innerHTML = '';
+      }
+    }
+
+    onValue(ref(db, `sessions/${code}/session/battle`), (snap) => {
+      const battle = snap.val();
+      const startBox = document.getElementById('dm-battle-start');
+      const activeBox = document.getElementById('dm-battle-active');
+      if (!battle || !battle.active) {
+        startBox.classList.remove('hidden');
+        activeBox.classList.add('hidden');
+        return;
+      }
+      startBox.classList.add('hidden');
+      activeBox.classList.remove('hidden');
+      renderDmBattle(battle);
+    });
+
+    document.getElementById('dm-battle-active').addEventListener('click', async (e) => {
+      const battlePath = `sessions/${code}/session/battle`;
+      const snap = await get(ref(db, battlePath));
+      const battle = snap.val();
+      if (!battle) return;
+
+      if (e.target.dataset.enemyHit) {
+        const delta = parseInt(e.target.dataset.enemyHit, 10);
+        let hits = Math.max(0, Math.min(battle.enemyMax, (battle.enemyHits || 0) + delta));
+        let enemyIndex = battle.enemyIndex || 0;
+        let enemyMegaActive = battle.enemyMegaActive;
+        let enemyMax = battle.enemyMax;
+        if (hits >= battle.enemyMax) {
+          enemyIndex += 1;
+          hits = 0;
+          const nextMon = (battle.enemyRoster || [])[enemyIndex];
+          const startsMega = nextMon && nextMon.startMega && (nextMon.mega || nextMon.megaX);
+          enemyMegaActive = !!startsMega;
+          enemyMax = (battle.mode === 'simultaneous' ? 12 : 4) * (startsMega ? 2 : 1);
+        }
+        const stageIdx = Math.min(4, Math.floor((hits / enemyMax) * 4));
+        const catchAvailable = battle.mode === 'legendary' ? stageIdx >= 3 : false;
+        await update(ref(db, battlePath), { enemyHits: hits, enemyIndex, enemyMax, enemyMegaActive, catchAvailable, lastHit: { key: 'enemy', ts: Date.now() } });
+        return;
+      }
+
+      if (e.target.dataset.enemyMega) {
+        const { max, hits } = toggleMegaFields(battle.enemyHits, battle.enemyMax, true);
+        await update(ref(db, battlePath), { enemyMax: max, enemyHits: hits, enemyMegaActive: true });
+        return;
+      }
+
+      if (e.target.dataset.assignedEnemyHit) {
+        const slot = e.target.dataset.assignedEnemyHit;
+        const eb = battle.enemyByPlayer[slot];
+        const hits = Math.min(eb.max, (eb.hits || 0) + 1);
+        await update(ref(db, `${battlePath}/enemyByPlayer/${slot}`), { hits });
+        await update(ref(db, battlePath), { lastHit: { key: `assigned-enemy-${slot}`, ts: Date.now() } });
+        return;
+      }
+
+      if (e.target.dataset.assignedEnemyMega) {
+        const slot = e.target.dataset.assignedEnemyMega;
+        const eb = battle.enemyByPlayer[slot];
+        const { max, hits } = toggleMegaFields(eb.hits, eb.max, true);
+        await update(ref(db, `${battlePath}/enemyByPlayer/${slot}`), { max, hits, megaActive: true });
+        return;
+      }
+
+      if (e.target.dataset.playerHit) {
+        const slot = e.target.dataset.playerHit;
+        const p = battle.players[slot];
+        const hits = Math.min(p.max, (p.hits || 0) + 1);
+        if (hits >= p.max) {
+          const benched = [...(p.benched || [])];
+          if (p.active) benched.push(p.active);
+          const party = (latestPlayers[slot] && latestPlayers[slot].party) || [];
+          const remaining = party.filter((m) => !benched.includes(m));
+          if (remaining.length === 0) {
+            await update(ref(db, `${battlePath}/players/${slot}`), { active: null, hits: 0, status: null, benched, out: true, megaActive: false, max: 4 });
+          } else {
+            await update(ref(db, `${battlePath}/players/${slot}`), { active: remaining[0], hits: 0, status: null, benched, out: false, megaActive: false, max: 4 });
+          }
+        } else {
+          await update(ref(db, `${battlePath}/players/${slot}`), { hits });
+        }
+        await update(ref(db, battlePath), { lastHit: { key: `player-${slot}`, ts: Date.now() } });
+        return;
+      }
+
+      if (e.target.dataset.playerMega) {
+        const slot = e.target.dataset.playerMega;
+        const p = battle.players[slot];
+        const { max, hits } = toggleMegaFields(p.hits, p.max, true);
+        await update(ref(db, `${battlePath}/players/${slot}`), { max, hits, megaActive: true, megaUsed: true });
+        return;
+      }
+
+      if (e.target.dataset.playerTurn) {
+        const slot = e.target.dataset.playerTurn;
+        await update(ref(db, `${battlePath}/players/${slot}`), { status: null });
+        return;
+      }
+
+      if (e.target.dataset.catchLegendary) {
+        const slot = e.target.dataset.catchLegendary;
+        const name = battle.enemyRoster[0].n;
+        const pSnap = await get(ref(db, `sessions/${code}/players/${slot}`));
+        const p = pSnap.val() || {};
+        const party = p.party || [];
+        const boxArr = p.box || [];
+        const balls = typeof p.pokeballs === 'number' ? p.pokeballs : 0;
+        if (party.length < 6) party.push(name); else boxArr.push(name);
+        await update(ref(db, `sessions/${code}/players/${slot}`), { party, box: boxArr, pokeballs: Math.max(0, balls - 1) });
+        await update(ref(db, battlePath), { active: false });
+        return;
+      }
+
+      if (e.target.dataset.declareWinner) {
+        const winner = e.target.dataset.declareWinner;
+        if (battle.pvpPurpose === 'mystery-egg') {
+          const pSnap = await get(ref(db, `sessions/${code}/players/${winner}`));
+          const p = pSnap.val() || {};
+          const party = p.party || [];
+          const boxArr = p.box || [];
+          if (party.length < 6) party.push('Ash-Greninja'); else boxArr.push('Ash-Greninja');
+          await update(ref(db, `sessions/${code}/players/${winner}`), { party, box: boxArr });
+        } else if (battle.pvpPurpose === 'championship') {
+          const cSnap = await get(ref(db, `sessions/${code}/session/championship`));
+          const c = cSnap.val() || {};
+          await update(ref(db, `sessions/${code}/session/championship`), { [winner]: (c[winner] || 0) + 1 });
+        }
+        await update(ref(db, battlePath), { active: false });
+        return;
+      }
+    });
+
+    document.getElementById('dm-battle-active').addEventListener('change', async (e) => {
+      const battlePath = `sessions/${code}/session/battle`;
+      if (e.target.dataset.playerSwap) {
+        const slot = e.target.dataset.playerSwap;
+        const val = e.target.value;
+        if (!val) return;
+        await update(ref(db, `${battlePath}/players/${slot}`), { active: val, hits: 0, status: null, megaActive: false, max: 4 });
+        e.target.value = '';
+        return;
+      }
+      if (e.target.dataset.playerStatus) {
+        const slot = e.target.dataset.playerStatus;
+        await update(ref(db, `${battlePath}/players/${slot}`), { status: e.target.value || null });
+        return;
+      }
+    });
+
+    document.getElementById('btn-battle-victory').addEventListener('click', async () => {
+      const battlePath = `sessions/${code}/session/battle`;
+      const snap = await get(ref(db, battlePath));
+      const battle = snap.val();
+      if (battle && battle.isGym) {
+        for (const slot of ['P1', 'P2', 'P3']) {
+          const bSnap = await get(ref(db, `sessions/${code}/players/${slot}/badges`));
+          const current = bSnap.exists() ? bSnap.val() : 0;
+          await update(ref(db, `sessions/${code}/players/${slot}`), { badges: current + 1 });
+        }
+      }
+      await update(ref(db, battlePath), { active: false });
+    });
+
+    document.getElementById('btn-battle-reset').addEventListener('click', async () => {
+      const battlePath = `sessions/${code}/session/battle`;
+      const snap = await get(ref(db, battlePath));
+      const battle = snap.val();
+      if (!battle) return;
+      const players = {};
+      ['P1', 'P2', 'P3'].forEach((slot) => { players[slot] = freshPlayerBattleState(slot, battle.soloPlayer || (battle.pvpParticipants ? null : null)); });
+      if (battle.pvpParticipants) {
+        ['P1', 'P2', 'P3'].forEach((slot) => { if (!battle.pvpParticipants.includes(slot)) players[slot].out = true; });
+      }
+      const updates = { players };
+      if (battle.mode === 'assigned') {
+        const enemyByPlayer = {};
+        ['P1', 'P2', 'P3'].forEach((slot, i) => {
+          const m = battle.enemyRoster[i] || {};
+          enemyByPlayer[slot] = { hits: 0, max: 4, megaActive: false };
+        });
+        updates.enemyByPlayer = enemyByPlayer;
+      } else if (battle.mode !== 'pvp') {
+        updates.enemyHits = 0;
+        updates.enemyIndex = 0;
+        updates.enemyMax = battle.mode === 'simultaneous' ? 12 : 4;
+        updates.enemyMegaActive = false;
+        updates.catchAvailable = false;
+      }
+      await update(ref(db, battlePath), updates);
+    });
+
+    document.getElementById('btn-battle-retreat').addEventListener('click', async () => {
+      await update(ref(db, `sessions/${code}/session/battle`), { active: false });
+    });
+
+    // Map controls
+    document.getElementById('btn-show-map').addEventListener('click', async () => {
+      await update(ref(db, `sessions/${code}/session`), { mapVisible: true });
+    });
+    document.getElementById('btn-hide-map').addEventListener('click', async () => {
+      await update(ref(db, `sessions/${code}/session`), { mapVisible: false });
+    });
+
+    // NPC popup controls
+    const npcSelect = document.getElementById('dm-npc-select');
+    npcSelect.innerHTML = NPCS.map(n => `<option value="${n.id}">${escapeHtml(n.name)}</option>`).join('');
+    document.getElementById('btn-show-npc').addEventListener('click', async () => {
+      const npc = NPCS.find(n => n.id === npcSelect.value);
+      if (!npc) return;
+      await update(ref(db, `sessions/${code}/session`), { currentNpc: { name: npc.name, sprite: npc.sprite } });
+    });
+    document.getElementById('btn-clear-npc').addEventListener('click', async () => {
+      await update(ref(db, `sessions/${code}/session`), { currentNpc: null });
+    });
+
     // Scene picker
     const sceneSelect = document.getElementById('dm-scene-select');
     sceneSelect.innerHTML = SCENES.map(s => `<option value="${s.file}">${s.n}. ${escapeHtml(s.title)}</option>`).join('');
@@ -970,97 +1456,6 @@
         alert('Could not delete the campaign. Check your Firebase database rules.');
       }
     }, { once: true });
-  }
-
-  // ---- DM roster panels (evolve + party/box management) ----
-  function renderDmRosterPanels(code, players) {
-    const container = document.getElementById('dm-roster-panels');
-    container.innerHTML = '';
-    ['P1','P2','P3'].forEach(slot => {
-      const p = players[slot] || {};
-      if (!p.joined) return;
-      const panel = document.createElement('div');
-      panel.className = 'dm-player-roster';
-      panel.innerHTML = `<label style="color:var(--accent-teal);margin-top:12px;">${escapeHtml(p.name||slot)} — Party</label>`;
-      const partyUl = document.createElement('ul');
-      partyUl.className = 'party-list';
-      const party = p.party || [];
-      party.forEach((mon, i) => {
-        const li = document.createElement('li');
-        li.innerHTML = `<span class="party-mon-name">${escapeHtml(mon)}</span>`;
-        // Evolve row
-        const evolveRow = document.createElement('div');
-        evolveRow.className = 'dm-evolve-row';
-        evolveRow.innerHTML = `<select disabled><option value="">Loading...</option></select><button data-eslot="${slot}" data-eidx="${i}" disabled>Evolve</button>`;
-        
-        const selectEl = evolveRow.querySelector('select');
-        const evolveBtn = evolveRow.querySelector('button');
-
-        fetchNextEvolutions(mon).then(evos => {
-          if (!evos || evos.length === 0) {
-            selectEl.innerHTML = `<option value="">Fully Evolved</option>`;
-          } else {
-            selectEl.innerHTML = evos.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
-            selectEl.disabled = false;
-            evolveBtn.disabled = false;
-          }
-        });
-
-        evolveBtn.addEventListener('click', async () => {
-          const newName = selectEl.value;
-          if (!newName) return;
-          const snap = await get(ref(db, `sessions/${code}/players/${slot}/party`));
-          const arr = snap.val() || [];
-          arr[i] = newName;
-          await update(ref(db, `sessions/${code}/players/${slot}`), { party: arr });
-        });
-        li.appendChild(evolveRow);
-        // Move to box button
-        const toBoxBtn = document.createElement('button');
-        toBoxBtn.className = 'party-action-btn';
-        toBoxBtn.textContent = '→ Box';
-        toBoxBtn.addEventListener('click', async () => {
-          const pSnap = await get(ref(db, `sessions/${code}/players/${slot}`));
-          const pd = pSnap.val() || {};
-          const pa = pd.party || []; const ba = pd.box || [];
-          if (pa.length <= 1) { alert('Party must have at least 1 Pokémon!'); return; }
-          ba.push(pa.splice(i, 1)[0]);
-          await update(ref(db, `sessions/${code}/players/${slot}`), { party: pa, box: ba });
-        });
-        li.appendChild(toBoxBtn);
-        partyUl.appendChild(li);
-      });
-      panel.appendChild(partyUl);
-      // Box section
-      const boxArr = p.box || [];
-      if (boxArr.length) {
-        const boxLabel = document.createElement('label');
-        boxLabel.style.color = 'var(--text-dim)';
-        boxLabel.textContent = `${p.name||slot} — Box`;
-        panel.appendChild(boxLabel);
-        const boxUl = document.createElement('ul');
-        boxUl.className = 'party-list';
-        boxArr.forEach((mon, i) => {
-          const li = document.createElement('li');
-          li.innerHTML = `<span class="party-mon-name">${escapeHtml(mon)}</span>`;
-          const toPartyBtn = document.createElement('button');
-          toPartyBtn.className = 'party-action-btn';
-          toPartyBtn.textContent = '→ Party';
-          toPartyBtn.addEventListener('click', async () => {
-            const pSnap = await get(ref(db, `sessions/${code}/players/${slot}`));
-            const pd = pSnap.val() || {};
-            const pa = pd.party || []; const ba = pd.box || [];
-            if (pa.length >= 6) { alert('Party is full (6 max)! Move one to box first.'); return; }
-            pa.push(ba.splice(i, 1)[0]);
-            await update(ref(db, `sessions/${code}/players/${slot}`), { party: pa, box: ba });
-          });
-          li.appendChild(toPartyBtn);
-          boxUl.appendChild(li);
-        });
-        panel.appendChild(boxUl);
-      }
-      container.appendChild(panel);
-    });
   }
 
   // ---- Player: join flow ----
@@ -1132,11 +1527,6 @@
 
   function attachPlayerView(code, slot) {
     showScreen('playerView');
-    // Set trainer avatar sprite
-    const trainerImg = document.getElementById('player-trainer-sprite');
-    trainerImg.src = `sprites/trainer-${slot.toLowerCase()}.png`;
-    trainerImg.alt = `Trainer ${slot}`;
-    document.getElementById('player-slot-label').textContent = slot;
 
     onValue(ref(db, `sessions/${code}/players/${slot}`), (snap) => {
       const p = snap.val() || {};
@@ -1144,42 +1534,27 @@
       const badgeStrip = document.getElementById('player-badge-strip');
       badgeStrip.innerHTML = '';
       const badgeCount = p.badges || 0;
-      for (let i = 0; i < 8; i++) {
+      const gyms = BOSSES.filter(b => b.isGym);
+      gyms.forEach((gym, i) => {
+        const item = document.createElement('div');
+        item.className = 'badge-item' + (i < badgeCount ? ' earned' : '');
         const dot = document.createElement('div');
         dot.className = 'badge-dot';
         if (i < badgeCount) dot.style.background = 'var(--accent-gold)';
-        badgeStrip.appendChild(dot);
-      }
+        item.appendChild(dot);
+        const label = document.createElement('span');
+        label.textContent = gym.label.replace(/^Gym \d+ — /, '');
+        item.appendChild(label);
+        badgeStrip.appendChild(item);
+      });
       const partyBox = document.getElementById('player-party-box');
       if (p.party && p.party.length) {
         partyBox.classList.remove('hidden');
         const list = document.getElementById('player-party-list');
         list.innerHTML = '';
-        p.party.forEach((mon, idx) => {
+        p.party.forEach((mon) => {
           const li = document.createElement('li');
-          const img = document.createElement('img');
-          img.className = 'party-sprite';
-          img.alt = mon;
-          img.src = '';
-          fetchPokemonSprite(mon).then(url => { if (url) img.src = url; });
-          li.appendChild(img);
-          const nameSpan = document.createElement('span');
-          nameSpan.className = 'party-mon-name';
-          nameSpan.textContent = mon;
-          li.appendChild(nameSpan);
-          // Move to box button
-          const toBoxBtn = document.createElement('button');
-          toBoxBtn.className = 'party-action-btn';
-          toBoxBtn.textContent = '→ Box';
-          toBoxBtn.addEventListener('click', async () => {
-            const pSnap = await get(ref(db, `sessions/${code}/players/${slot}`));
-            const pd = pSnap.val() || {};
-            const pa = pd.party || []; const ba = pd.box || [];
-            if (pa.length <= 1) return;
-            ba.push(pa.splice(idx, 1)[0]);
-            await update(ref(db, `sessions/${code}/players/${slot}`), { party: pa, box: ba });
-          });
-          li.appendChild(toBoxBtn);
+          li.innerHTML = `<span>${escapeHtml(mon)}</span><span>${escapeHtml(p.type || '')}</span>`;
           list.appendChild(li);
         });
       } else {
@@ -1191,31 +1566,9 @@
         boxBox.classList.remove('hidden');
         const list = document.getElementById('player-box-list');
         list.innerHTML = '';
-        p.box.forEach((mon, idx) => {
+        p.box.forEach((mon) => {
           const li = document.createElement('li');
-          const img = document.createElement('img');
-          img.className = 'party-sprite';
-          img.alt = mon;
-          img.src = '';
-          fetchPokemonSprite(mon).then(url => { if (url) img.src = url; });
-          li.appendChild(img);
-          const nameSpan = document.createElement('span');
-          nameSpan.className = 'party-mon-name';
-          nameSpan.textContent = mon;
-          li.appendChild(nameSpan);
-          // Move to party button
-          const toPartyBtn = document.createElement('button');
-          toPartyBtn.className = 'party-action-btn';
-          toPartyBtn.textContent = '→ Party';
-          toPartyBtn.addEventListener('click', async () => {
-            const pSnap = await get(ref(db, `sessions/${code}/players/${slot}`));
-            const pd = pSnap.val() || {};
-            const pa = pd.party || []; const ba = pd.box || [];
-            if (pa.length >= 6) return;
-            pa.push(ba.splice(idx, 1)[0]);
-            await update(ref(db, `sessions/${code}/players/${slot}`), { party: pa, box: ba });
-          });
-          li.appendChild(toPartyBtn);
+          li.innerHTML = `<span>${escapeHtml(mon)}</span><span></span>`;
           list.appendChild(li);
         });
       } else {
@@ -1226,19 +1579,14 @@
       document.getElementById('player-pokeball-count').textContent = `Pokéballs: ${balls}`;
     });
 
-    onValue(ref(db, `sessions/${code}/session/currentEncounter`), async (snap) => {
+    onValue(ref(db, `sessions/${code}/session/currentEncounter`), (snap) => {
       const enc = snap.val();
       const banner = document.getElementById('player-encounter-banner');
-      const overlay = document.getElementById('encounter-overlay');
       if (enc && enc.status === 'pending' && enc.forPlayer === slot) {
         banner.classList.remove('hidden');
         document.getElementById('player-encounter-text').textContent = `A wild ${enc.pokemon} appeared!`;
-        // Show sprite overlay
-        const spriteUrl = await fetchPokemonSprite(enc.pokemon);
-        showEncounterOverlay(enc.pokemon, spriteUrl);
       } else {
         banner.classList.add('hidden');
-        overlay.classList.add('hidden');
       }
     });
 
@@ -1247,6 +1595,52 @@
       const sessSnap = await get(ref(db, `sessions/${code}/session`));
       const session = sessSnap.val() || {};
       renderPlayerPhase(code, slot, session, allPlayers);
+    });
+
+    onValue(ref(db, `sessions/${code}/session/battle`), (snap) => {
+      const battle = snap.val();
+      const banner = document.getElementById('player-battle-banner');
+      const content = document.getElementById('player-battle-content');
+      const participating = battle && battle.active && (
+        (battle.soloPlayer ? battle.soloPlayer === slot : true) &&
+        (battle.pvpParticipants ? battle.pvpParticipants.includes(slot) : true)
+      );
+      if (!participating) {
+        banner.classList.add('hidden');
+        return;
+      }
+      banner.classList.remove('hidden');
+      const p = (battle.players && battle.players[slot]) || {};
+      const lastHit = battle.lastHit;
+
+      let enemySideHtml = '';
+      if (battle.mode === 'pvp') {
+        enemySideHtml = `<p class="status-msg" style="text-align:center;">Facing: ${(battle.pvpParticipants || []).filter(s => s !== slot).join(', ')}</p>`;
+      } else if (battle.mode === 'assigned') {
+        const em = battle.enemyRoster[['P1', 'P2', 'P3'].indexOf(slot)];
+        const eb = (battle.enemyByPlayer && battle.enemyByPlayer[slot]) || { hits: 0, max: 4, megaActive: false };
+        enemySideHtml = `<div style="text-align:center;">${combatantHtml(em.n, eb.hits, eb.max, { mega: eb.megaActive && em.mega, megaX: eb.megaActive && em.megaX, gmax: em.gmax }, `assigned-enemy-${slot}`, lastHit)}</div>`;
+      } else {
+        const roster = battle.enemyRoster || [];
+        const idx = battle.enemyIndex || 0;
+        const currentMon = roster[idx];
+        const allDefeated = idx >= roster.length;
+        enemySideHtml = allDefeated
+          ? '<p class="status-msg" style="text-align:center;">Enemy defeated!</p>'
+          : `<div style="text-align:center;">${combatantHtml(currentMon.n, battle.enemyHits, battle.enemyMax, { mega: battle.enemyMegaActive && currentMon.mega, megaX: battle.enemyMegaActive && currentMon.megaX, gmax: currentMon.gmax }, 'enemy', lastHit)}</div>
+             ${roster.length > 1 ? `<p class="status-msg" style="text-align:center;">${idx}/${roster.length} down</p>` : ''}`;
+      }
+
+      content.innerHTML = `
+        <div class="pixel-font" style="font-size:12px;color:var(--accent-gold);text-align:center;">${escapeHtml(battle.label)}</div>
+        ${enemySideHtml}
+        <hr style="border:none;border-top:2px dashed var(--panel-light);margin:10px 0;">
+        ${p.out
+          ? '<p class="status-msg" style="color:var(--accent-red);text-align:center;">You are out of usable Pok&eacute;mon</p>'
+          : `<div style="text-align:center;">${combatantHtml(p.active || '—', p.hits, p.max, { mega: p.megaActive }, `player-${slot}`, lastHit)}</div>
+             ${p.status ? `<p class="status-msg" style="text-align:center;color:var(--accent-gold);">[${escapeHtml(p.status)}]</p>` : ''}`}
+      `;
+      hydrateSprites(content);
     });
 
     onValue(ref(db, `sessions/${code}/session`), async (snap) => {
@@ -1260,6 +1654,18 @@
         overlay.classList.remove('hidden');
       } else {
         overlay.classList.add('hidden');
+      }
+
+      const mapOverlay = document.getElementById('map-overlay');
+      mapOverlay.classList.toggle('hidden', !session.mapVisible);
+
+      const npcOverlay = document.getElementById('npc-overlay');
+      if (session.currentNpc) {
+        document.getElementById('npc-overlay-img').src = `sprites/${session.currentNpc.sprite}`;
+        document.getElementById('npc-overlay-name').textContent = session.currentNpc.name;
+        npcOverlay.classList.remove('hidden');
+      } else {
+        npcOverlay.classList.add('hidden');
       }
     });
   }
@@ -1337,10 +1743,6 @@
       party: [mon],
       draftDone: true
     });
-    // Show starter sprite popup
-    const spriteUrl = await fetchPokemonSprite(mon);
-    showEncounterOverlay(mon, spriteUrl, `You chose ${mon}!`);
-    setTimeout(() => { document.getElementById('encounter-overlay').classList.add('hidden'); }, 3000);
     const sessSnap = await get(ref(db, `sessions/${code}/session`));
     const session = sessSnap.val() || {};
     const order = session.draftOrder || [];
@@ -1363,180 +1765,6 @@
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
-  }
-
-  // ---- Pokémon sprite system ----
-  const SLUG_OVERRIDES = {
-    'nidoran-m': 'nidoran-male', 'nidoran-f': 'nidoran-female',
-    'mr. mime': 'mr-mime', 'mr. rime': 'mr-rime', 'mime jr.': 'mime-jr',
-    'farfetch\'d': 'farfetchd', 'sirfetch\'d': 'sirfetchd',
-    'type: null': 'type-null',
-    'flabébé': 'flabebe',
-    'tapu koko': 'tapu-koko', 'tapu lele': 'tapu-lele',
-    'tapu bulu': 'tapu-bulu', 'tapu fini': 'tapu-fini',
-    'ho-oh': 'ho-oh', 'porygon-z': 'porygon-z',
-    'kommo-o': 'kommo-o', 'hakamo-o': 'hakamo-o', 'jangmo-o': 'jangmo-o',
-    'lycanroc': 'lycanroc-midday', 'midday lycanroc': 'lycanroc-midday',
-    'mimikyu': 'mimikyu-disguised',
-    'basculin': 'basculin-red-striped',
-    'sinistcha': 'sinistcha',
-    'meowstic': 'meowstic-male',
-    'indeedee': 'indeedee-male',
-    'oinkologne': 'oinkologne',
-    'scream tail': 'scream-tail',
-  };
-
-  function slugifyPokemon(name) {
-    let s = name.trim().toLowerCase();
-    // Regional forms: "Alolan X" → "x-alola", "Galarian X" → "x-galar", "Hisuian X" → "x-hisui"
-    const regionalPrefixes = [
-      { prefix: 'alolan ', suffix: '-alola' },
-      { prefix: 'galarian ', suffix: '-galar' },
-      { prefix: 'hisuian ', suffix: '-hisui' },
-      { prefix: 'paldean ', suffix: '-paldea' },
-    ];
-    for (const rp of regionalPrefixes) {
-      if (s.startsWith(rp.prefix)) {
-        s = s.slice(rp.prefix.length);
-        // Recurse to handle the base name, then append suffix
-        return slugifyPokemon(s) + rp.suffix;
-      }
-    }
-    // Mega forms: "Mega X" → "x-mega"
-    if (s.startsWith('mega ')) {
-      s = s.slice(5);
-      return slugifyPokemon(s) + '-mega';
-    }
-    // Ash-Greninja
-    if (s === 'ash-greninja') return 'greninja-ash';
-    // Check overrides
-    if (SLUG_OVERRIDES[s]) return SLUG_OVERRIDES[s];
-    // Default: replace spaces and dots with hyphens, remove other special chars
-    return s.replace(/[.'']/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-  }
-
-  const spriteCache = new Map();
-  const evolutionCache = new Map();
-
-  async function fetchNextEvolutions(name) {
-    const slug = slugifyPokemon(name);
-    if (evolutionCache.has(slug)) return evolutionCache.get(slug);
-
-    // Extract base slug for species lookup
-    const baseSlug = slug.replace(/-(alola|galar|hisui|paldea|mega)$/, '');
-    
-    // Determine the regional prefix of the current pokemon to re-apply later
-    let prefix = '';
-    const lowerName = name.trim().toLowerCase();
-    const prefixes = ['alolan ', 'galarian ', 'hisuian ', 'paldean '];
-    for (const p of prefixes) {
-      if (lowerName.startsWith(p)) { prefix = p; break; }
-    }
-
-    try {
-      const speciesResp = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${baseSlug}`);
-      if (!speciesResp.ok) throw new Error(`Species API ${speciesResp.status}`);
-      const speciesData = await speciesResp.json();
-      const chainUrl = speciesData.evolution_chain?.url;
-      if (!chainUrl) {
-        evolutionCache.set(slug, []);
-        return [];
-      }
-      const chainResp = await fetch(chainUrl);
-      if (!chainResp.ok) throw new Error(`Chain API ${chainResp.status}`);
-      const chainData = await chainResp.json();
-      
-      let nextEvos = [];
-      function searchTree(node) {
-        if (node.species.name === baseSlug) {
-          nextEvos = node.evolves_to.map(e => e.species.name);
-          return true;
-        }
-        for (const child of node.evolves_to) {
-          if (searchTree(child)) return true;
-        }
-        return false;
-      }
-      searchTree(chainData.chain);
-      
-      // Capitalize and apply prefix
-      let finalEvos = nextEvos.map(n => {
-        let capitalBase = n.charAt(0).toUpperCase() + n.slice(1).replace(/-/g, ' ');
-        if (prefix) {
-          let capitalPrefix = prefix.charAt(0).toUpperCase() + prefix.slice(1);
-          return capitalPrefix + capitalBase;
-        }
-        return capitalBase;
-      });
-
-      // Simple manual overrides for common regional branched evolutions
-      if (slug === 'meowth-galar') finalEvos = ['Perrserker'];
-      if (slug === 'farfetchd-galar') finalEvos = ['Sirfetch\\'d'];
-      if (slug === 'linoone-galar') finalEvos = ['Obstagoon'];
-      if (slug === 'mime-jr') finalEvos = ['Mr. Mime', 'Galarian Mr. Mime'];
-
-      evolutionCache.set(slug, finalEvos);
-      return finalEvos;
-    } catch (e) {
-      console.warn(`Could not fetch evolutions for "${name}"`, e);
-      evolutionCache.set(slug, []);
-      return [];
-    }
-  }
-
-  async function fetchPokemonSprite(name) {
-    const slug = slugifyPokemon(name);
-    if (spriteCache.has(slug)) return spriteCache.get(slug);
-    try {
-      const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${slug}`);
-      if (!resp.ok) throw new Error(`PokeAPI ${resp.status}`);
-      const data = await resp.json();
-      const url = data.sprites.other?.['official-artwork']?.front_default
-                || data.sprites.front_default
-                || null;
-      spriteCache.set(slug, url);
-      return url;
-    } catch (e) {
-      console.warn(`Could not fetch sprite for "${name}" (slug: ${slug})`, e);
-      spriteCache.set(slug, null);
-      return null;
-    }
-  }
-
-  function showEncounterOverlay(pokemonName, spriteUrl, customText) {
-    const overlay = document.getElementById('encounter-overlay');
-    const img = document.getElementById('enc-sprite-img');
-    const text = document.getElementById('enc-overlay-text');
-
-    // Set content
-    text.textContent = customText || `A wild ${pokemonName} appeared!`;
-    if (spriteUrl) {
-      img.src = spriteUrl;
-      img.alt = pokemonName;
-      img.style.display = 'block';
-    } else {
-      img.style.display = 'none';
-    }
-
-    // Populate particles
-    const particlesBox = overlay.querySelector('.enc-particles');
-    particlesBox.innerHTML = '';
-    for (let i = 0; i < 12; i++) {
-      const span = document.createElement('span');
-      span.style.left = Math.random() * 100 + '%';
-      span.style.top = (40 + Math.random() * 50) + '%';
-      span.style.animationDelay = (Math.random() * 2) + 's';
-      span.style.background = ['var(--accent-gold)', 'var(--accent-teal)', 'var(--accent-red)'][Math.floor(Math.random() * 3)];
-      particlesBox.appendChild(span);
-    }
-
-    // Re-trigger flash animation
-    const flash = overlay.querySelector('.enc-flash');
-    flash.style.animation = 'none';
-    flash.offsetHeight; // force reflow
-    flash.style.animation = '';
-
-    overlay.classList.remove('hidden');
   }
 </script>
 
