@@ -292,6 +292,92 @@
     100% { filter: brightness(1) saturate(1); transform: translateX(0); }
   }
   .sprite-hit { animation: damageFlash 0.5s ease; }
+  .slot-btn.selected {
+    background: var(--accent-gold);
+    color: var(--panel);
+    box-shadow: 0 3px 0 0 #a5253a inset;
+  }
+
+  .badge-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--border-pixel);
+    display: inline-block;
+  }
+
+  .party-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    border-bottom: 2px solid var(--panel-light);
+  }
+  .party-row img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    image-rendering: pixelated;
+  }
+  .party-row .party-info {
+    flex: 1;
+    text-align: left;
+  }
+  .party-row .party-name { font-size: 12px; }
+  .party-row .party-type { font-size: 9px; color: var(--text-dim); }
+  .party-row .party-actions button {
+    width: auto;
+    padding: 4px 6px;
+    font-size: 9px;
+    display: inline-block;
+    margin-left: 3px;
+  }
+
+  #screen-player-view.battle-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    overflow-y: auto;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .transient-banner {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 60;
+    background: var(--panel);
+    border: 4px solid var(--accent-red-dark);
+    padding: 14px 22px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-main);
+    box-shadow: 0 6px 0 0 #000;
+  }
+  .victory-banner {
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 61;
+    background: var(--accent-gold);
+    border: 5px solid var(--panel);
+    padding: 24px 36px;
+    text-align: center;
+    font-size: 20px;
+    color: var(--panel);
+    box-shadow: 0 8px 0 0 #000;
+  }
+  .status-badge {
+    display: inline-block;
+    font-size: 9px;
+    padding: 2px 5px;
+    border: 1px solid var(--accent-gold);
+    color: var(--accent-gold);
+    border-radius: 3px;
+  }
 </style>
 </head>
 <body>
@@ -398,6 +484,12 @@
       </div>
       <button class="btn secondary" id="btn-start-championship-duel">Start Championship Duel (pick 2 above)</button>
       <p class="status-msg" id="dm-championship-standings"></p>
+      <label style="font-size:11px;">Declare True Champion</label>
+      <div class="slot-row">
+        <div class="slot-btn" data-champion="P1">P1</div>
+        <div class="slot-btn" data-champion="P2">P2</div>
+        <div class="slot-btn" data-champion="P3">P3</div>
+      </div>
     </div>
     <div id="dm-battle-active" class="hidden" style="margin-top:12px;padding:12px;border:3px solid var(--accent-red-dark);background:var(--panel-light);">
       <div id="dm-battle-enemy"></div>
@@ -456,7 +548,9 @@
   <!-- PLAYER VIEW (post join) -->
   <div id="screen-player-view" class="cartridge hidden">
     <h2 class="pixel-font" style="font-size:14px;color:var(--accent-teal);text-align:center;margin-top:0;" id="player-view-name">trainer</h2>
+    <img id="player-trainer-sprite" style="display:block;width:64px;height:64px;object-fit:contain;image-rendering:pixelated;margin:0 auto 10px;" alt="Your trainer">
     <p class="status-msg" id="player-view-status">Connected. Waiting for the Dungeon Master&hellip;</p>
+    <button class="btn secondary" id="btn-player-view-map">View Map</button>
     <div class="badge-strip" id="player-badge-strip"></div>
 
     <div id="player-draft-picker" class="hidden">
@@ -473,13 +567,13 @@
     </div>
 
     <div id="player-party-box" class="hidden">
-      <label>Your party</label>
-      <ul class="party-list" id="player-party-list"></ul>
+      <label>Your party (drag order decides who battles first)</label>
+      <div id="player-party-list"></div>
     </div>
 
     <div id="player-box-box" class="hidden">
       <label>Your box</label>
-      <ul class="party-list" id="player-box-list"></ul>
+      <div id="player-box-list"></div>
     </div>
 
     <p class="status-msg" id="player-pokeball-count"></p>
@@ -501,14 +595,16 @@
   </div>
 
   <!-- MAP OVERLAY -->
-  <div id="map-overlay" class="hidden" style="position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:51;">
-    <img id="map-overlay-img" src="map.png" style="max-width:100%;max-height:100%;object-fit:contain;" alt="Campaign map">
+  <div id="map-overlay" class="hidden" style="position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:51;">
+    <img id="map-overlay-img" src="map.png" style="max-width:100%;max-height:85%;object-fit:contain;" alt="Campaign map" onerror="this.style.display='none';document.getElementById('map-overlay-error').classList.remove('hidden');">
+    <p class="status-msg hidden" id="map-overlay-error" style="color:var(--accent-red);">map.png hasn't been uploaded to the repo root yet.</p>
+    <button class="btn secondary" id="btn-close-map-overlay" style="width:auto;padding:8px 20px;margin-top:14px;">Close Map</button>
   </div>
 
   <!-- NPC OVERLAY -->
-  <div id="npc-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:52;">
-    <img id="npc-overlay-img" style="max-width:60%;max-height:70%;object-fit:contain;image-rendering:pixelated;" alt="NPC">
-    <p class="pixel-font" id="npc-overlay-name" style="font-size:14px;color:var(--accent-gold);margin-top:14px;"></p>
+  <div id="npc-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:52;">
+    <img id="npc-overlay-img" style="max-width:80%;max-height:80%;object-fit:contain;image-rendering:pixelated;" alt="NPC">
+    <p class="pixel-font" id="npc-overlay-name" style="font-size:16px;color:var(--accent-gold);margin-top:16px;"></p>
   </div>
 
 </div>
@@ -541,9 +637,10 @@
   };
 
   const ROUTES = [
-    { id: "route-1", name: "Route 1 — First Steps", encounterTable: { "Common": "Pidgey, Rattata, Caterpie", "Uncommon": "Sentret, Hoppip", "Rare": "Eevee" } },
-    { id: "route-2", name: "Route 2 — The Forest Road", encounterTable: { "Common": "Caterpie, Weedle, Bellsprout", "Uncommon": "Hoothoot, Ledyba", "Rare": "Pikachu" } },
-    { id: "route-4", name: "Route 4 — Echoing Caverns", encounterTable: { "Common": "Zubat, Geodude, Diglett", "Uncommon": "Onix, Roggenrola", "Rare": "Nosepass" } },
+    { id: "route-1", name: "Route 1 — First Steps", encounterTable: { "Normal":"Rattata","Bug":"Caterpie","Flying":"Pidgey","Grass":"Oddish","Dark":"Poochyena","Electric":"Pichu","Fire":"Vulpix","Water":"Magikarp","Ground":"Sandshrew","Fighting":"Machop","Poison":"Weedle","Rock":"Geodude","Psychic":"Abra","Ghost":"Shuppet","Steel":"Klink","Fairy":"Cleffa","Ice":"Snorunt","Dragon":"Dratini" } },
+    { id: "route-2", name: "Route 2 — The Forest Road", encounterTable: { "Normal":"Zigzagoon","Bug":"Kricketot","Flying":"Hoothoot","Grass":"Bellsprout","Dark":"Nuzleaf","Electric":"Mareep","Fire":"Growlithe","Water":"Poliwag","Ground":"Diglett","Fighting":"Makuhita","Poison":"Grimer","Rock":"Onix","Psychic":"Drowzee","Ghost":"Gastly","Steel":"Magnemite","Fairy":"Igglybuff","Ice":"Swinub","Dragon":"Bagon" } },
+    { id: "route-3", name: "Route 3 — Toward Cerulean", encounterTable: { "Normal":"Stantler","Bug":"Combee","Flying":"Doduo","Grass":"Sunkern","Dark":"Houndour","Electric":"Voltorb","Fire":"Slugma","Water":"Tentacool","Ground":"Cubone","Fighting":"Tyrogue","Poison":"Koffing","Rock":"Roggenrola","Psychic":"Ralts","Ghost":"Duskull","Steel":"Aron","Fairy":"Snubbull","Ice":"Seel","Dragon":"Vibrava" } },
+    { id: "route-4", name: "Route 4 — Cave Approach", encounterTable: { "Normal":"Zigzagoon","Bug":"Paras","Flying":"Zubat","Grass":"Foongus","Dark":"Zorua","Electric":"Joltik","Fire":"Numel","Water":"Wooper","Ground":"Drilbur","Fighting":"Timburr","Poison":"Trubbish","Rock":"Nosepass","Psychic":"Spoink","Ghost":"Misdreavus, Sinistcha","Steel":"Ferroseed","Fairy":"Flabébé","Ice":"Vanillite","Dragon":"Deino" } },
     { id: "route-5", name: "Route 5 — Ashen Road", encounterTable: { "Normal":"Linoone","Bug":"Volbeat, Illumise","Flying":"Fletchinder","Grass":"Gogoat","Dark":"Mightyena","Electric":"Emolga","Fire":"Ponyta","Water":"Poliwhirl","Ground":"Krokorok","Fighting":"Throh, Sawk","Poison":"Salandit","Rock":"Lycanroc","Psychic":"Duosion","Ghost":"Lampent","Steel":"Skarmory","Fairy":"Mimikyu","Ice":"Sneasel","Dragon":"Fraxure, Jangmo-o","Volcanic ecosystem":"Slugma, Numel, Torkoal, Salandit, Houndoom, Camerupt, Oddish, Budew, Roselia" } },
     { id: "route-6", name: "Route 6 — The Old Road", encounterTable: { "Normal":"Bibarel","Bug":"Ribombee","Flying":"Hawlucha","Grass":"Tsareena","Dark":"Mightyena","Electric":"Luxio","Fire":"Ninetales","Water":"Floatzel","Ground":"Donphan","Fighting":"Passimian","Poison":"Drapion","Rock":"Lycanroc","Psychic":"Gothorita","Ghost":"Mimikyu","Steel":"Bisharp","Fairy":"Clefable","Ice":"Beartic","Dragon":"Gabite","Forest ecosystem":"Trevenant, Ursaring, Absol, Heracross, Pinsir, Sawsbuck","Pond":"Floatzel, Poliwag, Psyduck, Corphish, Basculin, Lapras" } },
     { id: "route-7", name: "Route 7 — The Sacred Road", encounterTable: { "Normal":"Furret","Bug":"Heracross","Flying":"Noctowl","Grass":"Roserade","Dark":"Absol","Electric":"Manectric","Fire":"Arcanine","Water":"Azumarill","Ground":"Excadrill","Fighting":"Hawlucha","Poison":"Toxicroak","Rock":"Crustle","Psychic":"Gardevoir","Ghost":"Mismagius","Steel":"Mawile","Fairy":"Granbull","Ice":"Weavile","Dragon":"Haxorus, Hakamo-o","Stream":"Azumarill, Poliwhirl, Basculin, Floatzel, Corphish, Dratini, Milotic" } },
@@ -554,14 +651,15 @@
   function mon(name, opts) { return Object.assign({ n: name }, opts || {}); }
 
   const BOSSES = [
-    { id: "gym-brock", label: "Gym 1 — Brock (Rock)", mode: "rotation", isGym: true, sprite: "brock.png", roster: [mon("Golett"), mon("Alolan Geodude"), mon("Krokorok")] },
-    { id: "gym-misty", label: "Gym 2 — Misty (Water)", mode: "rotation", isGym: true, sprite: "misty.png", roster: [mon("Poliwhirl"), mon("Seaking"), mon("Starmie")] },
-    { id: "gym-clemont", label: "Gym 3 — Clemont (Electric)", mode: "rotation", isGym: true, sprite: "clemont.png", roster: [mon("Magneton"), mon("Heliolisk"), mon("Luxray")] },
-    { id: "gym-flannery", label: "Gym 4 — Flannery (Fire)", mode: "rotation", isGym: true, sprite: "flannery.png", roster: [mon("Torkoal"), mon("Camerupt"), mon("Talonflame")] },
-    { id: "gym-cilan", label: "Gym 5 — Cilan (Grass)", mode: "rotation", isGym: true, sprite: "cilan.png", roster: [mon("Whimsicott"), mon("Lurantis"), mon("Tsareena")] },
-    { id: "gym-olympia", label: "Gym 6 — Olympia (Psychic)", mode: "rotation", isGym: true, sprite: "olympia.png", roster: [mon("Sigilyph"), mon("Meowstic"), mon("Gothitelle")] },
-    { id: "gym-allister", label: "Gym 7 — Allister (Ghost)", mode: "rotation", isGym: true, sprite: "allister.png", roster: [mon("Mimikyu"), mon("Dusknoir"), mon("Gengar")] },
-    { id: "gym-iris", label: "Gym 8 — Iris (Dragon)", mode: "rotation", isGym: true, sprite: "iris.png", roster: [mon("Fraxure"), mon("Druddigon"), mon("Haxorus")] },
+    { id: "gym-brock", label: "Gym 1 — Brock (Rock)", mode: "rotation", isGym: true, gymOrder: 1, sprite: "brock.png", roster: [mon("Golett"), mon("Alolan Geodude"), mon("Krokorok")] },
+    { id: "gym-misty", label: "Gym 2 — Misty (Water)", mode: "rotation", isGym: true, gymOrder: 2, sprite: "misty.png", roster: [mon("Psyduck"), mon("Tatsugiri"), mon("Wugtrio"), mon("Tirtouga"), mon("Buizel"), mon("Corphish")] },
+    { id: "gym-clemont", label: "Gym 3 — Clemont (Electric)", mode: "rotation", isGym: true, gymOrder: 3, sprite: "clemont.png", roster: [mon("Raichu"), mon("Alolan Golem"), mon("Luxray"), mon("Galvantula"), mon("Vikavolt"), mon("Toxtricity"), mon("Electivire"), mon("Jolteon"), mon("Magnezone")] },
+    { id: "gym-flannery", label: "Gym 4 — Flannery (Fire)", mode: "rotation", isGym: true, gymOrder: 4, sprite: "flannery.png", roster: [mon("Charmeleon"), mon("Arcanine"), mon("Alolan Marowak"), mon("Quilava"), mon("Combusken"), mon("Torkoal"), mon("Magmortar"), mon("Simisear"), mon("Darmanitan"), mon("Chandelure"), mon("Coalossal"), mon("Centiskorch")] },
+    { id: "gym-cilan", label: "Gym 5 — Cilan (Grass)", mode: "rotation", isGym: true, gymOrder: 5, sprite: "cilan.png", roster: [mon("Venusaur"), mon("Tangela"), mon("Meganium"), mon("Grovyle"), mon("Ludicolo"), mon("Shiftry"), mon("Roselia"), mon("Cacturne"), mon("Torterra"), mon("Leafeon"), mon("Serperior"), mon("Simisage"), mon("Amoonguss"), mon("Hisuian Decidueye"), mon("Kartana")] },
+    { id: "gym-olympia", label: "Gym 6 — Olympia (Psychic)", mode: "rotation", isGym: true, gymOrder: 6, sprite: "olympia.png", roster: [mon("Alakazam"), mon("Starmie"), mon("Galarian Mr. Mime"), mon("Espeon"), mon("Wobbuffet"), mon("Gardevoir"), mon("Medicham"), mon("Metagross"), mon("Latias"), mon("Gallade"), mon("Gothitelle"), mon("Reuniclus"), mon("Scream Tail"), mon("Rabsca"), mon("Mr. Rime"), mon("Malamar"), mon("Delphox"), mon("Hisuian Braviary")] },
+    { id: "gym-allister", label: "Gym 7 — Allister (Ghost)", mode: "rotation", isGym: true, gymOrder: 7, sprite: "allister.png", roster: [mon("Gengar"), mon("Hisuian Typhlosion"), mon("Sableye"), mon("Dusclops"), mon("Spiritomb"), mon("Froslass"), mon("Cofagrigus"), mon("Golurk"), mon("Aegislash"), mon("Trevenant"), mon("Palossand"), mon("Spectrier"), mon("Skeledirge"), mon("Brambleghast"), mon("Annihilape"), mon("Gholdengo"), mon("Sinistcha"), mon("Mismagius")] },
+    { id: "gym-iris", label: "Gym 8 — Iris (Dragon)", mode: "rotation", isGym: true, gymOrder: 8, sprite: "iris.png", roster: [mon("Dragonite", { mega: true }), mon("Altaria", { mega: true }), mon("Salamence", { mega: true }), mon("Garchomp", { mega: true }), mon("Latias", { mega: true }), mon("Regidrago")] },
+
     { id: "route3-talon", label: "Route 3 — Backpacker Talon", mode: "simultaneous", isGym: false, sprite: "backpacker-talon.png", roster: [mon("Machoke"), mon("Haunter"), mon("Gabite")] },
     { id: "route6-gladion-boss", label: "Route 6 — Gladion (boss)", mode: "simultaneous", isGym: false, sprite: "gladion.png", roster: [mon("Silvally"), mon("Lucario"), mon("Zoroark")] },
     { id: "elite-lance", label: "Elite Three — Lance", mode: "rotation", isGym: false, sprite: "lance.png", roster: [mon("Dragonite"), mon("Salamence"), mon("Flygon"), mon("Hydreigon"), mon("Haxorus"), mon("Goodra"), mon("Dragapult"), mon("Kommo-o"), mon("Baxcalibur")] },
@@ -571,18 +669,19 @@
     { id: "champ-steven", label: "Champion — Steven", mode: "simultaneous", isGym: false, sprite: "steven.png", roster: [mon("Skarmory"), mon("Aggron"), mon("Scizor"), mon("Excadrill"), mon("Tyranitar"), mon("Metagross")] },
     { id: "champ-diantha", label: "Champion — Diantha", mode: "simultaneous", isGym: false, sprite: "diantha.png", roster: [mon("Hawlucha"), mon("Goodra"), mon("Florges"), mon("Aurorus"), mon("Gourgeist"), mon("Gardevoir", { mega: true, startMega: true })] },
 
-    // Route trainer battles — "assigned" mode: roster[0]→P1, roster[1]→P2, roster[2]→P3, each an independent 1v1
-    { id: "route1-joey", label: "Route 1 — Youngster Joey", mode: "assigned", isGym: false, sprite: "youngster-joey.png", roster: [mon("Rattata"), mon("Sentret"), mon("Dhelmise")] },
-    { id: "route1-gladion", label: "Route 1 — Gladion", mode: "assigned", isGym: false, sprite: "gladion.png", roster: [mon("Zorua"), mon("Rockruff"), mon("Type: Null")] },
-    { id: "route2-emma", label: "Route 2 — Lass Emma", mode: "assigned", isGym: false, sprite: "lass-emma.png", roster: [mon("Psyduck"), mon("Oddish"), mon("Drampa")] },
-    { id: "route2-rangercabin", label: "Route 2 — Ranger Cabin", mode: "assigned", isGym: false, sprite: "ranger-cabin.png", roster: [mon("Arcanine"), mon("Noctowl"), mon("Absol")] },
-    { id: "cerulean-grunt", label: "Cerulean Lab — Team Cataclysm Grunt", mode: "assigned", isGym: false, sprite: "team-cataclysm-grunt.png", scriptedWin: true, roster: [mon("Flapple"), mon("Appletun"), mon("Dipplin")] },
-    { id: "route3-kai", label: "Route 3 — Boss Trainer Kai (Gmax)", mode: "simultaneous", isGym: false, sprite: "kai.png", roster: [mon("Drednaw", { gmax: true }), mon("Grimmsnarl", { gmax: true }), mon("Machamp", { gmax: true })] },
+    // Cycling trainer battles ("rotation" mode, roster is a multiple of 3) — enemy sends one Pokémon at a time,
+    // and the app auto-highlights whose turn it is: P1 vs #1, P2 vs #2, P3 vs #3, back to P1 vs #4, etc.
+    { id: "route1-joey", label: "Route 1 — Youngster Joey", mode: "rotation", isGym: false, sprite: "youngster-joey.png", roster: [mon("Rattata"), mon("Sentret"), mon("Dhelmise")] },
+    { id: "route1-gladion", label: "Route 1 — Gladion", mode: "rotation", isGym: false, sprite: "gladion.png", roster: [mon("Zorua"), mon("Rockruff"), mon("Type: Null")] },
+    { id: "route2-emma", label: "Route 2 — Lass Emma", mode: "rotation", isGym: false, sprite: "lass-emma.png", roster: [mon("Psyduck"), mon("Oddish"), mon("Drampa")] },
+    { id: "route2-rangercabin", label: "Route 2 — Ranger Cabin", mode: "rotation", isGym: false, sprite: "ranger-cabin.png", roster: [mon("Arcanine"), mon("Noctowl"), mon("Absol")] },
+    { id: "cerulean-grunt", label: "Cerulean Lab — Team Cataclysm Grunt", mode: "rotation", isGym: false, sprite: "team-cataclysm-grunt.png", scriptedWin: true, roster: [mon("Flapple"), mon("Appletun"), mon("Dipplin")] },
+    { id: "route3-kai-cycle", label: "Route 3 — Kai", mode: "rotation", isGym: false, sprite: "kai.png", roster: [mon("Wartortle"), mon("Poliwrath"), mon("Starmie")] },
     { id: "lumiose-vesper", label: "Lumiose Museum — Commander Vesper", mode: "simultaneous", isGym: false, sprite: "commander-vesper.png", scriptedLoss: true, roster: [mon("Charizard", { megaX: true }), mon("Raichu", { megaX: true }), mon("Golurk", { mega: true })] },
-    { id: "route4-bruce", label: "Route 4 — Hiker Bruce", mode: "assigned", isGym: false, sprite: "hiker-bruce.png", roster: [mon("Monferno"), mon("Meditite"), mon("Hariyama")] },
+    { id: "route4-bruce", label: "Route 4 — Hiker Bruce", mode: "rotation", isGym: false, sprite: "hiker-bruce.png", roster: [mon("Monferno"), mon("Meditite"), mon("Hariyama")] },
     { id: "echoing-rowan", label: "Echoing Caverns — Professor Rowan", mode: "simultaneous", isGym: false, sprite: "professor-rowan.png", roster: [mon("Annihilape"), mon("Iron Valiant"), mon("Sneasler"), mon("Crabominable")] },
-    { id: "route5-emma2", label: "Route 5 — Lass Emma", mode: "assigned", isGym: false, sprite: "lass-emma.png", roster: [mon("Wiglett"), mon("Quaxwell"), mon("Basculin")] },
-    { id: "route5-kai2", label: "Route 5 — Kai", mode: "assigned", isGym: false, sprite: "kai.png", roster: [mon("Wartortle"), mon("Poliwrath"), mon("Starmie")] },
+    { id: "route5-emma2", label: "Route 5 — Lass Emma", mode: "rotation", isGym: false, sprite: "lass-emma.png", roster: [mon("Wiglett"), mon("Quaxwell"), mon("Basculin")] },
+    { id: "route5-boss-trainer", label: "Route 5 — Boss Trainer (Gmax)", mode: "simultaneous", isGym: false, sprite: "kai.png", roster: [mon("Drednaw", { gmax: true }), mon("Grimmsnarl", { gmax: true }), mon("Machamp", { gmax: true })] },
     { id: "shrine-kira", label: "Mega Stone Shrine — Kira", mode: "rotation", isGym: false, sprite: "kira.png", requiresPlayerPick: true, roster: [mon("Feraligatr", { mega: true }), mon("Swampert", { mega: true }), mon("Greninja", { mega: true })] },
     { id: "shrine-ronan", label: "Mega Stone Shrine — Ronan", mode: "rotation", isGym: false, sprite: "ronan.png", requiresPlayerPick: true, roster: [mon("Falinks", { mega: true }), mon("Scrafty", { mega: true }), mon("Blaziken", { mega: true })] },
     { id: "shrine-mei", label: "Mega Stone Shrine — Mei", mode: "rotation", isGym: false, sprite: "mei.png", requiresPlayerPick: true, roster: [mon("Delphox", { mega: true }), mon("Scovillain", { mega: true }), mon("Heatran", { mega: true })] }
@@ -610,19 +709,34 @@
   }
   function hpDots(hits, max) {
     let dots = '';
+    const remaining = Math.max(0, max - hits);
     for (let i = 0; i < max; i++) {
-      dots += `<span style="display:inline-block;width:12px;height:12px;margin-right:3px;border:2px solid var(--panel-light);background:${i < hits ? 'var(--accent-red)' : 'transparent'};"></span>`;
+      dots += `<span style="display:inline-block;width:12px;height:12px;margin-right:3px;border:2px solid var(--panel-light);background:${i < remaining ? 'var(--accent-teal)' : 'transparent'};"></span>`;
     }
     return dots;
   }
+  function showToast(text, kind) {
+    const el = document.createElement('div');
+    el.className = kind === 'victory' ? 'victory-banner' : 'transient-banner';
+    el.textContent = text;
+    document.body.appendChild(el);
+    setTimeout(() => { el.remove(); }, kind === 'victory' ? 4500 : 2800);
+  }
+  const STATUS_VERBS = { confuse: 'confused', poison: 'poisoned', burn: 'burned', paralysis: 'paralyzed' };
 
   // ---- Pokémon sprite fetching (PokeAPI, cached client-side) ----
   const SPRITE_URL_CACHE = new Map();
   const SPRITE_OVERRIDES = {
     "alolan geodude": "geodude-alola", "alolan ninetales": "ninetales-alola",
-    "alolan x": "x-alola", "type: null": "type-null", "type null": "type-null",
-    "mr. mime": "mr-mime", "ash-greninja": "greninja-ash",
-    "iron valiant": "iron-valiant"
+    "alolan marowak": "marowak-alola", "alolan golem": "golem-alola",
+    "galarian mr. mime": "mr-mime-galar", "galarian mr mime": "mr-mime-galar",
+    "hisuian decidueye": "decidueye-hisui", "hisuian typhlosion": "typhlosion-hisui",
+    "hisuian braviary": "braviary-hisui",
+    "type: null": "type-null", "type null": "type-null",
+    "mr. mime": "mr-mime", "mr. rime": "mr-rime", "ash-greninja": "greninja-ash",
+    "iron valiant": "iron-valiant",
+    "lycanroc": "lycanroc-midday", "basculin": "basculin-red-striped",
+    "mimikyu": "mimikyu-disguised", "tatsugiri": "tatsugiri-curly", "toxtricity": "toxtricity-amped"
   };
   function baseSlug(name) {
     const key = (name || '').trim().toLowerCase();
@@ -677,6 +791,76 @@
         <div>${hpDots(hits, max)}</div>
       </div>
     `;
+  }
+
+  const TYPE_CACHE = new Map();
+  async function getPokemonTypeLabel(name) {
+    const slug = baseSlug(name);
+    if (TYPE_CACHE.has(slug)) return TYPE_CACHE.get(slug);
+    let label = '';
+    try {
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${slug}`);
+      if (res.ok) {
+        const data = await res.json();
+        label = (data.types || []).map((t) => t.type.name).map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join('/');
+      }
+    } catch (e) { label = ''; }
+    TYPE_CACHE.set(slug, label);
+    return label;
+  }
+  function hydrateTypes(container) {
+    if (!container) return;
+    container.querySelectorAll('[data-type-name]').forEach((el) => {
+      getPokemonTypeLabel(el.dataset.typeName).then((label) => { if (label) el.textContent = label; });
+    });
+  }
+
+  const TYPE_BADGE_COLORS = {
+    Rock: '#b8a038', Water: '#6890f0', Electric: '#f8d030', Fire: '#f08030', Grass: '#78c850',
+    Psychic: '#f85888', Ghost: '#705898', Dragon: '#7038f8'
+  };
+  function badgeIconHtml(gym, earned) {
+    const m = gym.label.match(/\(([^)]+)\)/);
+    const color = m ? (TYPE_BADGE_COLORS[m[1]] || '#888') : '#888';
+    return `<span class="badge-icon" style="background:${earned ? color : 'var(--panel-light)'};opacity:${earned ? 1 : 0.35};"></span>`;
+  }
+
+  // Official Mega Evolution capable species (lowercase). Species using Mega X/Y use the megaX slug by default.
+  const MEGA_CAPABLE = new Set(["venusaur","charizard","blastoise","beedrill","pidgeot","alakazam","slowbro","gengar",
+    "kangaskhan","pinsir","gyarados","aerodactyl","mewtwo","ampharos","steelix","scizor","heracross","houndoom",
+    "tyranitar","sceptile","blaziken","swampert","gardevoir","sableye","mawile","aggron","medicham","manectric",
+    "sharpedo","camerupt","altaria","banette","absol","glalie","salamence","metagross","latias","latios","rayquaza",
+    "lopunny","garchomp","lucario","abomasnow","gallade","audino","diancie"]);
+  const MEGA_XY_SPECIES = new Set(["charizard", "mewtwo"]);
+  function isMegaCapable(name) {
+    return MEGA_CAPABLE.has(baseSlug(name));
+  }
+
+  async function getEvolutionOptions(name) {
+    try {
+      const slug = baseSlug(name);
+      const specRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${slug}`);
+      if (!specRes.ok) return [];
+      const spec = await specRes.json();
+      if (!spec.evolution_chain) return [];
+      const chainRes = await fetch(spec.evolution_chain.url);
+      if (!chainRes.ok) return [];
+      const chainData = await chainRes.json();
+      function findNode(node) {
+        if (node.species.name === slug) return node;
+        for (const child of node.evolves_to) {
+          const found = findNode(child);
+          if (found) return found;
+        }
+        return null;
+      }
+      const node = findNode(chainData.chain);
+      if (!node) return [];
+      return node.evolves_to.map((n) => n.species.name);
+    } catch (e) { return []; }
+  }
+  function titleCase(slug) {
+    return slug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   }
 
   function flattenEncounterTable(table) {
@@ -851,24 +1035,82 @@
       ['P1', 'P2', 'P3'].forEach((slot) => {
         const p = players[slot] || {};
         const li = document.createElement('li');
+        li.style.display = 'block';
         if (p.joined) {
-          const extra = p.starter ? ` &mdash; ${escapeHtml(p.starter)} (${escapeHtml(p.type || '')})` : '';
           const balls = typeof p.pokeballs === 'number' ? p.pokeballs : 0;
-          li.innerHTML = `<span>${slot}</span><span>${escapeHtml(p.name || 'Trainer')}${extra} &middot; balls: ${balls} <button class="btn secondary" style="display:inline-block;width:auto;padding:6px 10px;margin:0 0 0 8px;font-size:11px;" data-grant-slot="${slot}">+1 ball</button></span>`;
+          const megaBadge = p.hasMegaStone ? ' <span class="status-badge">Mega Stone</span>' : '';
+          const partyHtml = (p.party || []).map((m, i) => `
+            <span style="display:inline-flex;align-items:center;gap:4px;margin:2px 4px 2px 0;padding:2px 6px;border:1px solid var(--panel-light);">
+              <img data-sprite-name="${escapeHtml(m)}" style="width:20px;height:20px;object-fit:contain;image-rendering:pixelated;" alt="">
+              ${escapeHtml(m)}
+              <button class="btn secondary" data-evolve="${slot}:${i}" style="width:auto;padding:2px 6px;font-size:9px;margin-left:2px;">Evolve</button>
+            </span>
+          `).join('');
+          li.innerHTML = `
+            <div><span class="pixel-font" style="font-size:11px;">${slot}</span> — ${escapeHtml(p.name || 'Trainer')}${p.starter ? ` (${escapeHtml(p.starter)})` : ''}${megaBadge} &middot; balls: ${balls}
+              <button class="btn secondary" style="display:inline-block;width:auto;padding:5px 8px;font-size:10px;margin-left:6px;" data-grant-slot="${slot}">+1 ball</button>
+              <button class="btn secondary" style="display:inline-block;width:auto;padding:5px 8px;font-size:10px;margin-left:4px;" data-grant-mega="${slot}" ${p.hasMegaStone ? 'disabled' : ''}>Give Mega Stone</button>
+            </div>
+            <div style="margin-top:6px;">${partyHtml}</div>
+            <div id="evolve-picker-${slot}" style="margin-top:4px;"></div>
+          `;
         } else {
           li.classList.add('empty');
           li.innerHTML = `<span>${slot}</span><span>waiting to join&hellip;</span>`;
         }
         list.appendChild(li);
       });
+      hydrateSprites(list);
     });
 
     document.getElementById('dm-player-list').addEventListener('click', async (e) => {
-      const slot = e.target.dataset.grantSlot;
-      if (!slot) return;
-      const snap = await get(ref(db, `sessions/${code}/players/${slot}/pokeballs`));
-      const current = snap.exists() ? snap.val() : 0;
-      await update(ref(db, `sessions/${code}/players/${slot}`), { pokeballs: current + 1 });
+      if (e.target.dataset.grantSlot) {
+        const slot = e.target.dataset.grantSlot;
+        const snap = await get(ref(db, `sessions/${code}/players/${slot}/pokeballs`));
+        const current = snap.exists() ? snap.val() : 0;
+        await update(ref(db, `sessions/${code}/players/${slot}`), { pokeballs: current + 1 });
+        return;
+      }
+      if (e.target.dataset.grantMega) {
+        const slot = e.target.dataset.grantMega;
+        await update(ref(db, `sessions/${code}/players/${slot}`), { hasMegaStone: true });
+        return;
+      }
+      if (e.target.dataset.evolve) {
+        const [slot, idxStr] = e.target.dataset.evolve.split(':');
+        const idx = parseInt(idxStr, 10);
+        const party = [...((latestPlayers[slot] && latestPlayers[slot].party) || [])];
+        const currentName = party[idx];
+        if (!currentName) return;
+        const options = await getEvolutionOptions(currentName);
+        if (options.length === 0) { alert(`${currentName} has no further evolution.`); return; }
+        if (options.length === 1) {
+          const targetName = titleCase(options[0]);
+          if (!confirm(`Evolve ${currentName} into ${targetName}?`)) return;
+          party[idx] = targetName;
+          await update(ref(db, `sessions/${code}/players/${slot}`), { party });
+          return;
+        }
+        const picker = document.getElementById(`evolve-picker-${slot}`);
+        picker.innerHTML = `
+          <select id="evolve-select-${slot}-${idx}" style="width:auto;display:inline-block;">
+            ${options.map((o) => `<option value="${o}">${titleCase(o)}</option>`).join('')}
+          </select>
+          <button class="btn secondary" data-confirm-evolve="${slot}:${idx}" style="width:auto;padding:4px 8px;font-size:10px;display:inline-block;">Confirm Evolve</button>
+        `;
+        return;
+      }
+      if (e.target.dataset.confirmEvolve) {
+        const [slot, idxStr] = e.target.dataset.confirmEvolve.split(':');
+        const idx = parseInt(idxStr, 10);
+        const select = document.getElementById(`evolve-select-${slot}-${idx}`);
+        const targetSlug = select.value;
+        const party = [...((latestPlayers[slot] && latestPlayers[slot].party) || [])];
+        party[idx] = titleCase(targetSlug);
+        await update(ref(db, `sessions/${code}/players/${slot}`), { party });
+        document.getElementById(`evolve-picker-${slot}`).innerHTML = '';
+        return;
+      }
     });
 
     onValue(ref(db, `sessions/${code}/session`), (snap) => {
@@ -923,10 +1165,17 @@
     function renderEncounterTable() {
       const box = document.getElementById('dm-encounter-table');
       box.innerHTML = '';
-      if (!encRoute || !encPlayer) return;
+      if (!encRoute) return;
       const route = ROUTES.find(r => r.id === encRoute);
       if (!route) return;
       const options = flattenEncounterTable(route.encounterTable);
+      if (!encPlayer) {
+        const hint = document.createElement('div');
+        hint.className = 'status-msg';
+        hint.style.textAlign = 'left';
+        hint.textContent = 'Pick a player above, then tap a Pokémon to send the encounter.';
+        box.appendChild(hint);
+      }
       let currentTier = null;
       options.forEach((opt) => {
         if (opt.tier !== currentTier) {
@@ -943,6 +1192,7 @@
         btn.style.margin = '4px 0';
         btn.textContent = opt.name;
         btn.addEventListener('click', async () => {
+          if (!encPlayer) { alert('Pick a player first.'); return; }
           await update(ref(db, `sessions/${code}/session`), {
             currentEncounter: { route: route.name, pokemon: opt.name, forPlayer: encPlayer, status: 'pending' }
           });
@@ -1068,7 +1318,7 @@
         ['P1', 'P2', 'P3'].forEach((slot) => { players[slot] = freshPlayerBattleState(slot, leg.player); });
         await set(ref(db, `sessions/${code}/session/battle`), {
           active: true, bossId: leg.id, label: `${leg.name} — ${leg.player} solo fight`, mode: 'legendary', isGym: false,
-          sprite: null, enemyRoster: [mon(leg.name)], enemyIndex: 0, enemyHits: 0, enemyMax: 4, enemyMegaActive: false,
+          sprite: null, enemyRoster: [mon(leg.name)], enemyIndex: 0, enemyHits: 0, enemyMax: 24, enemyMegaActive: false,
           soloPlayer: leg.player, legendaryStatus: leg.status, catchAvailable: false,
           players, lastHit: null
         });
@@ -1105,12 +1355,21 @@
     document.getElementById('btn-start-championship-duel').addEventListener('click', () => {
       if (pvpPickedSlots.length !== 2) { alert('Pick exactly 2 players above for the duel.'); return; }
       startPvpBattle(pvpPickedSlots, 'championship', `Final Championship — ${pvpPickedSlots.join(' vs ')}`);
+      pvpPickedSlots = [];
+      document.querySelectorAll('#dm-battle-start [data-pvp-slot]').forEach((b) => b.classList.remove('selected'));
     });
 
     onValue(ref(db, `sessions/${code}/session/championship`), (snap) => {
       const c = snap.val() || {};
       document.getElementById('dm-championship-standings').textContent =
         `Standings — P1: ${c.P1 || 0}  P2: ${c.P2 || 0}  P3: ${c.P3 || 0}`;
+    });
+
+    document.querySelectorAll('#dm-battle-start [data-champion]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        await update(ref(db, `sessions/${code}/session`), { trueChampion: btn.dataset.champion });
+        await update(ref(db, `sessions/${code}/session/battle`), { toast: { text: `${btn.dataset.champion} is crowned the True Champion!`, ts: Date.now(), kind: 'victory' } });
+      });
     });
 
     function toggleMegaFields(hits, max, activating) {
@@ -1164,6 +1423,7 @@
         const party = (latestPlayers[slot] && latestPlayers[slot].party) || [];
         const benched = p.benched || [];
         const swapOptions = party.filter((m) => !benched.includes(m));
+        const isTurn = battle.mode === 'rotation' && !battle.soloPlayer && battle.currentTurnSlot === slot;
         if (p.out) {
           return `<div style="margin-bottom:14px;"><span class="pixel-font" style="font-size:11px;">${slot}</span> — <span class="status-msg" style="color:var(--accent-red);">out of usable Pok&eacute;mon</span></div>`;
         }
@@ -1183,13 +1443,13 @@
           `;
         }
         return `
-          <div style="margin-bottom:14px;">
-            <span class="pixel-font" style="font-size:11px;">${slot}</span>
+          <div style="margin-bottom:14px;${isTurn ? 'border-left:4px solid var(--accent-gold);padding-left:8px;' : ''}">
+            <span class="pixel-font" style="font-size:11px;">${slot}</span>${isTurn ? ' <span class="status-badge">their turn</span>' : ''}
             ${p.status ? `<span style="color:var(--accent-gold);font-size:11px;"> [${escapeHtml(p.status)}]</span>` : ''}
             ${combatantHtml(p.active || '—', p.hits, p.max, { mega: p.megaActive }, `player-${slot}`, battle.lastHit)}
             <span class="status-msg">(${hpStageLabel(p.hits, p.max)})</span><br>
             <button class="btn secondary" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;" data-player-hit="${slot}">-1 stage (hit)</button>
-            ${!p.megaUsed ? `<button class="btn secondary" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;" data-player-mega="${slot}">Mega Evolve!</button>` : ''}
+            ${(!p.megaUsed && (latestPlayers[slot] && latestPlayers[slot].hasMegaStone) && isMegaCapable(p.active)) ? `<button class="btn secondary" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;" data-player-mega="${slot}">Mega Evolve!</button>` : ''}
             <br>
             <select data-player-swap="${slot}" style="width:auto;display:inline-block;font-size:10px;padding:4px;margin-top:4px;">
               <option value="">swap active&hellip;</option>
@@ -1219,8 +1479,13 @@
       }
     }
 
+    let dmLastToastTs = 0;
     onValue(ref(db, `sessions/${code}/session/battle`), (snap) => {
       const battle = snap.val();
+      if (battle && battle.toast && battle.toast.ts > dmLastToastTs) {
+        dmLastToastTs = battle.toast.ts;
+        showToast(battle.toast.text, battle.toast.kind);
+      }
       const startBox = document.getElementById('dm-battle-start');
       const activeBox = document.getElementById('dm-battle-active');
       if (!battle || !battle.active) {
@@ -1245,7 +1510,10 @@
         let enemyIndex = battle.enemyIndex || 0;
         let enemyMegaActive = battle.enemyMegaActive;
         let enemyMax = battle.enemyMax;
+        let toast = null;
         if (hits >= battle.enemyMax) {
+          const defeatedMon = (battle.enemyRoster || [])[enemyIndex];
+          toast = { text: `${defeatedMon ? defeatedMon.n : 'The enemy'} has fainted!`, ts: Date.now() };
           enemyIndex += 1;
           hits = 0;
           const nextMon = (battle.enemyRoster || [])[enemyIndex];
@@ -1255,7 +1523,10 @@
         }
         const stageIdx = Math.min(4, Math.floor((hits / enemyMax) * 4));
         const catchAvailable = battle.mode === 'legendary' ? stageIdx >= 3 : false;
-        await update(ref(db, battlePath), { enemyHits: hits, enemyIndex, enemyMax, enemyMegaActive, catchAvailable, lastHit: { key: 'enemy', ts: Date.now() } });
+        const currentTurnSlot = ['P1', 'P2', 'P3'][enemyIndex % 3];
+        const updates = { enemyHits: hits, enemyIndex, enemyMax, enemyMegaActive, catchAvailable, currentTurnSlot, lastHit: { key: 'enemy', ts: Date.now() } };
+        if (toast) updates.toast = toast;
+        await update(ref(db, battlePath), updates);
         return;
       }
 
@@ -1286,7 +1557,9 @@
         const slot = e.target.dataset.playerHit;
         const p = battle.players[slot];
         const hits = Math.min(p.max, (p.hits || 0) + 1);
+        let toast = null;
         if (hits >= p.max) {
+          toast = { text: `${p.active || 'Your Pokémon'} has fainted!`, ts: Date.now() };
           const benched = [...(p.benched || [])];
           if (p.active) benched.push(p.active);
           const party = (latestPlayers[slot] && latestPlayers[slot].party) || [];
@@ -1299,13 +1572,17 @@
         } else {
           await update(ref(db, `${battlePath}/players/${slot}`), { hits });
         }
-        await update(ref(db, battlePath), { lastHit: { key: `player-${slot}`, ts: Date.now() } });
+        const updates = { lastHit: { key: `player-${slot}`, ts: Date.now() } };
+        if (toast) updates.toast = toast;
+        await update(ref(db, battlePath), updates);
         return;
       }
 
       if (e.target.dataset.playerMega) {
         const slot = e.target.dataset.playerMega;
         const p = battle.players[slot];
+        const hasStone = latestPlayers[slot] && latestPlayers[slot].hasMegaStone;
+        if (!hasStone || !isMegaCapable(p.active)) { alert('This player needs a Mega Stone and this Pokémon must be Mega-capable.'); return; }
         const { max, hits } = toggleMegaFields(p.hits, p.max, true);
         await update(ref(db, `${battlePath}/players/${slot}`), { max, hits, megaActive: true, megaUsed: true });
         return;
@@ -1340,10 +1617,12 @@
           const boxArr = p.box || [];
           if (party.length < 6) party.push('Ash-Greninja'); else boxArr.push('Ash-Greninja');
           await update(ref(db, `sessions/${code}/players/${winner}`), { party, box: boxArr });
+          await update(ref(db, battlePath), { toast: { text: `${winner} wins the Egg Battle! Ash-Greninja joins their team!`, ts: Date.now(), kind: 'victory' } });
         } else if (battle.pvpPurpose === 'championship') {
           const cSnap = await get(ref(db, `sessions/${code}/session/championship`));
           const c = cSnap.val() || {};
           await update(ref(db, `sessions/${code}/session/championship`), { [winner]: (c[winner] || 0) + 1 });
+          await update(ref(db, battlePath), { toast: { text: `${winner} wins the duel!`, ts: Date.now(), kind: 'victory' } });
         }
         await update(ref(db, battlePath), { active: false });
         return;
@@ -1362,7 +1641,16 @@
       }
       if (e.target.dataset.playerStatus) {
         const slot = e.target.dataset.playerStatus;
-        await update(ref(db, `${battlePath}/players/${slot}`), { status: e.target.value || null });
+        const val = e.target.value || null;
+        const battlePathC = `sessions/${code}/session/battle`;
+        const bSnap = await get(ref(db, battlePathC));
+        const b = bSnap.val();
+        const p = b && b.players && b.players[slot];
+        const updates = { status: val };
+        await update(ref(db, `${battlePathC}/players/${slot}`), updates);
+        if (val && p) {
+          await update(ref(db, battlePathC), { toast: { text: `${p.active || 'Pokémon'} has been ${STATUS_VERBS[val] || val}!`, ts: Date.now() } });
+        }
         return;
       }
     });
@@ -1378,6 +1666,7 @@
           await update(ref(db, `sessions/${code}/players/${slot}`), { badges: current + 1 });
         }
       }
+      await update(ref(db, battlePath), { toast: { text: `${(battle && battle.label) || 'Battle'} — Victory!`, ts: Date.now(), kind: 'victory' } });
       await update(ref(db, battlePath), { active: false });
     });
 
@@ -1528,55 +1817,126 @@
   function attachPlayerView(code, slot) {
     showScreen('playerView');
 
+    document.getElementById('player-trainer-sprite').src = `sprites/trainer-${slot.toLowerCase()}.png`;
+
+    let localMapOpen = false;
+    document.getElementById('btn-player-view-map').addEventListener('click', () => {
+      localMapOpen = true;
+      document.getElementById('map-overlay').classList.remove('hidden');
+    });
+    document.getElementById('btn-close-map-overlay').addEventListener('click', async () => {
+      localMapOpen = false;
+      const sessSnap = await get(ref(db, `sessions/${code}/session/mapVisible`));
+      if (!sessSnap.val()) document.getElementById('map-overlay').classList.add('hidden');
+    });
+
+    async function movePartyMon(fromIdx, toIdx) {
+      const snap = await get(ref(db, `sessions/${code}/players/${slot}/party`));
+      const party = snap.val() || [];
+      if (toIdx < 0 || toIdx >= party.length) return;
+      const [item] = party.splice(fromIdx, 1);
+      party.splice(toIdx, 0, item);
+      await update(ref(db, `sessions/${code}/players/${slot}`), { party });
+    }
+    async function boxPartyMon(idx) {
+      const snap = await get(ref(db, `sessions/${code}/players/${slot}`));
+      const p = snap.val() || {};
+      const party = p.party || [];
+      const box = p.box || [];
+      const [item] = party.splice(idx, 1);
+      if (item) box.push(item);
+      await update(ref(db, `sessions/${code}/players/${slot}`), { party, box });
+    }
+    async function unboxMon(idx) {
+      const snap = await get(ref(db, `sessions/${code}/players/${slot}`));
+      const p = snap.val() || {};
+      const party = p.party || [];
+      const box = p.box || [];
+      if (party.length >= 6) { alert('Party is full (6). Box another Pokémon first.'); return; }
+      const [item] = box.splice(idx, 1);
+      if (item) party.push(item);
+      await update(ref(db, `sessions/${code}/players/${slot}`), { party, box });
+    }
+
     onValue(ref(db, `sessions/${code}/players/${slot}`), (snap) => {
       const p = snap.val() || {};
       document.getElementById('player-view-name').textContent = p.name || 'trainer';
       const badgeStrip = document.getElementById('player-badge-strip');
       badgeStrip.innerHTML = '';
       const badgeCount = p.badges || 0;
-      const gyms = BOSSES.filter(b => b.isGym);
+      const gyms = BOSSES.filter(b => b.isGym).sort((a, b) => (a.gymOrder || 0) - (b.gymOrder || 0));
       gyms.forEach((gym, i) => {
         const item = document.createElement('div');
         item.className = 'badge-item' + (i < badgeCount ? ' earned' : '');
-        const dot = document.createElement('div');
-        dot.className = 'badge-dot';
-        if (i < badgeCount) dot.style.background = 'var(--accent-gold)';
-        item.appendChild(dot);
+        item.innerHTML = badgeIconHtml(gym, i < badgeCount);
         const label = document.createElement('span');
         label.textContent = gym.label.replace(/^Gym \d+ — /, '');
         item.appendChild(label);
         badgeStrip.appendChild(item);
       });
+
+      const megaNote = p.hasMegaStone ? '<span class="status-badge">Mega Stone</span>' : '';
+      document.getElementById('player-pokeball-count').innerHTML = `Pokéballs: ${typeof p.pokeballs === 'number' ? p.pokeballs : 0} ${megaNote}`;
+
       const partyBox = document.getElementById('player-party-box');
+      const partyList = document.getElementById('player-party-list');
       if (p.party && p.party.length) {
         partyBox.classList.remove('hidden');
-        const list = document.getElementById('player-party-list');
-        list.innerHTML = '';
-        p.party.forEach((mon) => {
-          const li = document.createElement('li');
-          li.innerHTML = `<span>${escapeHtml(mon)}</span><span>${escapeHtml(p.type || '')}</span>`;
-          list.appendChild(li);
-        });
+        partyList.innerHTML = p.party.map((m, i) => `
+          <div class="party-row">
+            <img data-sprite-name="${escapeHtml(m)}" alt="${escapeHtml(m)}">
+            <div class="party-info">
+              <div class="party-name">${escapeHtml(m)}</div>
+              <div class="party-type" data-type-name="${escapeHtml(m)}">&hellip;</div>
+            </div>
+            <div class="party-actions">
+              <button data-move="${i}:-1" ${i === 0 ? 'disabled' : ''}>&uarr;</button>
+              <button data-move="${i}:1" ${i === p.party.length - 1 ? 'disabled' : ''}>&darr;</button>
+              <button data-box="${i}">Box</button>
+            </div>
+          </div>
+        `).join('');
+        hydrateSprites(partyList);
+        hydrateTypes(partyList);
       } else {
         partyBox.classList.add('hidden');
       }
 
       const boxBox = document.getElementById('player-box-box');
+      const boxList = document.getElementById('player-box-list');
       if (p.box && p.box.length) {
         boxBox.classList.remove('hidden');
-        const list = document.getElementById('player-box-list');
-        list.innerHTML = '';
-        p.box.forEach((mon) => {
-          const li = document.createElement('li');
-          li.innerHTML = `<span>${escapeHtml(mon)}</span><span></span>`;
-          list.appendChild(li);
-        });
+        boxList.innerHTML = p.box.map((m, i) => `
+          <div class="party-row">
+            <img data-sprite-name="${escapeHtml(m)}" alt="${escapeHtml(m)}">
+            <div class="party-info">
+              <div class="party-name">${escapeHtml(m)}</div>
+              <div class="party-type" data-type-name="${escapeHtml(m)}">&hellip;</div>
+            </div>
+            <div class="party-actions">
+              <button data-unbox="${i}">To Party</button>
+            </div>
+          </div>
+        `).join('');
+        hydrateSprites(boxList);
+        hydrateTypes(boxList);
       } else {
         boxBox.classList.add('hidden');
       }
+    });
 
-      const balls = typeof p.pokeballs === 'number' ? p.pokeballs : 0;
-      document.getElementById('player-pokeball-count').textContent = `Pokéballs: ${balls}`;
+    document.getElementById('player-party-list').addEventListener('click', (e) => {
+      if (e.target.dataset.move) {
+        const [idx, dir] = e.target.dataset.move.split(':').map(Number);
+        movePartyMon(idx, idx + dir);
+      } else if (e.target.dataset.box) {
+        boxPartyMon(parseInt(e.target.dataset.box, 10));
+      }
+    });
+    document.getElementById('player-box-list').addEventListener('click', (e) => {
+      if (e.target.dataset.unbox) {
+        unboxMon(parseInt(e.target.dataset.unbox, 10));
+      }
     });
 
     onValue(ref(db, `sessions/${code}/session/currentEncounter`), (snap) => {
@@ -1597,48 +1957,67 @@
       renderPlayerPhase(code, slot, session, allPlayers);
     });
 
+    let playerLastToastTs = 0;
     onValue(ref(db, `sessions/${code}/session/battle`), (snap) => {
       const battle = snap.val();
+      if (battle && battle.toast && battle.toast.ts > playerLastToastTs) {
+        playerLastToastTs = battle.toast.ts;
+        showToast(battle.toast.text, battle.toast.kind);
+      }
       const banner = document.getElementById('player-battle-banner');
       const content = document.getElementById('player-battle-content');
       const participating = battle && battle.active && (
         (battle.soloPlayer ? battle.soloPlayer === slot : true) &&
         (battle.pvpParticipants ? battle.pvpParticipants.includes(slot) : true)
       );
+      document.getElementById('screen-player-view').classList.toggle('battle-fullscreen', !!participating);
       if (!participating) {
         banner.classList.add('hidden');
         return;
       }
       banner.classList.remove('hidden');
-      const p = (battle.players && battle.players[slot]) || {};
       const lastHit = battle.lastHit;
 
       let enemySideHtml = '';
       if (battle.mode === 'pvp') {
-        enemySideHtml = `<p class="status-msg" style="text-align:center;">Facing: ${(battle.pvpParticipants || []).filter(s => s !== slot).join(', ')}</p>`;
-      } else if (battle.mode === 'assigned') {
-        const em = battle.enemyRoster[['P1', 'P2', 'P3'].indexOf(slot)];
-        const eb = (battle.enemyByPlayer && battle.enemyByPlayer[slot]) || { hits: 0, max: 4, megaActive: false };
-        enemySideHtml = `<div style="text-align:center;">${combatantHtml(em.n, eb.hits, eb.max, { mega: eb.megaActive && em.mega, megaX: eb.megaActive && em.megaX, gmax: em.gmax }, `assigned-enemy-${slot}`, lastHit)}</div>`;
+        enemySideHtml = '';
       } else {
+        const npcTag = battle.sprite ? `<img src="sprites/${battle.sprite}" style="width:56px;height:56px;object-fit:contain;image-rendering:pixelated;display:block;margin:0 auto 6px;" alt="">` : '';
         const roster = battle.enemyRoster || [];
         const idx = battle.enemyIndex || 0;
         const currentMon = roster[idx];
         const allDefeated = idx >= roster.length;
-        enemySideHtml = allDefeated
+        enemySideHtml = `${npcTag}` + (allDefeated
           ? '<p class="status-msg" style="text-align:center;">Enemy defeated!</p>'
           : `<div style="text-align:center;">${combatantHtml(currentMon.n, battle.enemyHits, battle.enemyMax, { mega: battle.enemyMegaActive && currentMon.mega, megaX: battle.enemyMegaActive && currentMon.megaX, gmax: currentMon.gmax }, 'enemy', lastHit)}</div>
-             ${roster.length > 1 ? `<p class="status-msg" style="text-align:center;">${idx}/${roster.length} down</p>` : ''}`;
+             ${roster.length > 1 ? `<p class="status-msg" style="text-align:center;">${idx}/${roster.length} down</p>` : ''}`);
       }
+
+      // Team row: for team battles (rotation/simultaneous/pvp), show ALL participating players' combatants,
+      // not just the viewer's own — highlighting the viewer and (for cycling gym fights) whose turn it is.
+      const teamSlots = battle.soloPlayer ? [battle.soloPlayer] : (battle.pvpParticipants || ['P1', 'P2', 'P3']);
+      const teamHtml = teamSlots.map((s) => {
+        const pl = (battle.players && battle.players[s]) || {};
+        const isMe = s === slot;
+        const isTurn = battle.mode === 'rotation' && !battle.soloPlayer && battle.currentTurnSlot === s;
+        const wrapStyle = `padding:4px;border:2px solid ${isTurn ? 'var(--accent-gold)' : (isMe ? 'var(--accent-teal)' : 'transparent')};`;
+        if (pl.out) {
+          return `<div style="${wrapStyle}text-align:center;"><span class="status-msg">${s}${isMe ? ' (you)' : ''} — out</span></div>`;
+        }
+        return `
+          <div style="${wrapStyle}text-align:center;">
+            <span class="status-msg">${s}${isMe ? ' (you)' : ''}${isTurn ? ' — turn' : ''}</span>
+            ${combatantHtml(pl.active || '—', pl.hits, pl.max, { mega: pl.megaActive }, `player-${s}`, lastHit)}
+            ${pl.status ? `<div class="status-badge">${escapeHtml(pl.status)}</div>` : ''}
+          </div>
+        `;
+      }).join('');
 
       content.innerHTML = `
         <div class="pixel-font" style="font-size:12px;color:var(--accent-gold);text-align:center;">${escapeHtml(battle.label)}</div>
         ${enemySideHtml}
         <hr style="border:none;border-top:2px dashed var(--panel-light);margin:10px 0;">
-        ${p.out
-          ? '<p class="status-msg" style="color:var(--accent-red);text-align:center;">You are out of usable Pok&eacute;mon</p>'
-          : `<div style="text-align:center;">${combatantHtml(p.active || '—', p.hits, p.max, { mega: p.megaActive }, `player-${slot}`, lastHit)}</div>
-             ${p.status ? `<p class="status-msg" style="text-align:center;color:var(--accent-gold);">[${escapeHtml(p.status)}]</p>` : ''}`}
+        <div class="battle-stage">${teamHtml}</div>
       `;
       hydrateSprites(content);
     });
@@ -1657,7 +2036,7 @@
       }
 
       const mapOverlay = document.getElementById('map-overlay');
-      mapOverlay.classList.toggle('hidden', !session.mapVisible);
+      mapOverlay.classList.toggle('hidden', !(session.mapVisible || localMapOpen));
 
       const npcOverlay = document.getElementById('npc-overlay');
       if (session.currentNpc) {
@@ -1666,6 +2045,11 @@
         npcOverlay.classList.remove('hidden');
       } else {
         npcOverlay.classList.add('hidden');
+      }
+
+      const champEl = document.getElementById('player-view-status');
+      if (session.trueChampion) {
+        champEl.textContent = `👑 ${session.trueChampion} is the True Champion!`;
       }
     });
   }
