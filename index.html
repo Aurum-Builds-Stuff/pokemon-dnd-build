@@ -258,21 +258,22 @@
     flex-wrap: wrap;
   }
   .battle-combatant {
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
     align-items: center;
-    width: 100px;
+    width: 130px;
   }
   .battle-combatant img {
     image-rendering: pixelated;
-    width: 72px;
-    height: 72px;
+    width: 100px;
+    height: 100px;
     object-fit: contain;
+    animation: combatantIn 0.4s ease;
   }
   .battle-combatant.is-gmax img,
   .battle-combatant.is-mega img {
-    width: 100px;
-    height: 100px;
+    width: 150px;
+    height: 150px;
   }
   .battle-combatant .combatant-tag {
     font-size: 9px;
@@ -283,6 +284,11 @@
     font-size: 10px;
     text-align: center;
     margin-top: 2px;
+  }
+
+  @keyframes combatantIn {
+    0% { transform: scale(0.6); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
   }
 
   @keyframes damageFlash {
@@ -314,8 +320,8 @@
     border-bottom: 2px solid var(--panel-light);
   }
   .party-row img {
-    width: 40px;
-    height: 40px;
+    width: 56px;
+    height: 56px;
     object-fit: contain;
     image-rendering: pixelated;
   }
@@ -469,11 +475,23 @@
         <option value="P3">Solo for P3</option>
       </select>
       <button class="btn" id="btn-start-boss-battle">Start Boss Battle</button>
-      <div class="slot-row" style="margin-top:10px;">
-        <div class="slot-btn" id="btn-start-leg-P1" style="font-size:11px;">Groudon (P1)</div>
-        <div class="slot-btn" id="btn-start-leg-P2" style="font-size:11px;">Kyogre (P2)</div>
-        <div class="slot-btn" id="btn-start-leg-P3" style="font-size:11px;">Rayquaza (P3)</div>
+      <hr style="border:none;border-top:2px dashed var(--panel-light);margin:14px 0;">
+      <label style="font-size:11px;">Weather Trio — roll for pick order (lowest picks first)</label>
+      <div class="slot-row">
+        <input type="number" id="leg-roll-P1" placeholder="P1" style="width:60px;">
+        <input type="number" id="leg-roll-P2" placeholder="P2" style="width:60px;">
+        <input type="number" id="leg-roll-P3" placeholder="P3" style="width:60px;">
       </div>
+      <button class="btn secondary" id="btn-leg-compute-order">Roll for Pick Order</button>
+      <p class="status-msg" id="leg-order-display"></p>
+      <select id="dm-leg-player-select">
+        <option value="">Which player?</option>
+        <option value="P1">P1</option><option value="P2">P2</option><option value="P3">P3</option>
+      </select>
+      <select id="dm-leg-select">
+        <option value="">Which legendary?</option>
+      </select>
+      <button class="btn" id="btn-start-legendary">Start Legendary Fight</button>
       <hr style="border:none;border-top:2px dashed var(--panel-light);margin:14px 0;">
       <label style="font-size:11px;">Player vs Player</label>
       <button class="btn secondary" id="btn-start-mystery-egg">Route 7 — 3-Way Egg Battle</button>
@@ -602,9 +620,23 @@
   </div>
 
   <!-- NPC OVERLAY -->
-  <div id="npc-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:52;">
-    <img id="npc-overlay-img" style="max-width:80%;max-height:80%;object-fit:contain;image-rendering:pixelated;" alt="NPC">
-    <p class="pixel-font" id="npc-overlay-name" style="font-size:16px;color:var(--accent-gold);margin-top:16px;"></p>
+  <div id="npc-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:52;">
+    <img id="npc-overlay-img" style="max-width:92%;max-height:88%;object-fit:contain;image-rendering:pixelated;" alt="NPC">
+    <p class="pixel-font" id="npc-overlay-name" style="font-size:22px;color:var(--accent-gold);margin-top:20px;"></p>
+  </div>
+
+  <!-- WILD ENCOUNTER FLASH OVERLAY -->
+  <div id="encounter-flash-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:53;">
+    <p class="pixel-font" style="font-size:14px;color:var(--accent-gold);margin-bottom:10px;">A wild Pok&eacute;mon appeared!</p>
+    <img id="encounter-flash-img" style="width:220px;height:220px;object-fit:contain;image-rendering:pixelated;animation:combatantIn 0.5s ease;" alt="">
+    <p class="pixel-font" id="encounter-flash-name" style="font-size:18px;color:var(--text-main);margin-top:14px;"></p>
+  </div>
+
+  <!-- EVOLUTION FULLSCREEN OVERLAY -->
+  <div id="evolution-overlay" class="hidden" style="position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:54;">
+    <p class="pixel-font" style="font-size:14px;color:var(--accent-gold);margin-bottom:16px;" id="evolution-overlay-label">What?</p>
+    <img id="evolution-overlay-img" style="width:200px;height:200px;object-fit:contain;image-rendering:pixelated;" alt="">
+    <p class="pixel-font" style="font-size:20px;color:var(--accent-teal);margin-top:20px;" id="evolution-overlay-result"></p>
   </div>
 
 </div>
@@ -681,16 +713,16 @@
     { id: "route4-bruce", label: "Route 4 — Hiker Bruce", mode: "rotation", isGym: false, sprite: "hiker-bruce.png", roster: [mon("Monferno"), mon("Meditite"), mon("Hariyama")] },
     { id: "echoing-rowan", label: "Echoing Caverns — Professor Rowan", mode: "simultaneous", isGym: false, sprite: "professor-rowan.png", roster: [mon("Annihilape"), mon("Iron Valiant"), mon("Sneasler"), mon("Crabominable")] },
     { id: "route5-emma2", label: "Route 5 — Lass Emma", mode: "rotation", isGym: false, sprite: "lass-emma.png", roster: [mon("Wiglett"), mon("Quaxwell"), mon("Basculin")] },
-    { id: "route5-boss-trainer", label: "Route 5 — Boss Trainer (Gmax)", mode: "simultaneous", isGym: false, sprite: "kai.png", roster: [mon("Drednaw", { gmax: true }), mon("Grimmsnarl", { gmax: true }), mon("Machamp", { gmax: true })] },
+    { id: "route5-boss-trainer", label: "Route 5 — Boss Trainer (Gmax)", mode: "simultaneous", isGym: false, sprite: "kai.png", roster: [mon("Drednaw", { gmaxCapable: true }), mon("Grimmsnarl", { gmaxCapable: true }), mon("Machamp", { gmaxCapable: true })] },
     { id: "shrine-kira", label: "Mega Stone Shrine — Kira", mode: "rotation", isGym: false, sprite: "kira.png", requiresPlayerPick: true, roster: [mon("Feraligatr", { mega: true }), mon("Swampert", { mega: true }), mon("Greninja", { mega: true })] },
     { id: "shrine-ronan", label: "Mega Stone Shrine — Ronan", mode: "rotation", isGym: false, sprite: "ronan.png", requiresPlayerPick: true, roster: [mon("Falinks", { mega: true }), mon("Scrafty", { mega: true }), mon("Blaziken", { mega: true })] },
     { id: "shrine-mei", label: "Mega Stone Shrine — Mei", mode: "rotation", isGym: false, sprite: "mei.png", requiresPlayerPick: true, roster: [mon("Delphox", { mega: true }), mon("Scovillain", { mega: true }), mon("Heatran", { mega: true })] }
   ];
 
   const LEGENDARIES = [
-    { id: "leg-groudon", player: "P1", name: "Groudon", status: "burn" },
-    { id: "leg-kyogre", player: "P2", name: "Kyogre", status: "confuse" },
-    { id: "leg-rayquaza", player: "P3", name: "Rayquaza", status: "paralysis" }
+    { id: "leg-groudon", name: "Groudon", status: "burn", canPrimal: true },
+    { id: "leg-kyogre", name: "Kyogre", status: "confuse", canPrimal: true },
+    { id: "leg-rayquaza", name: "Rayquaza", status: "paralysis", canPrimal: false }
   ];
 
   const NPCS = [
@@ -749,6 +781,7 @@
     if (opts.megaX) slug += '-mega-x';
     else if (opts.mega) slug += '-mega';
     if (opts.gmax) slug += '-gmax';
+    if (opts.primal) slug += '-primal';
     return slug;
   }
   async function getSpriteUrl(name, opts) {
@@ -763,7 +796,7 @@
           (data.sprites.other && data.sprites.other['official-artwork'] && data.sprites.other['official-artwork'].front_default))) || null;
       }
     } catch (e) { url = null; }
-    if (!url && (opts.mega || opts.megaX || opts.gmax)) {
+    if (!url && (opts.mega || opts.megaX || opts.gmax || opts.primal)) {
       url = await getSpriteUrl(name, {});
     }
     SPRITE_URL_CACHE.set(slug, url);
@@ -773,7 +806,7 @@
     if (!container) return;
     container.querySelectorAll('img[data-sprite-name]').forEach((img) => {
       const name = img.dataset.spriteName;
-      const opts = { mega: img.dataset.spriteMega === '1', megaX: img.dataset.spriteMegax === '1', gmax: img.dataset.spriteGmax === '1' };
+      const opts = { mega: img.dataset.spriteMega === '1', megaX: img.dataset.spriteMegax === '1', gmax: img.dataset.spriteGmax === '1', primal: img.dataset.spritePrimal === '1' };
       getSpriteUrl(name, opts).then((url) => { if (url) img.src = url; });
     });
   }
@@ -781,12 +814,14 @@
     formOpts = formOpts || {};
     const isMega = !!(formOpts.mega || formOpts.megaX);
     const isGmax = !!formOpts.gmax;
+    const isPrimal = !!formOpts.primal;
     const flashCls = (lastHit && lastHit.key === hitKey && (Date.now() - lastHit.ts) < 900) ? 'sprite-hit' : '';
     return `
-      <div class="battle-combatant ${isMega ? 'is-mega' : ''} ${isGmax ? 'is-gmax' : ''}">
-        <img class="${flashCls}" data-sprite-name="${escapeHtml(name)}" data-sprite-mega="${formOpts.mega ? '1' : '0'}" data-sprite-megax="${formOpts.megaX ? '1' : '0'}" data-sprite-gmax="${isGmax ? '1' : '0'}" alt="${escapeHtml(name)}">
+      <div class="battle-combatant ${isMega ? 'is-mega' : ''} ${isGmax ? 'is-gmax' : ''} ${isPrimal ? 'is-mega' : ''}">
+        <img class="${flashCls}" data-sprite-name="${escapeHtml(name)}" data-sprite-mega="${formOpts.mega ? '1' : '0'}" data-sprite-megax="${formOpts.megaX ? '1' : '0'}" data-sprite-gmax="${isGmax ? '1' : '0'}" data-sprite-primal="${isPrimal ? '1' : '0'}" alt="${escapeHtml(name)}">
         ${formOpts.megaX ? '<span class="combatant-tag">MEGA X</span>' : (formOpts.mega ? '<span class="combatant-tag">MEGA</span>' : '')}
         ${isGmax ? '<span class="combatant-tag">GMAX</span>' : ''}
+        ${isPrimal ? '<span class="combatant-tag">PRIMAL</span>' : ''}
         <div class="combatant-name">${escapeHtml(name)}</div>
         <div>${hpDots(hits, max)}</div>
       </div>
@@ -861,6 +896,47 @@
   }
   function titleCase(slug) {
     return slug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
+
+  async function showEvolutionOverlay(fromName, toName) {
+    const overlay = document.getElementById('evolution-overlay');
+    const label = document.getElementById('evolution-overlay-label');
+    const img = document.getElementById('evolution-overlay-img');
+    const result = document.getElementById('evolution-overlay-result');
+    label.textContent = `${fromName} is evolving\u2026`;
+    result.textContent = '';
+    overlay.classList.remove('hidden');
+    const fromUrl = await getSpriteUrl(fromName, {});
+    if (fromUrl) img.src = fromUrl;
+    img.style.animation = 'none';
+    void img.offsetWidth;
+    img.style.animation = 'combatantIn 0.4s ease';
+    setTimeout(async () => {
+      const toUrl = await getSpriteUrl(toName, {});
+      if (toUrl) img.src = toUrl;
+      img.style.animation = 'none';
+      void img.offsetWidth;
+      img.style.animation = 'combatantIn 0.6s ease';
+      result.textContent = `${fromName} evolved into ${toName}!`;
+      setTimeout(() => { overlay.classList.add('hidden'); }, 2600);
+    }, 1800);
+  }
+  async function triggerEvolutionOverlay(code, fromName, toName) {
+    await update(ref(db, `sessions/${code}/session`), { evolutionEvent: { from: fromName, to: toName, ts: Date.now() } });
+  }
+
+  function effectiveMegaFlags(monObj) {
+    if (!monObj) return { mega: false, megaX: false };
+    if (monObj.mega || monObj.megaX) return { mega: !!monObj.mega, megaX: !!monObj.megaX };
+    if (isMegaCapable(monObj.n)) {
+      const isXY = MEGA_XY_SPECIES.has(baseSlug(monObj.n));
+      return { mega: !isXY, megaX: isXY };
+    }
+    return { mega: false, megaX: false };
+  }
+  const SPECIES_BASE_MAX = { regidrago: 12, "greninja-ash": 8 };
+  function baseMaxFor(name) {
+    return SPECIES_BASE_MAX[baseSlug(name)] || 4;
   }
 
   function flattenEncounterTable(table) {
@@ -1089,6 +1165,7 @@
           if (!confirm(`Evolve ${currentName} into ${targetName}?`)) return;
           party[idx] = targetName;
           await update(ref(db, `sessions/${code}/players/${slot}`), { party });
+          await triggerEvolutionOverlay(code, currentName, targetName);
           return;
         }
         const picker = document.getElementById(`evolve-picker-${slot}`);
@@ -1105,9 +1182,12 @@
         const idx = parseInt(idxStr, 10);
         const select = document.getElementById(`evolve-select-${slot}-${idx}`);
         const targetSlug = select.value;
+        const targetName = titleCase(targetSlug);
         const party = [...((latestPlayers[slot] && latestPlayers[slot].party) || [])];
-        party[idx] = titleCase(targetSlug);
+        const currentName = party[idx];
+        party[idx] = targetName;
         await update(ref(db, `sessions/${code}/players/${slot}`), { party });
+        await triggerEvolutionOverlay(code, currentName, targetName);
         document.getElementById(`evolve-picker-${slot}`).innerHTML = '';
         return;
       }
@@ -1263,9 +1343,10 @@
     function freshPlayerBattleState(slot, onlySlot) {
       const party = (latestPlayers[slot] && latestPlayers[slot].party) || [];
       const participating = !onlySlot || onlySlot === slot;
+      const activeMon = participating ? (party[0] || null) : null;
       return {
-        active: participating ? (party[0] || null) : null,
-        hits: 0, max: 4, status: null, benched: [], out: participating ? party.length === 0 : true,
+        active: activeMon,
+        hits: 0, max: baseMaxFor(activeMon || ''), status: null, benched: [], out: participating ? party.length === 0 : true,
         megaActive: false, megaUsed: false
       };
     }
@@ -1312,16 +1393,37 @@
       soloPlayerSelect.value = '';
     });
 
-    LEGENDARIES.forEach((leg) => {
-      document.getElementById(`btn-start-leg-${leg.player}`).addEventListener('click', async () => {
-        const players = {};
-        ['P1', 'P2', 'P3'].forEach((slot) => { players[slot] = freshPlayerBattleState(slot, leg.player); });
-        await set(ref(db, `sessions/${code}/session/battle`), {
-          active: true, bossId: leg.id, label: `${leg.name} — ${leg.player} solo fight`, mode: 'legendary', isGym: false,
-          sprite: null, enemyRoster: [mon(leg.name)], enemyIndex: 0, enemyHits: 0, enemyMax: 24, enemyMegaActive: false,
-          soloPlayer: leg.player, legendaryStatus: leg.status, catchAvailable: false,
-          players, lastHit: null
-        });
+    const legSelect = document.getElementById('dm-leg-select');
+    legSelect.innerHTML = '<option value="">Which legendary?</option>' + LEGENDARIES.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+
+    document.getElementById('btn-leg-compute-order').addEventListener('click', () => {
+      const rolls = {
+        P1: parseInt(document.getElementById('leg-roll-P1').value, 10),
+        P2: parseInt(document.getElementById('leg-roll-P2').value, 10),
+        P3: parseInt(document.getElementById('leg-roll-P3').value, 10)
+      };
+      const display = document.getElementById('leg-order-display');
+      if (Object.values(rolls).some(isNaN)) { display.textContent = 'Enter all three rolls.'; return; }
+      const vals = Object.values(rolls);
+      if (new Set(vals).size !== vals.length) { display.textContent = 'Tie — re-roll the tied players.'; return; }
+      const order = Object.entries(rolls).sort((a, b) => a[1] - b[1]).map(e => e[0]);
+      display.textContent = `Pick order (first choice → last): ${order.join(' → ')}`;
+    });
+
+    document.getElementById('btn-start-legendary').addEventListener('click', async () => {
+      const playerSlot = document.getElementById('dm-leg-player-select').value;
+      const legId = legSelect.value;
+      if (!playerSlot || !legId) { alert('Pick a player and a legendary.'); return; }
+      const leg = LEGENDARIES.find(l => l.id === legId);
+      if (!leg) return;
+      const players = {};
+      ['P1', 'P2', 'P3'].forEach((slot) => { players[slot] = freshPlayerBattleState(slot, playerSlot); });
+      await set(ref(db, `sessions/${code}/session/battle`), {
+        active: true, bossId: leg.id, label: `${leg.name} — ${playerSlot} solo fight`, mode: 'legendary', isGym: false,
+        sprite: null, enemyRoster: [mon(leg.name)], enemyIndex: 0, enemyHits: 0, enemyMax: 24, enemyMegaActive: false,
+        canPrimal: !!leg.canPrimal, enemyPrimalActive: false,
+        soloPlayer: playerSlot, legendaryStatus: leg.status, catchAvailable: false,
+        players, lastHit: null
       });
     });
 
@@ -1398,7 +1500,10 @@
         const allDefeated = idx >= roster.length;
         const legendNote = battle.mode === 'legendary' ? `<p class="status-msg">Thematic status for this fight: <b>${escapeHtml(battle.legendaryStatus || '')}</b> — apply below when it fits the story. Catch opens once the ⅛ stage is reached.</p>` : '';
         const npcTag = battle.sprite ? `<img src="sprites/${battle.sprite}" style="width:48px;height:48px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:8px;">` : '';
-        const canMega = currentMon && (currentMon.mega || currentMon.megaX) && !allDefeated;
+        const megaFlags = effectiveMegaFlags(currentMon);
+        const canMega = currentMon && (megaFlags.mega || megaFlags.megaX) && !allDefeated;
+        const canGmax = currentMon && currentMon.gmaxCapable && !allDefeated;
+        const canPrimal = battle.mode === 'legendary' && battle.canPrimal && !allDefeated;
         enemyBox.innerHTML = `
           <div class="pixel-font" style="font-size:12px;color:var(--accent-gold);">${npcTag}${escapeHtml(battle.label)}</div>
           ${legendNote}
@@ -1406,11 +1511,13 @@
           ${battle.scriptedLoss ? '<p class="status-msg" style="color:var(--accent-red);">Scripted loss — no restart, story continues after.</p>' : ''}
           <p class="status-msg">${allDefeated ? 'Enemy roster fully defeated!' : `Enemy ${idx}/${roster.length} down`}</p>
           ${allDefeated ? '' : `
-            ${combatantHtml(currentMon.n, battle.enemyHits, battle.enemyMax, { mega: battle.enemyMegaActive && currentMon.mega, megaX: battle.enemyMegaActive && currentMon.megaX, gmax: currentMon.gmax }, 'enemy', lastHit)}
+            ${combatantHtml(currentMon.n, battle.enemyHits, battle.enemyMax, { mega: battle.enemyMegaActive && megaFlags.mega, megaX: battle.enemyMegaActive && megaFlags.megaX, gmax: battle.enemyGmaxActive && currentMon.gmaxCapable, primal: battle.enemyPrimalActive }, 'enemy', lastHit)}
             <span class="status-msg">(${hpStageLabel(battle.enemyHits, battle.enemyMax)})</span><br>
             <button class="btn secondary" style="width:auto;padding:6px 14px;font-size:11px;display:inline-block;margin-top:8px;" data-enemy-hit="1">-1 stage (hit)</button>
             <button class="btn secondary" style="width:auto;padding:6px 14px;font-size:11px;display:inline-block;margin-top:8px;margin-left:6px;" data-enemy-hit="-1">undo</button>
             ${canMega && !battle.enemyMegaActive ? `<button class="btn" style="width:auto;padding:6px 14px;font-size:11px;display:inline-block;margin-top:8px;margin-left:6px;" data-enemy-mega="1">Mega Evolve!</button>` : ''}
+            ${canGmax && !battle.enemyGmaxActive ? `<button class="btn" style="width:auto;padding:6px 14px;font-size:11px;display:inline-block;margin-top:8px;margin-left:6px;" data-enemy-gmax="1">Gigantamax!</button>` : ''}
+            ${canPrimal && !battle.enemyPrimalActive ? `<button class="btn" style="width:auto;padding:6px 14px;font-size:11px;display:inline-block;margin-top:8px;margin-left:6px;" data-enemy-primal="1">Go Primal!</button>` : ''}
           `}
         `;
       }
@@ -1509,6 +1616,7 @@
         let hits = Math.max(0, Math.min(battle.enemyMax, (battle.enemyHits || 0) + delta));
         let enemyIndex = battle.enemyIndex || 0;
         let enemyMegaActive = battle.enemyMegaActive;
+        let enemyGmaxActive = battle.enemyGmaxActive;
         let enemyMax = battle.enemyMax;
         let toast = null;
         if (hits >= battle.enemyMax) {
@@ -1519,12 +1627,16 @@
           const nextMon = (battle.enemyRoster || [])[enemyIndex];
           const startsMega = nextMon && nextMon.startMega && (nextMon.mega || nextMon.megaX);
           enemyMegaActive = !!startsMega;
-          enemyMax = (battle.mode === 'simultaneous' ? 12 : 4) * (startsMega ? 2 : 1);
+          enemyGmaxActive = false;
+          const modeBase = battle.mode === 'simultaneous' ? 12 : 4;
+          const speciesBase = baseMaxFor(nextMon ? nextMon.n : '');
+          const effectiveBase = Math.max(modeBase, speciesBase);
+          enemyMax = effectiveBase * (startsMega ? 2 : 1);
         }
         const stageIdx = Math.min(4, Math.floor((hits / enemyMax) * 4));
         const catchAvailable = battle.mode === 'legendary' ? stageIdx >= 3 : false;
         const currentTurnSlot = ['P1', 'P2', 'P3'][enemyIndex % 3];
-        const updates = { enemyHits: hits, enemyIndex, enemyMax, enemyMegaActive, catchAvailable, currentTurnSlot, lastHit: { key: 'enemy', ts: Date.now() } };
+        const updates = { enemyHits: hits, enemyIndex, enemyMax, enemyMegaActive, enemyGmaxActive, catchAvailable, currentTurnSlot, lastHit: { key: 'enemy', ts: Date.now() } };
         if (toast) updates.toast = toast;
         await update(ref(db, battlePath), updates);
         return;
@@ -1533,6 +1645,16 @@
       if (e.target.dataset.enemyMega) {
         const { max, hits } = toggleMegaFields(battle.enemyHits, battle.enemyMax, true);
         await update(ref(db, battlePath), { enemyMax: max, enemyHits: hits, enemyMegaActive: true });
+        return;
+      }
+
+      if (e.target.dataset.enemyGmax) {
+        await update(ref(db, battlePath), { enemyGmaxActive: true });
+        return;
+      }
+
+      if (e.target.dataset.enemyPrimal) {
+        await update(ref(db, battlePath), { enemyPrimalActive: true });
         return;
       }
 
@@ -1567,7 +1689,7 @@
           if (remaining.length === 0) {
             await update(ref(db, `${battlePath}/players/${slot}`), { active: null, hits: 0, status: null, benched, out: true, megaActive: false, max: 4 });
           } else {
-            await update(ref(db, `${battlePath}/players/${slot}`), { active: remaining[0], hits: 0, status: null, benched, out: false, megaActive: false, max: 4 });
+            await update(ref(db, `${battlePath}/players/${slot}`), { active: remaining[0], hits: 0, status: null, benched, out: false, megaActive: false, max: baseMaxFor(remaining[0]) });
           }
         } else {
           await update(ref(db, `${battlePath}/players/${slot}`), { hits });
@@ -1635,7 +1757,7 @@
         const slot = e.target.dataset.playerSwap;
         const val = e.target.value;
         if (!val) return;
-        await update(ref(db, `${battlePath}/players/${slot}`), { active: val, hits: 0, status: null, megaActive: false, max: 4 });
+        await update(ref(db, `${battlePath}/players/${slot}`), { active: val, hits: 0, status: null, megaActive: false, max: baseMaxFor(val) });
         e.target.value = '';
         return;
       }
@@ -1676,7 +1798,7 @@
       const battle = snap.val();
       if (!battle) return;
       const players = {};
-      ['P1', 'P2', 'P3'].forEach((slot) => { players[slot] = freshPlayerBattleState(slot, battle.soloPlayer || (battle.pvpParticipants ? null : null)); });
+      ['P1', 'P2', 'P3'].forEach((slot) => { players[slot] = freshPlayerBattleState(slot, battle.soloPlayer || null); });
       if (battle.pvpParticipants) {
         ['P1', 'P2', 'P3'].forEach((slot) => { if (!battle.pvpParticipants.includes(slot)) players[slot].out = true; });
       }
@@ -1689,10 +1811,15 @@
         });
         updates.enemyByPlayer = enemyByPlayer;
       } else if (battle.mode !== 'pvp') {
+        const firstMon = (battle.enemyRoster || [])[0];
+        const modeBase = battle.mode === 'simultaneous' ? 12 : 4;
+        const speciesBase = baseMaxFor(firstMon ? firstMon.n : '');
         updates.enemyHits = 0;
         updates.enemyIndex = 0;
-        updates.enemyMax = battle.mode === 'simultaneous' ? 12 : 4;
+        updates.enemyMax = Math.max(modeBase, speciesBase);
         updates.enemyMegaActive = false;
+        updates.enemyGmaxActive = false;
+        updates.enemyPrimalActive = false;
         updates.catchAvailable = false;
       }
       await update(ref(db, battlePath), updates);
@@ -1820,6 +1947,7 @@
     document.getElementById('player-trainer-sprite').src = `sprites/trainer-${slot.toLowerCase()}.png`;
 
     let localMapOpen = false;
+    let lastEvoTs = 0;
     document.getElementById('btn-player-view-map').addEventListener('click', () => {
       localMapOpen = true;
       document.getElementById('map-overlay').classList.remove('hidden');
@@ -1942,11 +2070,18 @@
     onValue(ref(db, `sessions/${code}/session/currentEncounter`), (snap) => {
       const enc = snap.val();
       const banner = document.getElementById('player-encounter-banner');
+      const flash = document.getElementById('encounter-flash-overlay');
       if (enc && enc.status === 'pending' && enc.forPlayer === slot) {
         banner.classList.remove('hidden');
         document.getElementById('player-encounter-text').textContent = `A wild ${enc.pokemon} appeared!`;
+        flash.classList.remove('hidden');
+        document.getElementById('encounter-flash-name').textContent = enc.pokemon;
+        const img = document.getElementById('encounter-flash-img');
+        img.dataset.spriteName = enc.pokemon;
+        getSpriteUrl(enc.pokemon, {}).then((url) => { if (url) img.src = url; });
       } else {
         banner.classList.add('hidden');
+        flash.classList.add('hidden');
       }
     });
 
@@ -1987,9 +2122,10 @@
         const idx = battle.enemyIndex || 0;
         const currentMon = roster[idx];
         const allDefeated = idx >= roster.length;
+        const megaFlags = effectiveMegaFlags(currentMon);
         enemySideHtml = `${npcTag}` + (allDefeated
           ? '<p class="status-msg" style="text-align:center;">Enemy defeated!</p>'
-          : `<div style="text-align:center;">${combatantHtml(currentMon.n, battle.enemyHits, battle.enemyMax, { mega: battle.enemyMegaActive && currentMon.mega, megaX: battle.enemyMegaActive && currentMon.megaX, gmax: currentMon.gmax }, 'enemy', lastHit)}</div>
+          : `<div style="text-align:center;">${combatantHtml(currentMon.n, battle.enemyHits, battle.enemyMax, { mega: battle.enemyMegaActive && megaFlags.mega, megaX: battle.enemyMegaActive && megaFlags.megaX, gmax: battle.enemyGmaxActive && currentMon.gmaxCapable, primal: battle.enemyPrimalActive }, 'enemy', lastHit)}</div>
              ${roster.length > 1 ? `<p class="status-msg" style="text-align:center;">${idx}/${roster.length} down</p>` : ''}`);
       }
 
@@ -2050,6 +2186,11 @@
       const champEl = document.getElementById('player-view-status');
       if (session.trueChampion) {
         champEl.textContent = `👑 ${session.trueChampion} is the True Champion!`;
+      }
+
+      if (session.evolutionEvent && session.evolutionEvent.ts > lastEvoTs) {
+        lastEvoTs = session.evolutionEvent.ts;
+        showEvolutionOverlay(session.evolutionEvent.from, session.evolutionEvent.to);
       }
     });
   }
