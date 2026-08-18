@@ -307,6 +307,7 @@
     content: '';
     position: absolute;
     inset: 0;
+    opacity: 0;
     background: var(--accent-red);
     mix-blend-mode: multiply;
     animation: hitFlashOverlay 0.5s ease;
@@ -717,13 +718,13 @@
   };
 
   const ROUTES = [
-    { id: "route-1", name: "Route 1 — First Steps", encounterTable: { "Normal":"Rattata","Bug":"Caterpie","Flying":"Pidgey","Grass":"Oddish","Dark":"Poochyena","Electric":"Pichu","Fire":"Vulpix","Water":"Magikarp","Ground":"Sandshrew","Fighting":"Machop","Poison":"Weedle","Rock":"Geodude","Psychic":"Abra","Ghost":"Shuppet","Steel":"Klink","Fairy":"Cleffa","Ice":"Snorunt","Dragon":"Dratini" } },
-    { id: "route-2", name: "Route 2 — The Forest Road", encounterTable: { "Normal":"Zigzagoon","Bug":"Kricketot","Flying":"Hoothoot","Grass":"Bellsprout","Dark":"Nuzleaf","Electric":"Mareep","Fire":"Growlithe","Water":"Poliwag","Ground":"Diglett","Fighting":"Makuhita","Poison":"Grimer","Rock":"Onix","Psychic":"Drowzee","Ghost":"Gastly","Steel":"Magnemite","Fairy":"Igglybuff","Ice":"Swinub","Dragon":"Bagon" } },
-    { id: "route-3", name: "Route 3 — Toward Cerulean", encounterTable: { "Normal":"Stantler","Bug":"Combee","Flying":"Doduo","Grass":"Sunkern","Dark":"Houndour","Electric":"Voltorb","Fire":"Slugma","Water":"Tentacool","Ground":"Cubone","Fighting":"Tyrogue","Poison":"Koffing","Rock":"Roggenrola","Psychic":"Ralts","Ghost":"Duskull","Steel":"Aron","Fairy":"Snubbull","Ice":"Seel","Dragon":"Vibrava" } },
-    { id: "route-4", name: "Route 4 — Cave Approach", encounterTable: { "Normal":"Zigzagoon","Bug":"Paras","Flying":"Zubat","Grass":"Foongus","Dark":"Zorua","Electric":"Joltik","Fire":"Numel","Water":"Wooper","Ground":"Drilbur","Fighting":"Timburr","Poison":"Trubbish","Rock":"Nosepass","Psychic":"Spoink","Ghost":"Misdreavus, Sinistcha","Steel":"Ferroseed","Fairy":"Flabébé","Ice":"Vanillite","Dragon":"Deino" } },
-    { id: "route-5", name: "Route 5 — Ashen Road", encounterTable: { "Normal":"Linoone","Bug":"Volbeat, Illumise","Flying":"Fletchinder","Grass":"Gogoat","Dark":"Mightyena","Electric":"Emolga","Fire":"Ponyta","Water":"Poliwhirl","Ground":"Krokorok","Fighting":"Throh, Sawk","Poison":"Salandit","Rock":"Lycanroc","Psychic":"Duosion","Ghost":"Lampent","Steel":"Skarmory","Fairy":"Mimikyu","Ice":"Sneasel","Dragon":"Fraxure, Jangmo-o","Volcanic ecosystem":"Slugma, Numel, Torkoal, Salandit, Houndoom, Camerupt, Oddish, Budew, Roselia" } },
-    { id: "route-6", name: "Route 6 — The Old Road", encounterTable: { "Normal":"Bibarel","Bug":"Ribombee","Flying":"Hawlucha","Grass":"Tsareena","Dark":"Mightyena","Electric":"Luxio","Fire":"Ninetales","Water":"Floatzel","Ground":"Donphan","Fighting":"Passimian","Poison":"Drapion","Rock":"Lycanroc","Psychic":"Gothorita","Ghost":"Mimikyu","Steel":"Bisharp","Fairy":"Clefable","Ice":"Beartic","Dragon":"Gabite","Forest ecosystem":"Trevenant, Ursaring, Absol, Heracross, Pinsir, Sawsbuck","Pond":"Floatzel, Poliwag, Psyduck, Corphish, Basculin, Lapras" } },
-    { id: "route-7", name: "Route 7 — The Sacred Road", encounterTable: { "Normal":"Furret","Bug":"Heracross","Flying":"Noctowl","Grass":"Roserade","Dark":"Absol","Electric":"Manectric","Fire":"Arcanine","Water":"Azumarill","Ground":"Excadrill","Fighting":"Hawlucha","Poison":"Toxicroak","Rock":"Crustle","Psychic":"Gardevoir","Ghost":"Mismagius","Steel":"Mawile","Fairy":"Granbull","Ice":"Weavile","Dragon":"Haxorus, Hakamo-o","Stream":"Azumarill, Poliwhirl, Basculin, Floatzel, Corphish, Dratini, Milotic" } },
+    { id: "route-1", name: "Route 1 — First Steps", encounterTable: { "Normal":"Rattata","Bug":"Caterpie","Flying":"Pidgey","Grass":"Oddish","Dark":"Poochyena","Electric":"Pichu","Fire":"Vulpix","Water":"Magikarp","Ground":"Sandshrew","Fighting":"Machop","Poison":"Weedle","Rock":"Geodude, Glimmet","Psychic":"Abra","Ghost":"Shuppet","Steel":"Klink","Fairy":"Cleffa","Ice":"Snorunt","Dragon":"Dratini" } },
+    { id: "route-2", name: "Route 2 — The Forest Road", encounterTable: { "Normal":"Zigzagoon","Bug":"Kricketot","Flying":"Hoothoot","Grass":"Bellsprout","Dark":"Nuzleaf","Electric":"Mareep","Fire":"Growlithe","Water":"Poliwag, Tatsugiri","Ground":"Diglett","Fighting":"Makuhita","Poison":"Grimer","Rock":"Onix","Psychic":"Drowzee","Ghost":"Gastly","Steel":"Magnemite","Fairy":"Igglybuff","Ice":"Swinub","Dragon":"Bagon" } },
+    { id: "route-3", name: "Route 3 — Toward Cerulean", encounterTable: { "Normal":"Stantler","Bug":"Combee","Flying":"Doduo","Grass":"Sunkern","Dark":"Houndour","Electric":"Voltorb","Fire":"Slugma","Water":"Tentacool","Ground":"Cubone","Fighting":"Tyrogue","Poison":"Koffing","Rock":"Roggenrola","Psychic":"Ralts","Ghost":"Duskull","Steel":"Aron","Fairy":"Snubbull","Ice":"Seel","Dragon":"Vibrava, Frigibax" } },
+    { id: "route-4", name: "Route 4 — Cave Approach", encounterTable: { "Normal":"Zigzagoon","Bug":"Paras","Flying":"Zubat","Grass":"Foongus, Capsakid","Dark":"Zorua","Electric":"Joltik","Fire":"Numel","Water":"Wooper","Ground":"Drilbur","Fighting":"Timburr","Poison":"Trubbish","Rock":"Nosepass","Psychic":"Spoink","Ghost":"Misdreavus, Sinistcha","Steel":"Ferroseed","Fairy":"Flabébé","Ice":"Vanillite","Dragon":"Deino" } },
+    { id: "route-5", name: "Route 5 — Ashen Road", encounterTable: { "Normal":"Linoone","Bug":"Volbeat, Illumise, Wimpod","Flying":"Fletchinder","Grass":"Gogoat","Dark":"Mightyena","Electric":"Emolga","Fire":"Ponyta","Water":"Poliwhirl","Ground":"Krokorok","Fighting":"Throh, Sawk","Poison":"Salandit","Rock":"Lycanroc","Psychic":"Duosion","Ghost":"Lampent","Steel":"Skarmory","Fairy":"Mimikyu","Ice":"Sneasel","Dragon":"Fraxure, Jangmo-o","Volcanic ecosystem":"Slugma, Numel, Torkoal, Salandit, Houndoom, Camerupt, Oddish, Budew, Roselia" } },
+    { id: "route-6", name: "Route 6 — The Old Road", encounterTable: { "Normal":"Bibarel","Bug":"Ribombee","Flying":"Hawlucha, Starly","Grass":"Tsareena","Dark":"Mightyena","Electric":"Luxio","Fire":"Ninetales","Water":"Floatzel","Ground":"Donphan","Fighting":"Passimian","Poison":"Drapion","Rock":"Lycanroc","Psychic":"Gothorita","Ghost":"Mimikyu","Steel":"Bisharp","Fairy":"Clefable","Ice":"Beartic","Dragon":"Gabite","Forest ecosystem":"Trevenant, Ursaring, Absol, Heracross, Pinsir, Sawsbuck","Pond":"Floatzel, Poliwag, Psyduck, Corphish, Basculin, Lapras" } },
+    { id: "route-7", name: "Route 7 — The Sacred Road", encounterTable: { "Normal":"Furret","Bug":"Heracross","Flying":"Noctowl","Grass":"Roserade","Dark":"Absol","Electric":"Manectric","Fire":"Arcanine, Charcadet","Water":"Azumarill","Ground":"Excadrill","Fighting":"Hawlucha","Poison":"Toxicroak","Rock":"Crustle","Psychic":"Gardevoir","Ghost":"Mismagius","Steel":"Mawile","Fairy":"Granbull","Ice":"Weavile","Dragon":"Haxorus, Hakamo-o","Stream":"Azumarill, Poliwhirl, Basculin, Floatzel, Corphish, Dratini, Milotic" } },
     { id: "route-8", name: "Route 8 — The Ascent", encounterTable: { "Normal":"Kangaskhan","Bug":"Scizor","Flying":"Crobat","Grass":"Victreebel","Dark":"Honchkrow","Electric":"Luxray","Fire":"Houndoom","Water":"Gyarados","Ground":"Excadrill","Fighting":"Conkeldurr","Poison":"Crobat","Rock":"Aggron","Psychic":"Metagross","Ghost":"Chandelure","Steel":"Lucario","Fairy":"Sylveon, Tinkatuff","Ice":"Mamoswine","Dragon":"Goodra","Mountain ecosystem":"Rhydon, Absol, Braviary, Mandibuzz, Sneasel, Noivern, Dratini, Bagon, Beldum","Waterfall":"Gyarados, Floatzel, Golduck, Basculin, Whiscash, Lapras, Milotic" } }
   ];
 
@@ -738,7 +739,7 @@
     { id: "gym-cilan", label: "Gym 5 — Cilan (Grass)", mode: "rotation", isGym: true, gymOrder: 5, sprite: "cilan.png", roster: [mon("Venusaur"), mon("Tangela"), mon("Meganium"), mon("Grovyle"), mon("Ludicolo"), mon("Shiftry"), mon("Roselia"), mon("Cacturne"), mon("Torterra"), mon("Leafeon"), mon("Serperior"), mon("Simisage"), mon("Amoonguss"), mon("Hisuian Decidueye"), mon("Kartana")] },
     { id: "gym-olympia", label: "Gym 6 — Olympia (Psychic)", mode: "rotation", isGym: true, gymOrder: 6, sprite: "olympia.png", roster: [mon("Alakazam"), mon("Starmie"), mon("Galarian Mr. Mime"), mon("Espeon"), mon("Wobbuffet"), mon("Gardevoir"), mon("Medicham"), mon("Metagross"), mon("Latias"), mon("Gallade"), mon("Gothitelle"), mon("Reuniclus"), mon("Scream Tail"), mon("Rabsca"), mon("Mr. Rime"), mon("Malamar"), mon("Delphox"), mon("Hisuian Braviary")] },
     { id: "gym-allister", label: "Gym 7 — Allister (Ghost)", mode: "rotation", isGym: true, gymOrder: 7, sprite: "allister.png", roster: [mon("Gengar"), mon("Hisuian Typhlosion"), mon("Sableye"), mon("Dusclops"), mon("Spiritomb"), mon("Froslass"), mon("Cofagrigus"), mon("Golurk"), mon("Aegislash"), mon("Trevenant"), mon("Palossand"), mon("Spectrier"), mon("Skeledirge"), mon("Brambleghast"), mon("Annihilape"), mon("Gholdengo"), mon("Sinistcha"), mon("Mismagius")] },
-    { id: "gym-iris", label: "Gym 8 — Iris (Dragon)", mode: "rotation", isGym: true, gymOrder: 8, sprite: "iris.png", roster: [mon("Dragonite", { mega: true }), mon("Altaria", { mega: true }), mon("Salamence", { mega: true }), mon("Garchomp", { mega: true }), mon("Latias", { mega: true }), mon("Regidrago")] },
+    { id: "gym-iris", label: "Gym 8 — Iris (Dragon)", mode: "rotation", isGym: true, gymOrder: 8, sprite: "iris.png", megaHpMult: 3, roster: [mon("Dragonite", { mega: true }), mon("Altaria", { mega: true }), mon("Salamence", { mega: true }), mon("Garchomp", { mega: true }), mon("Latias", { mega: true }), mon("Regidrago")] },
 
     { id: "route3-talon", label: "Route 3 — Backpacker Talon", mode: "simultaneous", isGym: false, sprite: "backpacker-talon.png", roster: [mon("Machoke"), mon("Haunter"), mon("Gabite")] },
     { id: "route6-gladion-boss", label: "Route 6 — Gladion (boss)", mode: "simultaneous", isGym: false, sprite: "gladion.png", roster: [mon("Silvally"), mon("Lucario"), mon("Zoroark")] },
@@ -747,7 +748,7 @@
     { id: "elite-glacia", label: "Elite Three — Glacia", mode: "rotation", isGym: false, sprite: "glacia.png", roster: [mon("Froslass"), mon("Lapras"), mon("Weavile"), mon("Mamoswine"), mon("Alolan Ninetales"), mon("Beartic"), mon("Baxcalibur"), mon("Glaceon"), mon("Avalugg")] },
     { id: "champ-cynthia", label: "Champion — Cynthia", mode: "simultaneous", isGym: false, sprite: "cynthia.png", roster: [mon("Spiritomb"), mon("Milotic"), mon("Roserade"), mon("Togekiss"), mon("Lucario"), mon("Garchomp")] },
     { id: "champ-steven", label: "Champion — Steven", mode: "simultaneous", isGym: false, sprite: "steven.png", roster: [mon("Skarmory"), mon("Aggron"), mon("Scizor"), mon("Excadrill"), mon("Tyranitar"), mon("Metagross")] },
-    { id: "champ-diantha", label: "Champion — Diantha", mode: "simultaneous", isGym: false, sprite: "diantha.png", roster: [mon("Hawlucha"), mon("Goodra"), mon("Florges"), mon("Aurorus"), mon("Gourgeist"), mon("Gardevoir", { mega: true, startMega: true })] },
+    { id: "champ-diantha", label: "Champion — Diantha", mode: "simultaneous", isGym: false, sprite: "diantha.png", roster: [mon("Hawlucha"), mon("Goodra"), mon("Florges"), mon("Aurorus"), mon("Gourgeist"), mon("Gardevoir", { mega: true })] },
 
     // Cycling trainer battles ("rotation" mode, roster is a multiple of 3) — enemy sends one Pokémon at a time,
     // and the app auto-highlights whose turn it is: P1 vs #1, P2 vs #2, P3 vs #3, back to P1 vs #4, etc.
@@ -816,17 +817,22 @@
     "mr. mime": "mr-mime", "mr. rime": "mr-rime", "ash-greninja": "greninja-ash",
     "iron valiant": "iron-valiant",
     "lycanroc": "lycanroc-midday", "basculin": "basculin-red-striped",
-    "mimikyu": "mimikyu-disguised", "tatsugiri": "tatsugiri-curly", "toxtricity": "toxtricity-amped"
+    "mimikyu": "mimikyu-disguised", "tatsugiri": "tatsugiri-curly", "toxtricity": "toxtricity-amped",
+    "gourgeist": "gourgeist-average", "darmanitan": "darmanitan-standard"
   };
   function baseSlug(name) {
     const key = (name || '').trim().toLowerCase();
     if (SPRITE_OVERRIDES[key]) return SPRITE_OVERRIDES[key];
-    return key.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    // Strip diacritics (e.g. "Flabébé" -> "flabebe") before slugifying - PokeAPI names are plain ASCII.
+    const stripped = key.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return stripped.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
   function spriteSlug(name, opts) {
     opts = opts || {};
     let slug = baseSlug(name);
     if (opts.megaX) slug += '-mega-x';
+    else if (opts.megaY) slug += '-mega-y';
+    else if (opts.megaZ) slug += '-mega-z';
     else if (opts.mega) slug += '-mega';
     if (opts.gmax) slug += '-gmax';
     if (opts.primal) slug += '-primal';
@@ -844,7 +850,7 @@
           (data.sprites.other && data.sprites.other['official-artwork'] && data.sprites.other['official-artwork'].front_default))) || null;
       }
     } catch (e) { url = null; }
-    if (!url && (opts.mega || opts.megaX || opts.gmax || opts.primal)) {
+    if (!url && (opts.mega || opts.megaX || opts.megaY || opts.megaZ || opts.gmax || opts.primal)) {
       url = await getSpriteUrl(name, {});
     }
     SPRITE_URL_CACHE.set(slug, url);
@@ -854,22 +860,44 @@
     if (!container) return;
     container.querySelectorAll('img[data-sprite-name]').forEach((img) => {
       const name = img.dataset.spriteName;
-      const opts = { mega: img.dataset.spriteMega === '1', megaX: img.dataset.spriteMegax === '1', gmax: img.dataset.spriteGmax === '1', primal: img.dataset.spritePrimal === '1' };
+      const opts = {
+        mega: img.dataset.spriteMega === '1', megaX: img.dataset.spriteMegax === '1',
+        megaY: img.dataset.spriteMegay === '1', megaZ: img.dataset.spriteMegaz === '1',
+        gmax: img.dataset.spriteGmax === '1', primal: img.dataset.spritePrimal === '1'
+      };
       getSpriteUrl(name, opts).then((url) => { if (url) img.src = url; });
+    });
+  }
+  function hydrateMegaButtons(container) {
+    if (!container) return;
+    container.querySelectorAll('[data-mega-slot]').forEach(async (el) => {
+      const name = el.dataset.megaName;
+      if (!name) return;
+      const kind = el.dataset.megaKind;
+      const target = el.dataset.megaTarget || '';
+      const cap = await checkMegaCapability(name);
+      const variants = megaCapabilityVariants(cap);
+      if (variants.length === 0) return;
+      const attrKey = kind === 'enemy' ? 'data-enemy-mega' : 'data-player-mega';
+      const value = (v) => kind === 'enemy' ? v.key : `${target}:${v.key}`;
+      el.innerHTML = variants.map((v) => `<button class="btn secondary" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;margin-right:3px;" ${attrKey}="${value(v)}">${v.label}</button>`).join('');
     });
   }
   function combatantHtml(name, hits, max, formOpts, hitKey, lastHit) {
     formOpts = formOpts || {};
-    const isMega = !!(formOpts.mega || formOpts.megaX);
+    const isMega = !!(formOpts.mega || formOpts.megaX || formOpts.megaY || formOpts.megaZ);
     const isGmax = !!formOpts.gmax;
     const isPrimal = !!formOpts.primal;
     const flashCls = (lastHit && lastHit.key === hitKey && (Date.now() - lastHit.ts) < 900) ? 'sprite-hit' : '';
+    let tag = '';
+    if (formOpts.megaX) tag = 'MEGA X'; else if (formOpts.megaY) tag = 'MEGA Y';
+    else if (formOpts.megaZ) tag = 'MEGA Z'; else if (formOpts.mega) tag = 'MEGA';
     return `
       <div class="battle-combatant ${isMega ? 'is-mega' : ''} ${isGmax ? 'is-gmax' : ''} ${isPrimal ? 'is-mega' : ''}">
         <div class="sprite-wrap ${flashCls}">
-          <img data-sprite-name="${escapeHtml(name)}" data-sprite-mega="${formOpts.mega ? '1' : '0'}" data-sprite-megax="${formOpts.megaX ? '1' : '0'}" data-sprite-gmax="${isGmax ? '1' : '0'}" data-sprite-primal="${isPrimal ? '1' : '0'}" alt="${escapeHtml(name)}">
+          <img data-sprite-name="${escapeHtml(name)}" data-sprite-mega="${formOpts.mega ? '1' : '0'}" data-sprite-megax="${formOpts.megaX ? '1' : '0'}" data-sprite-megay="${formOpts.megaY ? '1' : '0'}" data-sprite-megaz="${formOpts.megaZ ? '1' : '0'}" data-sprite-gmax="${isGmax ? '1' : '0'}" data-sprite-primal="${isPrimal ? '1' : '0'}" alt="${escapeHtml(name)}">
         </div>
-        ${formOpts.megaX ? '<span class="combatant-tag">MEGA X</span>' : (formOpts.mega ? '<span class="combatant-tag">MEGA</span>' : '')}
+        ${tag ? `<span class="combatant-tag">${tag}</span>` : ''}
         ${isGmax ? '<span class="combatant-tag">GMAX</span>' : ''}
         ${isPrimal ? '<span class="combatant-tag">PRIMAL</span>' : ''}
         <div class="combatant-name">${escapeHtml(name)}</div>
@@ -909,15 +937,35 @@
     return `<img src="covers/${file}" class="badge-icon" style="object-fit:contain;background:transparent;opacity:${earned ? 1 : 0.3};filter:${earned ? 'none' : 'grayscale(1)'};" alt="${escapeHtml(gym.label)}">`;
   }
 
-  // Official Mega Evolution capable species (lowercase). Species using Mega X/Y use the megaX slug by default.
-  const MEGA_CAPABLE = new Set(["venusaur","charizard","blastoise","beedrill","pidgeot","alakazam","slowbro","gengar",
-    "kangaskhan","pinsir","gyarados","aerodactyl","mewtwo","ampharos","steelix","scizor","heracross","houndoom",
-    "tyranitar","sceptile","blaziken","swampert","gardevoir","sableye","mawile","aggron","medicham","manectric",
-    "sharpedo","camerupt","altaria","banette","absol","glalie","salamence","metagross","latias","latios","rayquaza",
-    "lopunny","garchomp","lucario","abomasnow","gallade","audino","diancie"]);
-  const MEGA_XY_SPECIES = new Set(["charizard", "mewtwo"]);
-  function isMegaCapable(name) {
-    return MEGA_CAPABLE.has(baseSlug(name));
+  // Mega Evolution capability is checked live against PokeAPI rather than a hardcoded list -
+  // the community dataset covers far more species (and X/Y/Z variants) than the official ~46,
+  // so we just ask "does {slug}-mega / -mega-x / -mega-y / -mega-z actually exist?" and cache the answer.
+  const MEGA_CAP_CACHE = new Map();
+  async function pokeApiExists(slug) {
+    try {
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${slug}`);
+      return res.ok;
+    } catch (e) { return false; }
+  }
+  async function checkMegaCapability(name) {
+    const slug = baseSlug(name);
+    if (MEGA_CAP_CACHE.has(slug)) return MEGA_CAP_CACHE.get(slug);
+    const [plain, x, y, z] = await Promise.all([
+      pokeApiExists(`${slug}-mega`), pokeApiExists(`${slug}-mega-x`),
+      pokeApiExists(`${slug}-mega-y`), pokeApiExists(`${slug}-mega-z`)
+    ]);
+    const result = { mega: plain, megaX: x, megaY: y, megaZ: z };
+    MEGA_CAP_CACHE.set(slug, result);
+    return result;
+  }
+  function megaCapabilityVariants(cap) {
+    if (!cap) return [];
+    const out = [];
+    if (cap.mega) out.push({ key: 'mega', label: 'Mega Evolve!' });
+    if (cap.megaX) out.push({ key: 'megaX', label: 'Mega Evolve X!' });
+    if (cap.megaY) out.push({ key: 'megaY', label: 'Mega Evolve Y!' });
+    if (cap.megaZ) out.push({ key: 'megaZ', label: 'Mega Evolve Z!' });
+    return out;
   }
 
   async function getEvolutionOptions(name) {
@@ -987,15 +1035,6 @@
     setTimeout(() => { overlay.classList.add('hidden'); }, 2600);
   }
 
-  function effectiveMegaFlags(monObj) {
-    if (!monObj) return { mega: false, megaX: false };
-    if (monObj.mega || monObj.megaX) return { mega: !!monObj.mega, megaX: !!monObj.megaX };
-    if (isMegaCapable(monObj.n)) {
-      const isXY = MEGA_XY_SPECIES.has(baseSlug(monObj.n));
-      return { mega: !isXY, megaX: isXY };
-    }
-    return { mega: false, megaX: false };
-  }
   const SPECIES_BASE_MAX = { regidrago: 12, "greninja-ash": 8 };
   function baseMaxFor(name) {
     return SPECIES_BASE_MAX[baseSlug(name)] || 4;
@@ -1022,7 +1061,6 @@
     {n:7,title:"Cerulean City",file:"07-cerulean-city.png"},
     {n:8,title:"Cerulean Lab — Team Cataclysm",file:"08-cerulean-lab.png"},
     {n:9,title:"Misty's Gym",file:"09-mistys-gym.png"},
-    {n:10,title:"Route 3 — Boss Battle",file:"10-route-3.png"},
     {n:11,title:"Lumiose City",file:"11-lumiose-city.png"},
     {n:12,title:"Lumiose Museum — Blue Orb Heist",file:"12-lumiose-museum.png"},
     {n:13,title:"Clemont's Gym",file:"13-clemonts-gym.png"},
@@ -1409,7 +1447,7 @@
       return {
         active: activeMon,
         hits: 0, max: baseMaxFor(activeMon || ''), status: null, benched: [], out: participating ? party.length === 0 : true,
-        megaActive: false, megaUsed: false
+        megaActive: false, megaUsed: false, megaVariant: null
       };
     }
 
@@ -1430,6 +1468,7 @@
       const battleObj = {
         active: true, bossId: boss.id, label: boss.label, mode: boss.mode, isGym: !!boss.isGym,
         sprite: boss.sprite || null, scriptedWin: !!boss.scriptedWin, scriptedLoss: !!boss.scriptedLoss,
+        megaHpMult: boss.megaHpMult || 2,
         enemyRoster: boss.roster, soloPlayer, legendaryStatus: null, catchAvailable: false,
         players, lastHit: null
       };
@@ -1437,18 +1476,15 @@
       if (boss.mode === 'assigned') {
         const enemyByPlayer = {};
         ['P1', 'P2', 'P3'].forEach((slot, i) => {
-          const m = boss.roster[i] || {};
-          const mega = !!m.startMega && (m.mega || m.megaX);
-          enemyByPlayer[slot] = { hits: 0, max: mega ? 8 : 4, megaActive: mega };
+          enemyByPlayer[slot] = { hits: 0, max: 4, megaActive: false };
         });
         battleObj.enemyByPlayer = enemyByPlayer;
       } else {
-        const first = boss.roster[0] || {};
-        const startMega = !!first.startMega && (first.mega || first.megaX);
         battleObj.enemyIndex = 0;
         battleObj.enemyHits = 0;
-        battleObj.enemyMax = startMega ? baseMax * 2 : baseMax;
-        battleObj.enemyMegaActive = startMega;
+        battleObj.enemyMax = baseMax;
+        battleObj.enemyMegaActive = false;
+        battleObj.enemyMegaVariant = null;
         battleObj.enemyGmaxActive = false;
         battleObj.enemyPrimalActive = false;
         battleObj.currentTurnSlot = 'P1';
@@ -1539,8 +1575,9 @@
       });
     });
 
-    function toggleMegaFields(hits, max, activating) {
-      const newMax = activating ? max * 2 : Math.max(4, max / 2);
+    function toggleMegaFields(hits, max, activating, mult) {
+      mult = mult || 2;
+      const newMax = activating ? max * mult : Math.round(max / mult);
       return { max: newMax, hits: Math.min(hits, newMax) };
     }
 
@@ -1565,10 +1602,9 @@
         const allDefeated = idx >= roster.length;
         const legendNote = battle.mode === 'legendary' ? `<p class="status-msg">Thematic status for this fight: <b>${escapeHtml(battle.legendaryStatus || '')}</b> — apply below when it fits the story. Catch opens once the ⅛ stage is reached.</p>` : '';
         const npcTag = battle.sprite ? `<img src="sprites/${battle.sprite}" style="width:48px;height:48px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;margin-right:8px;">` : '';
-        const megaFlags = effectiveMegaFlags(currentMon);
-        const canMega = currentMon && (megaFlags.mega || megaFlags.megaX) && !allDefeated;
         const canGmax = currentMon && currentMon.gmaxCapable && !allDefeated;
         const canPrimal = battle.mode === 'legendary' && battle.canPrimal && !allDefeated;
+        const megaOpts = battle.enemyMegaActive ? { [battle.enemyMegaVariant || 'mega']: true } : {};
         enemyBox.innerHTML = `
           <div class="pixel-font" style="font-size:12px;color:var(--accent-gold);">${npcTag}${escapeHtml(battle.label)}</div>
           ${legendNote}
@@ -1576,17 +1612,18 @@
           ${battle.scriptedLoss ? '<p class="status-msg" style="color:var(--accent-red);">Scripted loss — no restart, story continues after.</p>' : ''}
           <p class="status-msg">${allDefeated ? 'Enemy roster fully defeated!' : `Enemy ${idx}/${roster.length} down`}</p>
           ${allDefeated ? '' : `
-            ${combatantHtml(currentMon.n, battle.enemyHits, battle.enemyMax, { mega: battle.enemyMegaActive && megaFlags.mega, megaX: battle.enemyMegaActive && megaFlags.megaX, gmax: battle.enemyGmaxActive && currentMon.gmaxCapable, primal: battle.enemyPrimalActive }, 'enemy', lastHit)}
+            ${combatantHtml(currentMon.n, battle.enemyHits, battle.enemyMax, { gmax: battle.enemyGmaxActive && currentMon.gmaxCapable, primal: battle.enemyPrimalActive, ...megaOpts }, 'enemy', lastHit)}
             <span class="status-msg">(${hpStageLabel(battle.enemyHits, battle.enemyMax)})</span><br>
             <button class="btn secondary" style="width:auto;padding:6px 14px;font-size:11px;display:inline-block;margin-top:8px;" data-enemy-hit="1">-1 stage (hit)</button>
             <button class="btn secondary" style="width:auto;padding:6px 14px;font-size:11px;display:inline-block;margin-top:8px;margin-left:6px;" data-enemy-hit="-1">undo</button>
-            ${canMega && !battle.enemyMegaActive ? `<button class="btn" style="width:auto;padding:6px 14px;font-size:11px;display:inline-block;margin-top:8px;margin-left:6px;" data-enemy-mega="1">Mega Evolve!</button>` : ''}
+            ${!battle.enemyMegaActive ? `<span class="mega-btn-slot" data-mega-slot="1" data-mega-name="${escapeHtml(currentMon.n)}" data-mega-kind="enemy"></span>` : ''}
             ${canGmax && !battle.enemyGmaxActive ? `<button class="btn" style="width:auto;padding:6px 14px;font-size:11px;display:inline-block;margin-top:8px;margin-left:6px;" data-enemy-gmax="1">Gigantamax!</button>` : ''}
             ${canPrimal && !battle.enemyPrimalActive ? `<button class="btn" style="width:auto;padding:6px 14px;font-size:11px;display:inline-block;margin-top:8px;margin-left:6px;" data-enemy-primal="1">Go Primal!</button>` : ''}
           `}
         `;
       }
       hydrateSprites(enemyBox);
+      hydrateMegaButtons(enemyBox);
 
       const playersBox = document.getElementById('dm-battle-players');
       const slots = battle.soloPlayer ? [battle.soloPlayer] : (battle.pvpParticipants || ['P1', 'P2', 'P3']);
@@ -1599,29 +1636,16 @@
         if (p.out) {
           return `<div style="margin-bottom:14px;"><span class="pixel-font" style="font-size:11px;">${slot}</span> — <span class="status-msg" style="color:var(--accent-red);">out of usable Pok&eacute;mon</span></div>`;
         }
-        let assignedEnemyHtml = '';
-        if (battle.mode === 'assigned') {
-          const em = battle.enemyRoster[['P1', 'P2', 'P3'].indexOf(slot)];
-          const eb = (battle.enemyByPlayer && battle.enemyByPlayer[slot]) || { hits: 0, max: 4, megaActive: false };
-          const canMega = em && (em.mega || em.megaX);
-          assignedEnemyHtml = `
-            <div style="margin:6px 0;padding:6px;border:2px dashed var(--panel);">
-              <span class="status-msg">vs</span>
-              ${combatantHtml(em.n, eb.hits, eb.max, { mega: eb.megaActive && em.mega, megaX: eb.megaActive && em.megaX, gmax: em.gmax }, `assigned-enemy-${slot}`, battle.lastHit)}
-              <span class="status-msg">(${hpStageLabel(eb.hits, eb.max)})</span><br>
-              <button class="btn secondary" style="width:auto;padding:4px 8px;font-size:9px;display:inline-block;margin-top:4px;" data-assigned-enemy-hit="${slot}">-1 stage</button>
-              ${canMega && !eb.megaActive ? `<button class="btn" style="width:auto;padding:4px 8px;font-size:9px;display:inline-block;margin-top:4px;margin-left:4px;" data-assigned-enemy-mega="${slot}">Mega Evolve!</button>` : ''}
-            </div>
-          `;
-        }
+        const hasStone = latestPlayers[slot] && latestPlayers[slot].hasMegaStone;
+        const playerMegaOpts = p.megaActive ? { [p.megaVariant || 'mega']: true } : {};
         return `
           <div style="margin-bottom:14px;${isTurn ? 'border-left:4px solid var(--accent-gold);padding-left:8px;' : ''}">
             <span class="pixel-font" style="font-size:11px;">${slot}</span>${isTurn ? ' <span class="status-badge">their turn</span>' : ''}
             ${p.status ? `<span style="color:var(--accent-gold);font-size:11px;"> [${escapeHtml(p.status)}]</span>` : ''}
-            ${combatantHtml(p.active || '—', p.hits, p.max, { mega: p.megaActive }, `player-${slot}`, battle.lastHit)}
+            ${combatantHtml(p.active || '—', p.hits, p.max, playerMegaOpts, `player-${slot}`, battle.lastHit)}
             <span class="status-msg">(${hpStageLabel(p.hits, p.max)})</span><br>
             <button class="btn secondary" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;" data-player-hit="${slot}">-1 stage (hit)</button>
-            ${(!p.megaUsed && (latestPlayers[slot] && latestPlayers[slot].hasMegaStone) && isMegaCapable(p.active)) ? `<button class="btn secondary" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;" data-player-mega="${slot}">Mega Evolve!</button>` : ''}
+            ${(!p.megaUsed && hasStone && p.active) ? `<span class="mega-btn-slot" data-mega-slot="1" data-mega-name="${escapeHtml(p.active)}" data-mega-kind="player" data-mega-target="${slot}"></span>` : ''}
             <br>
             <select data-player-swap="${slot}" style="width:auto;display:inline-block;font-size:10px;padding:4px;margin-top:4px;">
               <option value="">swap active&hellip;</option>
@@ -1636,11 +1660,11 @@
             </select>
             <button class="btn secondary" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;" data-player-turn="${slot}">took turn (clear status)</button>
             ${battle.mode === 'legendary' && battle.catchAvailable ? `<button class="btn" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;" data-catch-legendary="${slot}">Catch!</button>` : ''}
-            ${assignedEnemyHtml}
           </div>
         `;
       }).join('');
       hydrateSprites(playersBox);
+      hydrateMegaButtons(playersBox);
 
       const declareBox = document.getElementById('dm-battle-pvp-declare');
       if (battle.mode === 'pvp') {
@@ -1681,6 +1705,7 @@
         let hits = Math.max(0, Math.min(battle.enemyMax, (battle.enemyHits || 0) + delta));
         let enemyIndex = battle.enemyIndex || 0;
         let enemyMegaActive = battle.enemyMegaActive;
+        let enemyMegaVariant = battle.enemyMegaVariant;
         let enemyGmaxActive = battle.enemyGmaxActive;
         let enemyMax = battle.enemyMax;
         let toast = null;
@@ -1690,26 +1715,26 @@
           enemyIndex += 1;
           hits = 0;
           const nextMon = (battle.enemyRoster || [])[enemyIndex];
-          const startsMega = nextMon && nextMon.startMega && (nextMon.mega || nextMon.megaX);
-          enemyMegaActive = !!startsMega;
+          enemyMegaActive = false;
+          enemyMegaVariant = null;
           enemyGmaxActive = false;
           const modeBase = battle.mode === 'simultaneous' ? 12 : 4;
           const speciesBase = baseMaxFor(nextMon ? nextMon.n : '');
-          const effectiveBase = Math.max(modeBase, speciesBase);
-          enemyMax = effectiveBase * (startsMega ? 2 : 1);
+          enemyMax = Math.max(modeBase, speciesBase);
         }
         const stageIdx = Math.min(4, Math.floor((hits / enemyMax) * 4));
         const catchAvailable = battle.mode === 'legendary' ? stageIdx >= 3 : false;
         const currentTurnSlot = ['P1', 'P2', 'P3'][enemyIndex % 3];
-        const updates = { enemyHits: hits, enemyIndex, enemyMax, enemyMegaActive, enemyGmaxActive, catchAvailable, currentTurnSlot, lastHit: { key: 'enemy', ts: Date.now() } };
+        const updates = { enemyHits: hits, enemyIndex, enemyMax, enemyMegaActive, enemyMegaVariant, enemyGmaxActive, catchAvailable, currentTurnSlot, lastHit: { key: 'enemy', ts: Date.now() } };
         if (toast) updates.toast = toast;
         await update(ref(db, battlePath), updates);
         return;
       }
 
       if (e.target.dataset.enemyMega) {
-        const { max, hits } = toggleMegaFields(battle.enemyHits, battle.enemyMax, true);
-        await update(ref(db, battlePath), { enemyMax: max, enemyHits: hits, enemyMegaActive: true });
+        const variant = e.target.dataset.enemyMega;
+        const { max, hits } = toggleMegaFields(battle.enemyHits, battle.enemyMax, true, battle.megaHpMult);
+        await update(ref(db, battlePath), { enemyMax: max, enemyHits: hits, enemyMegaActive: true, enemyMegaVariant: variant });
         return;
       }
 
@@ -1752,9 +1777,9 @@
           const party = (latestPlayers[slot] && latestPlayers[slot].party) || [];
           const remaining = party.filter((m) => !benched.includes(m));
           if (remaining.length === 0) {
-            await update(ref(db, `${battlePath}/players/${slot}`), { active: null, hits: 0, status: null, benched, out: true, megaActive: false, max: 4 });
+            await update(ref(db, `${battlePath}/players/${slot}`), { active: null, hits: 0, status: null, benched, out: true, megaActive: false, megaVariant: null, max: 4 });
           } else {
-            await update(ref(db, `${battlePath}/players/${slot}`), { active: remaining[0], hits: 0, status: null, benched, out: false, megaActive: false, max: baseMaxFor(remaining[0]) });
+            await update(ref(db, `${battlePath}/players/${slot}`), { active: remaining[0], hits: 0, status: null, benched, out: false, megaActive: false, megaVariant: null, max: baseMaxFor(remaining[0]) });
           }
         } else {
           await update(ref(db, `${battlePath}/players/${slot}`), { hits });
@@ -1766,12 +1791,12 @@
       }
 
       if (e.target.dataset.playerMega) {
-        const slot = e.target.dataset.playerMega;
+        const [slot, variant] = e.target.dataset.playerMega.split(':');
         const p = battle.players[slot];
         const hasStone = latestPlayers[slot] && latestPlayers[slot].hasMegaStone;
-        if (!hasStone || !isMegaCapable(p.active)) { alert('This player needs a Mega Stone and this Pokémon must be Mega-capable.'); return; }
+        if (!hasStone) { alert('This player needs a Mega Stone first.'); return; }
         const { max, hits } = toggleMegaFields(p.hits, p.max, true);
-        await update(ref(db, `${battlePath}/players/${slot}`), { max, hits, megaActive: true, megaUsed: true });
+        await update(ref(db, `${battlePath}/players/${slot}`), { max, hits, megaActive: true, megaVariant: variant, megaUsed: true });
         return;
       }
 
@@ -1822,7 +1847,7 @@
         const slot = e.target.dataset.playerSwap;
         const val = e.target.value;
         if (!val) return;
-        await update(ref(db, `${battlePath}/players/${slot}`), { active: val, hits: 0, status: null, megaActive: false, max: baseMaxFor(val) });
+        await update(ref(db, `${battlePath}/players/${slot}`), { active: val, hits: 0, status: null, megaActive: false, megaVariant: null, max: baseMaxFor(val) });
         e.target.value = '';
         return;
       }
@@ -1883,6 +1908,7 @@
         updates.enemyIndex = 0;
         updates.enemyMax = Math.max(modeBase, speciesBase);
         updates.enemyMegaActive = false;
+        updates.enemyMegaVariant = null;
         updates.enemyGmaxActive = false;
         updates.enemyPrimalActive = false;
         updates.catchAvailable = false;
@@ -2188,10 +2214,10 @@
         const idx = battle.enemyIndex || 0;
         const currentMon = roster[idx];
         const allDefeated = idx >= roster.length;
-        const megaFlags = effectiveMegaFlags(currentMon);
+        const megaOpts = battle.enemyMegaActive ? { [battle.enemyMegaVariant || 'mega']: true } : {};
         enemySideHtml = `${npcTag}` + (allDefeated
           ? '<p class="status-msg" style="text-align:center;">Enemy defeated!</p>'
-          : `<div style="text-align:center;">${combatantHtml(currentMon.n, battle.enemyHits, battle.enemyMax, { mega: battle.enemyMegaActive && megaFlags.mega, megaX: battle.enemyMegaActive && megaFlags.megaX, gmax: battle.enemyGmaxActive && currentMon.gmaxCapable, primal: battle.enemyPrimalActive }, 'enemy', lastHit)}</div>
+          : `<div style="text-align:center;">${combatantHtml(currentMon.n, battle.enemyHits, battle.enemyMax, { gmax: battle.enemyGmaxActive && currentMon.gmaxCapable, primal: battle.enemyPrimalActive, ...megaOpts }, 'enemy', lastHit)}</div>
              ${roster.length > 1 ? `<p class="status-msg" style="text-align:center;">${idx}/${roster.length} down</p>` : ''}`);
       }
 
@@ -2209,7 +2235,7 @@
         return `
           <div style="${wrapStyle}text-align:center;">
             <span class="status-msg">${s}${isMe ? ' (you)' : ''}${isTurn ? ' — turn' : ''}</span>
-            ${combatantHtml(pl.active || '—', pl.hits, pl.max, { mega: pl.megaActive }, `player-${s}`, lastHit)}
+            ${combatantHtml(pl.active || '—', pl.hits, pl.max, pl.megaActive ? { [pl.megaVariant || 'mega']: true } : {}, `player-${s}`, lastHit)}
             ${pl.status ? `<div class="status-badge">${escapeHtml(pl.status)}</div>` : ''}
           </div>
         `;
