@@ -290,14 +290,40 @@
     0% { transform: scale(0.6); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
   }
-
-  @keyframes damageFlash {
-    0% { filter: brightness(1) saturate(1); transform: translateX(0); }
-    20% { filter: brightness(1.8) sepia(1) saturate(8) hue-rotate(-50deg); transform: translateX(-4px); }
-    50% { transform: translateX(4px); }
-    100% { filter: brightness(1) saturate(1); transform: translateX(0); }
+  @keyframes catchPop {
+    0% { transform: scale(0.2) rotate(-15deg); opacity: 0; }
+    60% { transform: scale(1.15) rotate(5deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
-  .sprite-hit { animation: damageFlash 0.5s ease; }
+
+  .sprite-wrap {
+    position: relative;
+    display: inline-block;
+  }
+  .sprite-wrap.sprite-hit img {
+    animation: hitShake 0.5s ease;
+  }
+  .sprite-wrap.sprite-hit::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent-red);
+    mix-blend-mode: multiply;
+    animation: hitFlashOverlay 0.5s ease;
+    pointer-events: none;
+  }
+  @keyframes hitFlashOverlay {
+    0% { opacity: 0; }
+    25% { opacity: 0.75; }
+    100% { opacity: 0; }
+  }
+  @keyframes hitShake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-3px); }
+    100% { transform: translateX(0); }
+  }
   .slot-btn.selected {
     background: var(--accent-gold);
     color: var(--panel);
@@ -305,10 +331,8 @@
   }
 
   .badge-icon {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    border: 2px solid var(--border-pixel);
+    width: 32px;
+    height: 32px;
     display: inline-block;
   }
 
@@ -320,8 +344,8 @@
     border-bottom: 2px solid var(--panel-light);
   }
   .party-row img {
-    width: 56px;
-    height: 56px;
+    width: 72px;
+    height: 72px;
     object-fit: contain;
     image-rendering: pixelated;
   }
@@ -639,14 +663,38 @@
     <p class="pixel-font" style="font-size:20px;color:var(--accent-teal);margin-top:20px;" id="evolution-overlay-result"></p>
   </div>
 
+  <!-- CATCH CELEBRATION OVERLAY -->
+  <div id="catch-overlay" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:55;">
+    <img id="catch-overlay-img" style="width:180px;height:180px;object-fit:contain;image-rendering:pixelated;animation:catchPop 0.6s ease;" alt="">
+    <p class="pixel-font" style="font-size:18px;color:var(--accent-gold);margin-top:16px;">Gotcha!</p>
+    <p class="pixel-font" id="catch-overlay-name" style="font-size:16px;color:var(--text-main);margin-top:8px;"></p>
+  </div>
+
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
   import {
-    getDatabase, ref, set, get, update, onValue, child, remove
+    getDatabase, ref, set, get, update as rawUpdate, onValue, child, remove
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
   import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+  // Firebase's update() throws (silently, from a click handler's point of view) if ANY field in the
+  // payload is undefined. This wrapper strips undefined fields so a missed initializer never quietly
+  // breaks a button - it just omits that one field instead of failing the whole write.
+  function stripUndefined(obj) {
+    const out = {};
+    Object.keys(obj).forEach((k) => { if (obj[k] !== undefined) out[k] = obj[k]; });
+    return out;
+  }
+  async function update(refArg, data) {
+    try {
+      return await rawUpdate(refArg, stripUndefined(data));
+    } catch (err) {
+      console.error('Firebase update failed:', err, data);
+      throw err;
+    }
+  }
 
   const firebaseConfig = {
     apiKey: "AIzaSyBZkPzell6GahCvxDVeEasfyU93nJXsKeU",
@@ -818,7 +866,9 @@
     const flashCls = (lastHit && lastHit.key === hitKey && (Date.now() - lastHit.ts) < 900) ? 'sprite-hit' : '';
     return `
       <div class="battle-combatant ${isMega ? 'is-mega' : ''} ${isGmax ? 'is-gmax' : ''} ${isPrimal ? 'is-mega' : ''}">
-        <img class="${flashCls}" data-sprite-name="${escapeHtml(name)}" data-sprite-mega="${formOpts.mega ? '1' : '0'}" data-sprite-megax="${formOpts.megaX ? '1' : '0'}" data-sprite-gmax="${isGmax ? '1' : '0'}" data-sprite-primal="${isPrimal ? '1' : '0'}" alt="${escapeHtml(name)}">
+        <div class="sprite-wrap ${flashCls}">
+          <img data-sprite-name="${escapeHtml(name)}" data-sprite-mega="${formOpts.mega ? '1' : '0'}" data-sprite-megax="${formOpts.megaX ? '1' : '0'}" data-sprite-gmax="${isGmax ? '1' : '0'}" data-sprite-primal="${isPrimal ? '1' : '0'}" alt="${escapeHtml(name)}">
+        </div>
         ${formOpts.megaX ? '<span class="combatant-tag">MEGA X</span>' : (formOpts.mega ? '<span class="combatant-tag">MEGA</span>' : '')}
         ${isGmax ? '<span class="combatant-tag">GMAX</span>' : ''}
         ${isPrimal ? '<span class="combatant-tag">PRIMAL</span>' : ''}
@@ -850,14 +900,13 @@
     });
   }
 
-  const TYPE_BADGE_COLORS = {
-    Rock: '#b8a038', Water: '#6890f0', Electric: '#f8d030', Fire: '#f08030', Grass: '#78c850',
-    Psychic: '#f85888', Ghost: '#705898', Dragon: '#7038f8'
-  };
+  const BADGE_FILES = [
+    'badge-1-boulder.png', 'badge-2-cascade.png', 'badge-3-thunder.png', 'badge-4-volcano.png',
+    'badge-5-forest.png', 'badge-6-mind.png', 'badge-7-spirit.png', 'badge-8-dragon.png'
+  ];
   function badgeIconHtml(gym, earned) {
-    const m = gym.label.match(/\(([^)]+)\)/);
-    const color = m ? (TYPE_BADGE_COLORS[m[1]] || '#888') : '#888';
-    return `<span class="badge-icon" style="background:${earned ? color : 'var(--panel-light)'};opacity:${earned ? 1 : 0.35};"></span>`;
+    const file = BADGE_FILES[(gym.gymOrder || 1) - 1] || BADGE_FILES[0];
+    return `<img src="covers/${file}" class="badge-icon" style="object-fit:contain;background:transparent;opacity:${earned ? 1 : 0.3};filter:${earned ? 'none' : 'grayscale(1)'};" alt="${escapeHtml(gym.label)}">`;
   }
 
   // Official Mega Evolution capable species (lowercase). Species using Mega X/Y use the megaX slug by default.
@@ -923,6 +972,19 @@
   }
   async function triggerEvolutionOverlay(code, fromName, toName) {
     await update(ref(db, `sessions/${code}/session`), { evolutionEvent: { from: fromName, to: toName, ts: Date.now() } });
+  }
+  async function showCatchOverlay(pokemonName, forPlayer) {
+    const overlay = document.getElementById('catch-overlay');
+    const img = document.getElementById('catch-overlay-img');
+    const nameEl = document.getElementById('catch-overlay-name');
+    nameEl.textContent = `${forPlayer} caught ${pokemonName}!`;
+    overlay.classList.remove('hidden');
+    img.style.animation = 'none';
+    void img.offsetWidth;
+    img.style.animation = 'catchPop 0.6s ease';
+    const url = await getSpriteUrl(pokemonName, {});
+    if (url) img.src = url;
+    setTimeout(() => { overlay.classList.add('hidden'); }, 2600);
   }
 
   function effectiveMegaFlags(monObj) {
@@ -1316,7 +1378,7 @@
       await update(ref(db, `sessions/${code}/players/${enc.forPlayer}`), {
         party, box: boxArr, pokeballs: Math.max(0, balls - 1)
       });
-      await update(ref(db, `sessions/${code}/session`), { currentEncounter: null });
+      await update(ref(db, `sessions/${code}/session`), { currentEncounter: null, catchEvent: { pokemon: enc.pokemon, forPlayer: enc.forPlayer, ts: Date.now() } });
     });
 
     document.getElementById('btn-encounter-escape').addEventListener('click', async () => {
@@ -1387,6 +1449,9 @@
         battleObj.enemyHits = 0;
         battleObj.enemyMax = startMega ? baseMax * 2 : baseMax;
         battleObj.enemyMegaActive = startMega;
+        battleObj.enemyGmaxActive = false;
+        battleObj.enemyPrimalActive = false;
+        battleObj.currentTurnSlot = 'P1';
       }
 
       await set(ref(db, `sessions/${code}/session/battle`), battleObj);
@@ -1421,7 +1486,7 @@
       await set(ref(db, `sessions/${code}/session/battle`), {
         active: true, bossId: leg.id, label: `${leg.name} — ${playerSlot} solo fight`, mode: 'legendary', isGym: false,
         sprite: null, enemyRoster: [mon(leg.name)], enemyIndex: 0, enemyHits: 0, enemyMax: 24, enemyMegaActive: false,
-        canPrimal: !!leg.canPrimal, enemyPrimalActive: false,
+        enemyGmaxActive: false, canPrimal: !!leg.canPrimal, enemyPrimalActive: false, currentTurnSlot: 'P1',
         soloPlayer: playerSlot, legendaryStatus: leg.status, catchAvailable: false,
         players, lastHit: null
       });
@@ -1948,6 +2013,7 @@
 
     let localMapOpen = false;
     let lastEvoTs = 0;
+    let lastCatchTs = 0;
     document.getElementById('btn-player-view-map').addEventListener('click', () => {
       localMapOpen = true;
       document.getElementById('map-overlay').classList.remove('hidden');
@@ -2003,7 +2069,7 @@
         badgeStrip.appendChild(item);
       });
 
-      const megaNote = p.hasMegaStone ? '<span class="status-badge">Mega Stone</span>' : '';
+      const megaNote = p.hasMegaStone ? '<img src="covers/megastone.png" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;" alt="Mega Stone" title="Has Mega Stone">' : '';
       document.getElementById('player-pokeball-count').innerHTML = `Pokéballs: ${typeof p.pokeballs === 'number' ? p.pokeballs : 0} ${megaNote}`;
 
       const partyBox = document.getElementById('player-party-box');
@@ -2191,6 +2257,11 @@
       if (session.evolutionEvent && session.evolutionEvent.ts > lastEvoTs) {
         lastEvoTs = session.evolutionEvent.ts;
         showEvolutionOverlay(session.evolutionEvent.from, session.evolutionEvent.to);
+      }
+
+      if (session.catchEvent && session.catchEvent.ts > lastCatchTs) {
+        lastCatchTs = session.catchEvent.ts;
+        showCatchOverlay(session.catchEvent.pokemon, session.catchEvent.forPlayer);
       }
     });
   }
