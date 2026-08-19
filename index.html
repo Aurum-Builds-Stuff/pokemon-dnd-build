@@ -368,7 +368,7 @@
     position: fixed;
     top: 20%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) scale(1);
     z-index: 60;
     background: var(--panel);
     border: 4px solid var(--accent-red-dark);
@@ -377,12 +377,14 @@
     font-size: 13px;
     color: var(--text-main);
     box-shadow: 0 6px 0 0 #000;
+    opacity: 1;
+    transition: opacity 0.25s ease, transform 0.25s ease;
   }
   .victory-banner {
     position: fixed;
     top: 30%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) scale(1);
     z-index: 61;
     background: var(--accent-gold);
     border: 5px solid var(--panel);
@@ -391,6 +393,16 @@
     font-size: 20px;
     color: var(--panel);
     box-shadow: 0 8px 0 0 #000;
+    opacity: 1;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .transient-banner.toast-enter, .victory-banner.toast-enter {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.85);
+  }
+  .transient-banner.toast-exit, .victory-banner.toast-exit {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.92);
   }
   .status-badge {
     display: inline-block;
@@ -793,16 +805,21 @@
     let dots = '';
     const remaining = Math.max(0, max - hits);
     for (let i = 0; i < max; i++) {
-      dots += `<span style="display:inline-block;width:12px;height:12px;margin-right:3px;border:2px solid var(--panel-light);background:${i < remaining ? 'var(--accent-teal)' : 'transparent'};"></span>`;
+      dots += `<span style="display:inline-block;width:12px;height:12px;margin-right:3px;border:2px solid var(--panel-light);background:${i < remaining ? 'var(--accent-teal)' : 'transparent'};transition:background 0.3s ease, transform 0.3s ease;"></span>`;
     }
     return dots;
   }
   function showToast(text, kind) {
     const el = document.createElement('div');
-    el.className = kind === 'victory' ? 'victory-banner' : 'transient-banner';
+    el.className = (kind === 'victory' ? 'victory-banner' : 'transient-banner') + ' toast-enter';
     el.textContent = text;
     document.body.appendChild(el);
-    setTimeout(() => { el.remove(); }, kind === 'victory' ? 4500 : 2800);
+    requestAnimationFrame(() => { el.classList.remove('toast-enter'); });
+    const life = kind === 'victory' ? 4500 : 2800;
+    setTimeout(() => {
+      el.classList.add('toast-exit');
+      setTimeout(() => { el.remove(); }, 250);
+    }, life - 250);
   }
   const STATUS_VERBS = { confuse: 'confused', poison: 'poisoned', burn: 'burned', paralysis: 'paralyzed' };
 
@@ -819,7 +836,7 @@
     "iron valiant": "iron-valiant",
     "lycanroc": "lycanroc-midday", "basculin": "basculin-red-striped",
     "mimikyu": "mimikyu-disguised", "tatsugiri": "tatsugiri-curly", "toxtricity": "toxtricity-amped",
-    "gourgeist": "gourgeist-average", "darmanitan": "darmanitan-standard"
+    "gourgeist": "gourgeist-average", "darmanitan": "darmanitan-standard", "urshifu": "urshifu-single-strike"
   };
   function baseSlug(name) {
     const key = (name || '').trim().toLowerCase();
@@ -1827,23 +1844,31 @@
         const slot = e.target.dataset.playerHit;
         const p = battle.players[slot];
         const hits = Math.min(p.max, (p.hits || 0) + 1);
-        let toast = null;
+        const updates = { lastHit: { key: `player-${slot}`, ts: Date.now() } };
         if (hits >= p.max) {
-          toast = { text: `${p.active || 'Your Pokémon'} has fainted!`, ts: Date.now() };
+          updates.toast = { text: `${p.active || 'Your Pokémon'} has fainted!`, ts: Date.now() };
           const benched = [...(p.benched || [])];
           if (p.active) benched.push(p.active);
           const party = (latestPlayers[slot] && latestPlayers[slot].party) || [];
           const remaining = party.filter((m) => !benched.includes(m));
           if (remaining.length === 0) {
-            await update(ref(db, `${battlePath}/players/${slot}`), { active: null, hits: 0, status: null, benched, out: true, megaActive: false, megaVariant: null, gmaxActive: false, gmaxUsed: false, max: 4 });
+            Object.assign(updates, {
+              [`players/${slot}/active`]: null, [`players/${slot}/hits`]: 0, [`players/${slot}/status`]: null,
+              [`players/${slot}/benched`]: benched, [`players/${slot}/out`]: true,
+              [`players/${slot}/megaActive`]: false, [`players/${slot}/megaVariant`]: null,
+              [`players/${slot}/gmaxActive`]: false, [`players/${slot}/gmaxUsed`]: false, [`players/${slot}/max`]: 4
+            });
           } else {
-            await update(ref(db, `${battlePath}/players/${slot}`), { active: remaining[0], hits: 0, status: null, benched, out: false, megaActive: false, megaVariant: null, gmaxActive: false, gmaxUsed: false, max: baseMaxFor(remaining[0]) });
+            Object.assign(updates, {
+              [`players/${slot}/active`]: remaining[0], [`players/${slot}/hits`]: 0, [`players/${slot}/status`]: null,
+              [`players/${slot}/benched`]: benched, [`players/${slot}/out`]: false,
+              [`players/${slot}/megaActive`]: false, [`players/${slot}/megaVariant`]: null,
+              [`players/${slot}/gmaxActive`]: false, [`players/${slot}/gmaxUsed`]: false, [`players/${slot}/max`]: baseMaxFor(remaining[0])
+            });
           }
         } else {
-          await update(ref(db, `${battlePath}/players/${slot}`), { hits });
+          updates[`players/${slot}/hits`] = hits;
         }
-        const updates = { lastHit: { key: `player-${slot}`, ts: Date.now() } };
-        if (toast) updates.toast = toast;
         await update(ref(db, battlePath), updates);
         return;
       }
