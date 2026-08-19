@@ -300,23 +300,14 @@
     position: relative;
     display: inline-block;
   }
-  .sprite-wrap.sprite-hit img {
-    animation: hitShake 0.5s ease;
+  .sprite-wrap img {
+    transition: filter 0.12s ease;
   }
-  .sprite-wrap.sprite-hit::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    background: var(--accent-red);
-    mix-blend-mode: multiply;
-    animation: hitFlashOverlay 0.5s ease;
-    pointer-events: none;
+  .sprite-wrap.sprite-hit-active img {
+    filter: brightness(0) saturate(100%) invert(13%) sepia(96%) saturate(7472%) hue-rotate(0deg) brightness(97%) contrast(118%);
   }
-  @keyframes hitFlashOverlay {
-    0% { opacity: 0; }
-    25% { opacity: 0.75; }
-    100% { opacity: 0; }
+  .sprite-wrap.sprite-hit-active {
+    animation: hitShake 0.4s ease;
   }
   @keyframes hitShake {
     0% { transform: translateX(0); }
@@ -485,6 +476,16 @@
       <button class="btn secondary" id="btn-encounter-escape">Escaped</button>
       <button class="btn secondary" id="btn-encounter-runaway">Player Ran Away</button>
     </div>
+
+    <hr style="border:none;border-top:2px dashed var(--panel-light);margin:24px 0;">
+
+    <label>Grant a Gigantamax-capable Pok&eacute;mon</label>
+    <select id="dm-gmax-player-select">
+      <option value="">Which player?</option>
+      <option value="P1">P1</option><option value="P2">P2</option><option value="P3">P3</option>
+    </select>
+    <select id="dm-gmax-species-select"></select>
+    <button class="btn secondary" id="btn-grant-gmax">Grant Pok&eacute;mon</button>
 
     <hr style="border:none;border-top:2px dashed var(--panel-light);margin:24px 0;">
 
@@ -720,8 +721,8 @@
   const ROUTES = [
     { id: "route-1", name: "Route 1 — First Steps", encounterTable: { "Normal":"Rattata","Bug":"Caterpie","Flying":"Pidgey","Grass":"Oddish","Dark":"Poochyena","Electric":"Pichu","Fire":"Vulpix","Water":"Magikarp","Ground":"Sandshrew","Fighting":"Machop","Poison":"Weedle","Rock":"Geodude, Glimmet","Psychic":"Abra","Ghost":"Shuppet","Steel":"Klink","Fairy":"Cleffa","Ice":"Snorunt","Dragon":"Dratini" } },
     { id: "route-2", name: "Route 2 — The Forest Road", encounterTable: { "Normal":"Zigzagoon","Bug":"Kricketot","Flying":"Hoothoot","Grass":"Bellsprout","Dark":"Nuzleaf","Electric":"Mareep","Fire":"Growlithe","Water":"Poliwag, Tatsugiri","Ground":"Diglett","Fighting":"Makuhita","Poison":"Grimer","Rock":"Onix","Psychic":"Drowzee","Ghost":"Gastly","Steel":"Magnemite","Fairy":"Igglybuff","Ice":"Swinub","Dragon":"Bagon" } },
-    { id: "route-3", name: "Route 3 — Toward Cerulean", encounterTable: { "Normal":"Stantler","Bug":"Combee","Flying":"Doduo","Grass":"Sunkern","Dark":"Houndour","Electric":"Voltorb","Fire":"Slugma","Water":"Tentacool","Ground":"Cubone","Fighting":"Tyrogue","Poison":"Koffing","Rock":"Roggenrola","Psychic":"Ralts","Ghost":"Duskull","Steel":"Aron","Fairy":"Snubbull","Ice":"Seel","Dragon":"Vibrava, Frigibax" } },
-    { id: "route-4", name: "Route 4 — Cave Approach", encounterTable: { "Normal":"Zigzagoon","Bug":"Paras","Flying":"Zubat","Grass":"Foongus, Capsakid","Dark":"Zorua","Electric":"Joltik","Fire":"Numel","Water":"Wooper","Ground":"Drilbur","Fighting":"Timburr","Poison":"Trubbish","Rock":"Nosepass","Psychic":"Spoink","Ghost":"Misdreavus, Sinistcha","Steel":"Ferroseed","Fairy":"Flabébé","Ice":"Vanillite","Dragon":"Deino" } },
+    { id: "route-3", name: "Route 3 — Toward Cerulean", encounterTable: { "Normal":"Stantler","Bug":"Combee","Flying":"Doduo","Grass":"Sunkern","Dark":"Houndour","Electric":"Voltorb","Fire":"Slugma","Water":"Tentacool","Ground":"Cubone","Fighting":"Tyrogue, Kubfu","Poison":"Koffing","Rock":"Roggenrola","Psychic":"Ralts","Ghost":"Duskull","Steel":"Aron","Fairy":"Snubbull","Ice":"Seel","Dragon":"Vibrava, Frigibax" } },
+    { id: "route-4", name: "Route 4 — Cave Approach", encounterTable: { "Normal":"Zigzagoon","Bug":"Paras","Flying":"Zubat, Corvisquire","Grass":"Foongus, Capsakid","Dark":"Zorua","Electric":"Joltik","Fire":"Numel","Water":"Wooper","Ground":"Drilbur, Cufant","Fighting":"Timburr","Poison":"Trubbish","Rock":"Nosepass","Psychic":"Spoink","Ghost":"Misdreavus, Sinistcha","Steel":"Ferroseed","Fairy":"Flabébé","Ice":"Vanillite","Dragon":"Deino" } },
     { id: "route-5", name: "Route 5 — Ashen Road", encounterTable: { "Normal":"Linoone","Bug":"Volbeat, Illumise, Wimpod","Flying":"Fletchinder","Grass":"Gogoat","Dark":"Mightyena","Electric":"Emolga","Fire":"Ponyta","Water":"Poliwhirl","Ground":"Krokorok","Fighting":"Throh, Sawk","Poison":"Salandit","Rock":"Lycanroc","Psychic":"Duosion","Ghost":"Lampent","Steel":"Skarmory","Fairy":"Mimikyu","Ice":"Sneasel","Dragon":"Fraxure, Jangmo-o","Volcanic ecosystem":"Slugma, Numel, Torkoal, Salandit, Houndoom, Camerupt, Oddish, Budew, Roselia" } },
     { id: "route-6", name: "Route 6 — The Old Road", encounterTable: { "Normal":"Bibarel","Bug":"Ribombee","Flying":"Hawlucha, Starly","Grass":"Tsareena","Dark":"Mightyena","Electric":"Luxio","Fire":"Ninetales","Water":"Floatzel","Ground":"Donphan","Fighting":"Passimian","Poison":"Drapion","Rock":"Lycanroc","Psychic":"Gothorita","Ghost":"Mimikyu","Steel":"Bisharp","Fairy":"Clefable","Ice":"Beartic","Dragon":"Gabite","Forest ecosystem":"Trevenant, Ursaring, Absol, Heracross, Pinsir, Sawsbuck","Pond":"Floatzel, Poliwag, Psyduck, Corphish, Basculin, Lapras" } },
     { id: "route-7", name: "Route 7 — The Sacred Road", encounterTable: { "Normal":"Furret","Bug":"Heracross","Flying":"Noctowl","Grass":"Roserade","Dark":"Absol","Electric":"Manectric","Fire":"Arcanine, Charcadet","Water":"Azumarill","Ground":"Excadrill","Fighting":"Hawlucha","Poison":"Toxicroak","Rock":"Crustle","Psychic":"Gardevoir","Ghost":"Mismagius","Steel":"Mawile","Fairy":"Granbull","Ice":"Weavile","Dragon":"Haxorus, Hakamo-o","Stream":"Azumarill, Poliwhirl, Basculin, Floatzel, Corphish, Dratini, Milotic" } },
@@ -814,7 +815,7 @@
     "hisuian decidueye": "decidueye-hisui", "hisuian typhlosion": "typhlosion-hisui",
     "hisuian braviary": "braviary-hisui",
     "type: null": "type-null", "type null": "type-null",
-    "mr. mime": "mr-mime", "mr. rime": "mr-rime", "ash-greninja": "greninja-ash",
+    "mr. mime": "mr-mime", "mr. rime": "mr-rime", "ash-greninja": "greninja-ash", "aegislash": "aegislash-shield",
     "iron valiant": "iron-valiant",
     "lycanroc": "lycanroc-midday", "basculin": "basculin-red-striped",
     "mimikyu": "mimikyu-disguised", "tatsugiri": "tatsugiri-curly", "toxtricity": "toxtricity-amped",
@@ -883,18 +884,28 @@
       el.innerHTML = variants.map((v) => `<button class="btn secondary" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;margin-right:3px;" ${attrKey}="${value(v)}">${v.label}</button>`).join('');
     });
   }
-  function combatantHtml(name, hits, max, formOpts, hitKey, lastHit) {
+  function hydrateGmaxButtons(container) {
+    if (!container) return;
+    container.querySelectorAll('[data-gmax-slot]').forEach(async (el) => {
+      const name = el.dataset.gmaxName;
+      if (!name) return;
+      const target = el.dataset.gmaxTarget || '';
+      const ok = await checkGmaxCapability(name);
+      if (!ok) return;
+      el.innerHTML = `<button class="btn secondary" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;margin-right:3px;" data-player-gmax="${target}">Gigantamax!</button>`;
+    });
+  }
+  function combatantHtml(name, hits, max, formOpts, hitKey) {
     formOpts = formOpts || {};
     const isMega = !!(formOpts.mega || formOpts.megaX || formOpts.megaY || formOpts.megaZ);
     const isGmax = !!formOpts.gmax;
     const isPrimal = !!formOpts.primal;
-    const flashCls = (lastHit && lastHit.key === hitKey && (Date.now() - lastHit.ts) < 900) ? 'sprite-hit' : '';
     let tag = '';
     if (formOpts.megaX) tag = 'MEGA X'; else if (formOpts.megaY) tag = 'MEGA Y';
     else if (formOpts.megaZ) tag = 'MEGA Z'; else if (formOpts.mega) tag = 'MEGA';
     return `
       <div class="battle-combatant ${isMega ? 'is-mega' : ''} ${isGmax ? 'is-gmax' : ''} ${isPrimal ? 'is-mega' : ''}">
-        <div class="sprite-wrap ${flashCls}">
+        <div class="sprite-wrap" data-hit-key="${escapeHtml(hitKey || '')}">
           <img data-sprite-name="${escapeHtml(name)}" data-sprite-mega="${formOpts.mega ? '1' : '0'}" data-sprite-megax="${formOpts.megaX ? '1' : '0'}" data-sprite-megay="${formOpts.megaY ? '1' : '0'}" data-sprite-megaz="${formOpts.megaZ ? '1' : '0'}" data-sprite-gmax="${isGmax ? '1' : '0'}" data-sprite-primal="${isPrimal ? '1' : '0'}" alt="${escapeHtml(name)}">
         </div>
         ${tag ? `<span class="combatant-tag">${tag}</span>` : ''}
@@ -904,6 +915,14 @@
         <div>${hpDots(hits, max)}</div>
       </div>
     `;
+  }
+  function flashHit(hitKey) {
+    if (!hitKey) return;
+    document.querySelectorAll('.sprite-wrap').forEach((el) => {
+      if (el.dataset.hitKey !== hitKey) return;
+      el.classList.add('sprite-hit-active');
+      setTimeout(() => { el.classList.remove('sprite-hit-active'); }, 450);
+    });
   }
 
   const TYPE_CACHE = new Map();
@@ -966,6 +985,21 @@
     if (cap.megaY) out.push({ key: 'megaY', label: 'Mega Evolve Y!' });
     if (cap.megaZ) out.push({ key: 'megaZ', label: 'Mega Evolve Z!' });
     return out;
+  }
+
+  // Gigantamax — official species list (for the "grant a Gmax Pokémon" picker), and a live PokeAPI
+  // check (mirroring the mega system) so the in-battle button only shows when {slug}-gmax truly exists.
+  const GMAX_SPECIES = ["Venusaur", "Charizard", "Butterfree", "Pikachu", "Meowth", "Machamp", "Gengar",
+    "Kingler", "Lapras", "Eevee", "Snorlax", "Garbodor", "Melmetal", "Rillaboom", "Cinderace", "Inteleon",
+    "Corviknight", "Orbeetle", "Drednaw", "Coalossal", "Flapple", "Appletun", "Sandaconda", "Centiskorch",
+    "Hatterene", "Grimmsnarl", "Alcremie", "Copperajah", "Duraludon", "Toxtricity", "Urshifu"];
+  const GMAX_CAP_CACHE = new Map();
+  async function checkGmaxCapability(name) {
+    const slug = baseSlug(name);
+    if (GMAX_CAP_CACHE.has(slug)) return GMAX_CAP_CACHE.get(slug);
+    const ok = await pokeApiExists(`${slug}-gmax`);
+    GMAX_CAP_CACHE.set(slug, ok);
+    return ok;
   }
 
   async function getEvolutionOptions(name) {
@@ -1251,8 +1285,7 @@
         const slot = e.target.dataset.grantMega;
         await update(ref(db, `sessions/${code}/players/${slot}`), { hasMegaStone: true });
         return;
-      }
-      if (e.target.dataset.evolve) {
+      }      if (e.target.dataset.evolve) {
         const [slot, idxStr] = e.target.dataset.evolve.split(':');
         const idx = parseInt(idxStr, 10);
         const party = [...((latestPlayers[slot] && latestPlayers[slot].party) || [])];
@@ -1434,6 +1467,21 @@
       await update(ref(db, `sessions/${code}/session`), { currentEncounter: null });
     });
 
+    // ---- Grant a Gigantamax-capable Pokémon ----
+    const gmaxSpeciesSelect = document.getElementById('dm-gmax-species-select');
+    gmaxSpeciesSelect.innerHTML = GMAX_SPECIES.map((s) => `<option value="${s}">${s}</option>`).join('');
+    document.getElementById('btn-grant-gmax').addEventListener('click', async () => {
+      const slot = document.getElementById('dm-gmax-player-select').value;
+      const species = gmaxSpeciesSelect.value;
+      if (!slot || !species) { alert('Pick a player and a species.'); return; }
+      const pSnap = await get(ref(db, `sessions/${code}/players/${slot}`));
+      const p = pSnap.val() || {};
+      const party = p.party || [];
+      const boxArr = p.box || [];
+      if (party.length < 6) party.push(species); else boxArr.push(species);
+      await update(ref(db, `sessions/${code}/players/${slot}`), { party, box: boxArr });
+    });
+
     // ---- Battle engine (DM side) ----
     const bossSelect = document.getElementById('dm-battle-boss-select');
     bossSelect.innerHTML = '<option value="">Choose a boss/gym battle&hellip;</option>' +
@@ -1447,7 +1495,7 @@
       return {
         active: activeMon,
         hits: 0, max: baseMaxFor(activeMon || ''), status: null, benched: [], out: participating ? party.length === 0 : true,
-        megaActive: false, megaUsed: false, megaVariant: null
+        megaActive: false, megaUsed: false, megaVariant: null, gmaxActive: false, gmaxUsed: false
       };
     }
 
@@ -1638,6 +1686,7 @@
         }
         const hasStone = latestPlayers[slot] && latestPlayers[slot].hasMegaStone;
         const playerMegaOpts = p.megaActive ? { [p.megaVariant || 'mega']: true } : {};
+        if (p.gmaxActive) playerMegaOpts.gmax = true;
         return `
           <div style="margin-bottom:14px;${isTurn ? 'border-left:4px solid var(--accent-gold);padding-left:8px;' : ''}">
             <span class="pixel-font" style="font-size:11px;">${slot}</span>${isTurn ? ' <span class="status-badge">their turn</span>' : ''}
@@ -1646,6 +1695,7 @@
             <span class="status-msg">(${hpStageLabel(p.hits, p.max)})</span><br>
             <button class="btn secondary" style="width:auto;padding:5px 10px;font-size:10px;display:inline-block;margin-top:4px;" data-player-hit="${slot}">-1 stage (hit)</button>
             ${(!p.megaUsed && hasStone && p.active) ? `<span class="mega-btn-slot" data-mega-slot="1" data-mega-name="${escapeHtml(p.active)}" data-mega-kind="player" data-mega-target="${slot}"></span>` : ''}
+            ${(!p.gmaxUsed && p.active) ? `<span class="gmax-btn-slot" data-gmax-slot="1" data-gmax-name="${escapeHtml(p.active)}" data-gmax-target="${slot}"></span>` : ''}
             <br>
             <select data-player-swap="${slot}" style="width:auto;display:inline-block;font-size:10px;padding:4px;margin-top:4px;">
               <option value="">swap active&hellip;</option>
@@ -1665,6 +1715,7 @@
       }).join('');
       hydrateSprites(playersBox);
       hydrateMegaButtons(playersBox);
+      hydrateGmaxButtons(playersBox);
 
       const declareBox = document.getElementById('dm-battle-pvp-declare');
       if (battle.mode === 'pvp') {
@@ -1676,11 +1727,18 @@
     }
 
     let dmLastToastTs = 0;
+    let dmLastHitTs = 0;
+    let currentBattleState = null;
     onValue(ref(db, `sessions/${code}/session/battle`), (snap) => {
       const battle = snap.val();
+      currentBattleState = battle;
       if (battle && battle.toast && battle.toast.ts > dmLastToastTs) {
         dmLastToastTs = battle.toast.ts;
         showToast(battle.toast.text, battle.toast.kind);
+      }
+      if (battle && battle.lastHit && battle.lastHit.ts > dmLastHitTs) {
+        dmLastHitTs = battle.lastHit.ts;
+        flashHit(battle.lastHit.key);
       }
       const startBox = document.getElementById('dm-battle-start');
       const activeBox = document.getElementById('dm-battle-active');
@@ -1696,8 +1754,7 @@
 
     document.getElementById('dm-battle-active').addEventListener('click', async (e) => {
       const battlePath = `sessions/${code}/session/battle`;
-      const snap = await get(ref(db, battlePath));
-      const battle = snap.val();
+      const battle = currentBattleState;
       if (!battle) return;
 
       if (e.target.dataset.enemyHit) {
@@ -1739,7 +1796,8 @@
       }
 
       if (e.target.dataset.enemyGmax) {
-        await update(ref(db, battlePath), { enemyGmaxActive: true });
+        const { max, hits } = toggleMegaFields(battle.enemyHits, battle.enemyMax, true, 2);
+        await update(ref(db, battlePath), { enemyMax: max, enemyHits: hits, enemyGmaxActive: true });
         return;
       }
 
@@ -1777,9 +1835,9 @@
           const party = (latestPlayers[slot] && latestPlayers[slot].party) || [];
           const remaining = party.filter((m) => !benched.includes(m));
           if (remaining.length === 0) {
-            await update(ref(db, `${battlePath}/players/${slot}`), { active: null, hits: 0, status: null, benched, out: true, megaActive: false, megaVariant: null, max: 4 });
+            await update(ref(db, `${battlePath}/players/${slot}`), { active: null, hits: 0, status: null, benched, out: true, megaActive: false, megaVariant: null, gmaxActive: false, gmaxUsed: false, max: 4 });
           } else {
-            await update(ref(db, `${battlePath}/players/${slot}`), { active: remaining[0], hits: 0, status: null, benched, out: false, megaActive: false, megaVariant: null, max: baseMaxFor(remaining[0]) });
+            await update(ref(db, `${battlePath}/players/${slot}`), { active: remaining[0], hits: 0, status: null, benched, out: false, megaActive: false, megaVariant: null, gmaxActive: false, gmaxUsed: false, max: baseMaxFor(remaining[0]) });
           }
         } else {
           await update(ref(db, `${battlePath}/players/${slot}`), { hits });
@@ -1797,6 +1855,14 @@
         if (!hasStone) { alert('This player needs a Mega Stone first.'); return; }
         const { max, hits } = toggleMegaFields(p.hits, p.max, true);
         await update(ref(db, `${battlePath}/players/${slot}`), { max, hits, megaActive: true, megaVariant: variant, megaUsed: true });
+        return;
+      }
+
+      if (e.target.dataset.playerGmax) {
+        const slot = e.target.dataset.playerGmax;
+        const p = battle.players[slot];
+        const { max, hits } = toggleMegaFields(p.hits, p.max, true, 2);
+        await update(ref(db, `${battlePath}/players/${slot}`), { max, hits, gmaxActive: true, gmaxUsed: true });
         return;
       }
 
@@ -1847,7 +1913,7 @@
         const slot = e.target.dataset.playerSwap;
         const val = e.target.value;
         if (!val) return;
-        await update(ref(db, `${battlePath}/players/${slot}`), { active: val, hits: 0, status: null, megaActive: false, megaVariant: null, max: baseMaxFor(val) });
+        await update(ref(db, `${battlePath}/players/${slot}`), { active: val, hits: 0, status: null, megaActive: false, megaVariant: null, gmaxActive: false, gmaxUsed: false, max: baseMaxFor(val) });
         e.target.value = '';
         return;
       }
@@ -1855,9 +1921,7 @@
         const slot = e.target.dataset.playerStatus;
         const val = e.target.value || null;
         const battlePathC = `sessions/${code}/session/battle`;
-        const bSnap = await get(ref(db, battlePathC));
-        const b = bSnap.val();
-        const p = b && b.players && b.players[slot];
+        const p = currentBattleState && currentBattleState.players && currentBattleState.players[slot];
         const updates = { status: val };
         await update(ref(db, `${battlePathC}/players/${slot}`), updates);
         if (val && p) {
@@ -1869,8 +1933,7 @@
 
     document.getElementById('btn-battle-victory').addEventListener('click', async () => {
       const battlePath = `sessions/${code}/session/battle`;
-      const snap = await get(ref(db, battlePath));
-      const battle = snap.val();
+      const battle = currentBattleState;
       if (battle && battle.isGym) {
         for (const slot of ['P1', 'P2', 'P3']) {
           const bSnap = await get(ref(db, `sessions/${code}/players/${slot}/badges`));
@@ -1884,8 +1947,7 @@
 
     document.getElementById('btn-battle-reset').addEventListener('click', async () => {
       const battlePath = `sessions/${code}/session/battle`;
-      const snap = await get(ref(db, battlePath));
-      const battle = snap.val();
+      const battle = currentBattleState;
       if (!battle) return;
       const players = {};
       ['P1', 'P2', 'P3'].forEach((slot) => { players[slot] = freshPlayerBattleState(slot, battle.soloPlayer || null); });
@@ -2185,11 +2247,16 @@
     });
 
     let playerLastToastTs = 0;
+    let playerLastHitTs = 0;
     onValue(ref(db, `sessions/${code}/session/battle`), (snap) => {
       const battle = snap.val();
       if (battle && battle.toast && battle.toast.ts > playerLastToastTs) {
         playerLastToastTs = battle.toast.ts;
         showToast(battle.toast.text, battle.toast.kind);
+      }
+      if (battle && battle.lastHit && battle.lastHit.ts > playerLastHitTs) {
+        playerLastHitTs = battle.lastHit.ts;
+        flashHit(battle.lastHit.key);
       }
       const banner = document.getElementById('player-battle-banner');
       const content = document.getElementById('player-battle-content');
@@ -2235,7 +2302,7 @@
         return `
           <div style="${wrapStyle}text-align:center;">
             <span class="status-msg">${s}${isMe ? ' (you)' : ''}${isTurn ? ' — turn' : ''}</span>
-            ${combatantHtml(pl.active || '—', pl.hits, pl.max, pl.megaActive ? { [pl.megaVariant || 'mega']: true } : {}, `player-${s}`, lastHit)}
+            ${combatantHtml(pl.active || '—', pl.hits, pl.max, Object.assign(pl.megaActive ? { [pl.megaVariant || 'mega']: true } : {}, pl.gmaxActive ? { gmax: true } : {}), `player-${s}`, lastHit)}
             ${pl.status ? `<div class="status-badge">${escapeHtml(pl.status)}</div>` : ''}
           </div>
         `;
